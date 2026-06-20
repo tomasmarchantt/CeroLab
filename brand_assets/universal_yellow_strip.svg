@@ -1,0 +1,24 @@
+<svg width="420" height="110" viewBox="0 0 420 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="paperGrad" x1="0" y1="0" x2="420" y2="110" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFE34A"/>
+      <stop offset="0.45" stop-color="#FFD21F"/>
+      <stop offset="0.78" stop-color="#E8AF00"/>
+      <stop offset="1" stop-color="#C58B00"/>
+    </linearGradient>
+    <linearGradient id="topShine" x1="0" y1="0" x2="0" y2="110" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.35"/>
+      <stop offset="0.22" stop-color="#FFFFFF" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0.10"/>
+    </linearGradient>
+    <filter id="softShadow" x="-10%" y="-30%" width="120%" height="180%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="8" stdDeviation="7" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <rect x="16" y="22" width="388" height="66" rx="4" fill="url(#paperGrad)" filter="url(#softShadow)"/>
+  <rect x="16" y="22" width="388" height="66" rx="4" fill="url(#topShine)"/>
+  <rect x="16" y="22" width="388" height="66" rx="4" stroke="#B88400" stroke-opacity="0.45" stroke-width="2"/>
+  <path d="M22 30H398" stroke="#FFF4A3" stroke-opacity="0.45" stroke-width="2"/>
+  <path d="M22 82H398" stroke="#8A6500" stroke-opacity="0.22" stroke-width="2"/>
+</svg>

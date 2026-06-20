@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 768" role="img" aria-labelledby="title desc">
+  <title id="title">Vinagre amber reagent bottle</title>
+  <desc id="desc">Realistic amber laboratory reagent bottle labeled Vinagre Vinegar, transparent background.</desc>
+  <defs>
+    <linearGradient id="glassBody" x1="110" y1="170" x2="405" y2="650" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#8d561f" stop-opacity="0.58"/>
+      <stop offset="0.22" stop-color="#b7772c" stop-opacity="0.42"/>
+      <stop offset="0.48" stop-color="#5a3517" stop-opacity="0.50"/>
+      <stop offset="0.74" stop-color="#c68a3a" stop-opacity="0.34"/>
+      <stop offset="1" stop-color="#3e2410" stop-opacity="0.58"/>
+    </linearGradient>
+    <linearGradient id="glassEdge" x1="95" y1="180" x2="420" y2="700" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff3d0" stop-opacity="0.55"/>
+      <stop offset="0.18" stop-color="#d99a46" stop-opacity="0.30"/>
+      <stop offset="0.55" stop-color="#2c1809" stop-opacity="0.42"/>
+      <stop offset="1" stop-color="#f0bf6a" stop-opacity="0.28"/>
+    </linearGradient>
+    <linearGradient id="liquid" x1="140" y1="360" x2="370" y2="680" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f5df9b" stop-opacity="0.34"/>
+      <stop offset="0.55" stop-color="#d9a046" stop-opacity="0.24"/>
+      <stop offset="1" stop-color="#8c541c" stop-opacity="0.28"/>
+    </linearGradient>
+    <linearGradient id="cap" x1="176" y1="50" x2="334" y2="165" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f8f8f4"/>
+      <stop offset="0.35" stop-color="#d8d9d3"/>
+      <stop offset="0.75" stop-color="#9b9d99"/>
+      <stop offset="1" stop-color="#f0f0ec"/>
+    </linearGradient>
+    <linearGradient id="label" x1="140" y1="340" x2="375" y2="530" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fffdf2"/>
+      <stop offset="0.5" stop-color="#ece8d4"/>
+      <stop offset="1" stop-color="#fff8df"/>
+    </linearGradient>
+    <radialGradient id="shadow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#000" stop-opacity="0.32"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="16" flood-color="#000" flood-opacity="0.30"/>
+    </filter>
+    <filter id="innerGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <ellipse cx="256" cy="708" rx="126" ry="28" fill="url(#shadow)"/>
+
+  <g filter="url(#softShadow)">
+    <!-- cap -->
+    <path d="M185 76 C185 58 198 47 218 47 H294 C314 47 327 58 327 76 V146 H185 Z" fill="url(#cap)" stroke="#777a75" stroke-width="3"/>
+    <path d="M185 84 H327" stroke="#ffffff" stroke-opacity="0.72" stroke-width="4"/>
+    <path d="M194 61 H318" stroke="#82847f" stroke-opacity="0.6" stroke-width="3"/>
+    <g opacity="0.34" stroke="#777" stroke-width="2">
+      <path d="M203 51 V145"/><path d="M223 48 V145"/><path d="M243 47 V145"/><path d="M263 47 V145"/><path d="M283 48 V145"/><path d="M303 51 V145"/>
+    </g>
+
+    <!-- neck -->
+    <path d="M203 145 H309 L318 236 H194 Z" fill="url(#glassBody)" stroke="url(#glassEdge)" stroke-width="5"/>
+    <path d="M217 157 C221 185 220 207 215 231" stroke="#fff6d8" stroke-opacity="0.45" stroke-width="7" stroke-linecap="round" fill="none"/>
+    <path d="M291 157 C287 190 290 211 297 231" stroke="#1c0d04" stroke-opacity="0.20" stroke-width="9" stroke-linecap="round" fill="none"/>
+
+    <!-- shoulders/body -->
+    <path d="M194 236 C146 250 119 286 116 344 L104 620 C101 680 141 707 205 707 H307 C371 707 411 680 408 620 L396 344 C393 286 366 250 318 236 Z" fill="url(#glassBody)" stroke="url(#glassEdge)" stroke-width="7"/>
+
+    <!-- liquid volume visible through amber glass -->
+    <path d="M129 452 C175 468 327 468 383 452 L392 616 C395 656 366 680 311 680 H201 C146 680 117 656 120 616 Z" fill="url(#liquid)" opacity="0.78"/>
+    <ellipse cx="256" cy="452" rx="128" ry="18" fill="#f7daa0" opacity="0.22"/>
+
+    <!-- glass highlights -->
+    <path d="M153 283 C137 334 135 524 129 617 C127 650 148 676 181 684" fill="none" stroke="#fff4d2" stroke-opacity="0.46" stroke-width="11" stroke-linecap="round"/>
+    <path d="M182 259 C162 312 160 500 156 610" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="4" stroke-linecap="round"/>
+    <path d="M354 275 C376 340 381 518 385 611" fill="none" stroke="#1f1106" stroke-opacity="0.22" stroke-width="10" stroke-linecap="round"/>
+    <path d="M215 245 C244 257 278 257 309 244" fill="none" stroke="#ffe2a9" stroke-opacity="0.35" stroke-width="6" stroke-linecap="round"/>
+
+    <!-- label -->
+    <path d="M143 367 C178 354 334 354 369 367 L365 526 C330 539 181 539 147 526 Z" fill="url(#label)" stroke="#cbbf99" stroke-width="3"/>
+    <path d="M154 382 C190 373 322 373 358 382" fill="none" stroke="#ffffff" stroke-opacity="0.72" stroke-width="3"/>
+    <path d="M158 512 C198 520 315 520 354 512" fill="none" stroke="#b49d67" stroke-opacity="0.45" stroke-width="2"/>
+
+    <text x="256" y="438" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="58" font-weight="800" fill="#1a2421">Vinagre</text>
+    <text x="256" y="482" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="27" font-weight="600" fill="#5c4d2c">Vinegar</text>
+
+    <!-- base thickness -->
+    <ellipse cx="256" cy="666" rx="123" ry="20" fill="none" stroke="#f6d18b" stroke-opacity="0.25" stroke-width="6"/>
+    <ellipse cx="256" cy="682" rx="104" ry="12" fill="none" stroke="#241305" stroke-opacity="0.16" stroke-width="5"/>
+  </g>
+</svg>

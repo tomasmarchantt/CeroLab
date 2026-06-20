@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resultados — CeroLab</title>
+  <link rel="stylesheet" href="/shared/styles.css" />
+  <style>
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+    .results-topbar { background: rgba(10,28,19,0.98); border-bottom: 1px solid rgba(46,139,87,0.2); padding: 0 24px; height: 52px; display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+    .results-topbar-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    .results-topbar-logo img { height: 24px; }
+    .results-topbar-logo span { font-family: var(--display); font-size: 0.9rem; font-weight: 800; color: #fff; }
+
+    .results-body { flex: 1; display: flex; justify-content: center; padding: 48px 24px; overflow-y: auto; }
+    .results-container { width: 100%; max-width: 640px; display: flex; flex-direction: column; gap: 24px; }
+
+    .score-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(46,139,87,0.15); border-radius: 5px; padding: 36px; text-align: center; position: relative; overflow: hidden; }
+    .score-card::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(46,139,87,0.12) 0%, transparent 70%); pointer-events: none; }
+    .score-ring { width: 120px; height: 120px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.08); margin: 0 auto 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+    .score-ring svg { position: absolute; top: -4px; left: -4px; width: calc(100% + 8px); height: calc(100% + 8px); transform: rotate(-90deg); }
+    .score-main { font-family: var(--mono); font-size: 2.2rem; font-weight: 500; line-height: 1; position: relative; }
+    .score-denom { font-family: var(--mono); font-size: 0.65rem; color: rgba(255,255,255,0.35); position: relative; }
+    .score-label { font-family: var(--display); font-size: 1.3rem; font-weight: 800; color: #fff; margin-bottom: 6px; position: relative; }
+    .score-note { font-size: 0.87rem; color: rgba(255,255,255,0.45); position: relative; max-width: 380px; margin: 0 auto; line-height: 1.6; }
+
+    .breakdown-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-radius: 3px; }
+    .breakdown-item.correct   { background: rgba(68,170,68,0.07); border: 1px solid rgba(68,170,68,0.18); }
+    .breakdown-item.incorrect { background: rgba(214,69,80,0.07); border: 1px solid rgba(214,69,80,0.18); }
+    .breakdown-icon { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.7rem; margin-top: 2px; }
+    .breakdown-item.correct .breakdown-icon   { background: rgba(68,170,68,0.25); color: var(--neutral); }
+    .breakdown-item.incorrect .breakdown-icon { background: rgba(214,69,80,0.2); color: var(--acid); }
+    .breakdown-q { font-size: 0.82rem; color: rgba(255,255,255,0.65); line-height: 1.5; }
+    .breakdown-a { font-family: var(--mono); font-size: 0.72rem; margin-top: 3px; }
+    .breakdown-item.correct .breakdown-a   { color: var(--neutral); }
+    .breakdown-item.incorrect .breakdown-a { color: rgba(255,255,255,0.4); }
+  </style>
+</head>
+<body>
+  <header class="results-topbar">
+    <a href="/" class="results-topbar-logo">
+      <img src="/brand_assets/CeroLab PNG.png" alt="CeroLab" />
+      <span>CeroLab</span>
+    </a>
+    <span style="font-family:var(--mono);font-size:0.65rem;color:rgba(255,255,255,0.35);letter-spacing:0.08em;margin-left:8px;">Resultados — Indicadores de pH</span>
+    <div style="margin-left:auto;display:flex;gap:8px;">
+      <a href="/alumno" class="btn btn-ghost btn-sm">Ir al dashboard</a>
+    </div>
+  </header>
+
+  <div class="results-body">
+    <div class="results-container">
+
+      <span class="section-tag" style="color:var(--science);align-self:flex-start;">Experimento completado</span>
+
+      <!-- Score card -->
+      <div class="score-card">
+        <div class="score-ring" id="score-ring">
+          <svg viewBox="0 0 128 128" fill="none" aria-hidden="true">
+            <circle cx="64" cy="64" r="58" stroke="rgba(255,255,255,0.06)" stroke-width="8"/>
+            <circle id="score-arc" cx="64" cy="64" r="58" stroke="var(--science)" stroke-width="8" stroke-linecap="round"
+              stroke-dasharray="364.4" stroke-dashoffset="364.4" style="transition:stroke-dashoffset 1.2s ease, stroke 0.8s ease;"/>
+          </svg>
+          <div class="score-main" id="score-display">0</div>
+          <div class="score-denom" id="score-denom">/ 5</div>
+        </div>
+        <div class="score-label" id="score-headline">Calculando...</div>
+        <p class="score-note" id="score-note"></p>
+        <div style="margin-top:20px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap;position:relative;">
+          <div class="stat-block" style="align-items:center;">
+            <div class="stat-value" id="stat-pct">—</div>
+            <div class="stat-label">Porcentaje</div>
+          </div>
+          <div style="width:1px;background:rgba(255,255,255,0.08);"></div>
+          <div class="stat-block" style="align-items:center;">
+            <div class="stat-value" id="stat-correct">—</div>
+            <div class="stat-label">Correctas</div>
+          </div>
+          <div style="width:1px;background:rgba(255,255,255,0.08);"></div>
+          <div class="stat-block" style="align-items:center;">
+            <div class="stat-value" id="stat-wrong">—</div>
+            <div class="stat-label">Incorrectas</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Breakdown -->
+      <div>
+        <div style="font-family:var(--mono);font-size:0.65rem;letter-spacing:0.12em;color:rgba(255,255,255,0.3);text-transform:uppercase;margin-bottom:12px;">Detalle por pregunta</div>
+        <div style="display:flex;flex-direction:column;gap:8px;" id="breakdown-list">
+          <!-- populated by JS -->
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap;padding-top:4px;">
+        <a href="/alumno" class="btn btn-primary">Ver mi historial</a>
+        <a href="/experimento/acido-base" class="btn btn-secondary">Repetir experimento</a>
+        <a href="/alumno/quimica" class="btn btn-ghost btn-sm">Volver a Química</a>
+      </div>
+
+    </div>
+  </div>
+
+<script>
+  const params  = new URLSearchParams(location.search);
+  const score   = parseInt(params.get('score') ?? '4');
+  const total   = parseInt(params.get('total') ?? '5');
+  const pct     = Math.round(score / total * 100);
+
+  const questions = [
+    'El papel tornasol se vuelve rojo en soluciones ácidas (pH < 7)',
+    'La fenolftaleína incolora indica un medio neutro o ácido (pH < 8)',
+    'El agua destilada tiene pH 7, el más cercano a la neutralidad',
+    'El HCl es el ácido fuerte en el experimento (pH 1)',
+    'El indicador universal produce tonos violeta en bases fuertes (pH 13)'
+  ];
+  const correct_answers = [
+    'El papel se vuelve rojo',
+    'La solución es neutra o ácida',
+    'Agua destilada (pH 7)',
+    'HCl (Ácido clorhídrico)',
+    'Violeta o azul oscuro'
+  ];
+
+  // Simulate which were correct (assume last `score` questions were right)
+  const results = questions.map((q, i) => ({ q, correct: i < score, answer: correct_answers[i] }));
+
+  document.getElementById('score-display').textContent = score;
+  document.getElementById('score-denom').textContent = `/ ${total}`;
+  document.getElementById('stat-pct').textContent = pct + '%';
+  document.getElementById('stat-correct').textContent = score;
+  document.getElementById('stat-wrong').textContent = total - score;
+
+  let headline, note, color;
+  if (pct >= 80) {
+    headline = '¡Muy buen trabajo!'; note = 'Demostraste un sólido dominio de los conceptos de ácidos, bases e indicadores de pH. Tu docente recibirá estos resultados.';
+    color = 'var(--neutral)';
+  } else if (pct >= 60) {
+    headline = 'Buen progreso.'; note = 'Lograste aplicar correctamente la mayoría de los conceptos del experimento. Revisa las preguntas incorrectas para reforzar.';
+    color = 'var(--warning)';
+  } else {
+    headline = 'Sigue practicando.'; note = 'Necesitas repasar los conceptos de ácidos y bases. Puedes repetir el experimento y revisar el marco teórico.';
+    color = 'var(--acid)';
+  }
+
+  document.getElementById('score-headline').textContent = headline;
+  document.getElementById('score-note').textContent = note;
+
+  // Animate arc
+  const circumference = 2 * Math.PI * 58;
+  const offset = circumference * (1 - score/total);
+  setTimeout(() => {
+    document.getElementById('score-arc').style.strokeDashoffset = offset;
+    document.getElementById('score-arc').style.stroke = color;
+  }, 300);
+  document.getElementById('score-display').style.color = color;
+
+  // Render breakdown
+  const list = document.getElementById('breakdown-list');
+  results.forEach((r, i) => {
+    const div = document.createElement('div');
+    div.className = 'breakdown-item ' + (r.correct ? 'correct' : 'incorrect');
+    div.innerHTML = `
+      <div class="breakdown-icon">${r.correct ? '✓' : '✗'}</div>
+      <div>
+        <div class="breakdown-q">P${i+1}: ${r.q}</div>
+        <div class="breakdown-a">${r.correct ? '→ Respuesta correcta' : `→ Respuesta correcta: ${r.answer}`}</div>
+      </div>`;
+    list.appendChild(div);
+  });
+</script>
+</body>
+</html>

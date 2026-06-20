@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz — Indicadores de pH — CeroLab</title>
+  <link rel="stylesheet" href="/shared/styles.css" />
+  <style>
+    /* ── Shell ── */
+    .quiz-shell { display: grid; grid-template-rows: 52px 1fr; height: 100vh; }
+
+    /* ── Topbar ── */
+    .quiz-topbar { background: rgba(10,28,19,0.98); border-bottom: 1px solid rgba(46,139,87,0.2); display: flex; align-items: center; padding: 0 24px; gap: 14px; }
+    .quiz-topbar-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    .quiz-topbar-logo img { height: 24px; }
+    .quiz-topbar-logo span { font-family: var(--display); font-size: 0.9rem; font-weight: 800; color: #fff; }
+    .quiz-topbar-sep { width: 1px; height: 20px; background: rgba(255,255,255,0.1); }
+    .timer-display { font-family: var(--mono); font-size: 0.78rem; color: rgba(255,255,255,0.5); margin-left: auto; display: flex; align-items: center; gap: 6px; }
+    .timer-display span { font-size: 1rem; color: #fff; }
+
+    /* ── Body ── */
+    .quiz-body { overflow-y: auto; display: flex; justify-content: center; padding: 40px 24px; }
+    .quiz-container { width: 100%; max-width: 680px; }
+
+    /* ── Progress ── */
+    .quiz-progress { margin-bottom: 28px; }
+    .q-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+
+    /* 4. Badge-style question counter */
+    .q-badge {
+      font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.12em;
+      color: var(--science); text-transform: uppercase;
+      background: rgba(46,139,87,0.1); border: 1px solid rgba(46,139,87,0.22);
+      border-radius: 2px; padding: 3px 9px;
+    }
+    .q-score { font-family: var(--mono); font-size: 0.68rem; color: var(--science); letter-spacing: 0.04em; }
+
+    /* 3. Progress bar with glow + spring easing */
+    .progress-bar { height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: visible; position: relative; }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #1a6640, var(--science) 55%, rgba(52,211,153,0.9));
+      border-radius: 2px;
+      transition: width 0.65s cubic-bezier(0.34, 1.4, 0.64, 1);
+      box-shadow: 0 0 12px rgba(46,139,87,0.6), 0 0 5px rgba(52,211,153,0.35);
+      position: relative;
+    }
+    .progress-fill::after {
+      content: '';
+      position: absolute; right: -1px; top: 50%; transform: translateY(-50%);
+      width: 7px; height: 7px; border-radius: 50%;
+      background: rgba(52,211,153,0.95);
+      box-shadow: 0 0 8px rgba(52,211,153,0.7);
+    }
+
+    /* 1. Question transition animations */
+    @keyframes questionIn {
+      from { opacity: 0; transform: translateX(18px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes questionOut {
+      from { opacity: 1; transform: translateX(0); }
+      to   { opacity: 0; transform: translateX(-14px); }
+    }
+
+    /* ── Question card ── */
+    .question-card {
+      background: rgba(255,255,255,0.02); border: 1px solid rgba(46,139,87,0.15);
+      border-radius: 4px; padding: 28px; margin-bottom: 16px;
+      animation: questionIn 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+    }
+
+    /* 9. Question text — slightly more prominent */
+    .q-text {
+      font-family: var(--display); font-size: 1.12rem; font-weight: 700;
+      color: #fff; line-height: 1.48; margin-bottom: 22px;
+      letter-spacing: -0.01em;
+    }
+
+    /* 6. Observation card — lab note styling */
+    .q-context {
+      font-size: 0.83rem; color: rgba(255,255,255,0.52);
+      margin-bottom: 20px; padding: 10px 14px 13px;
+      background: rgba(46,139,87,0.05);
+      border-left: 2px solid rgba(46,139,87,0.42);
+      border-radius: 0 3px 3px 0; line-height: 1.65;
+    }
+    .q-context-label {
+      display: block; font-family: var(--mono); font-size: 0.55rem;
+      letter-spacing: 0.14em; color: rgba(46,139,87,0.72);
+      text-transform: uppercase; margin-bottom: 5px;
+    }
+
+    /* ── Options ── */
+    .options { display: flex; flex-direction: column; gap: 9px; }
+
+    /* 2. Answer feedback animations */
+    @keyframes correctPulse {
+      0%   { box-shadow: 0 0 0 0 rgba(68,170,68,0.55), 0 0 18px rgba(68,170,68,0.14); }
+      65%  { box-shadow: 0 0 0 10px rgba(68,170,68,0), 0 0 18px rgba(68,170,68,0.14); }
+      100% { box-shadow: 0 0 0 0 rgba(68,170,68,0), 0 0 18px rgba(68,170,68,0.14); }
+    }
+    @keyframes incorrectShake {
+      0%,100% { transform: translateX(0); }
+      15%     { transform: translateX(-6px); }
+      35%     { transform: translateX(5px); }
+      55%     { transform: translateX(-4px); }
+      75%     { transform: translateX(3px); }
+    }
+    @keyframes iconPop {
+      from { opacity: 0; transform: scale(0.3) rotate(-15deg); }
+      to   { opacity: 1; transform: scale(1) rotate(0deg); }
+    }
+
+    /* 5. Micro-interactions on option buttons */
+    .option-btn {
+      display: flex; align-items: center; gap: 12px; padding: 13px 16px;
+      background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 3px; cursor: pointer; text-align: left;
+      color: rgba(255,255,255,0.82);
+      transition: background 0.18s, border-color 0.18s,
+                  transform 0.14s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  box-shadow 0.18s, color 0.2s;
+      width: 100%; font-size: 0.88rem; line-height: 1.4;
+    }
+    .option-btn:hover:not(:disabled) {
+      background: rgba(46,139,87,0.08); border-color: rgba(46,139,87,0.3);
+      transform: translateY(-1px);
+      box-shadow: 0 5px 16px rgba(0,0,0,0.38), 0 0 0 1px rgba(46,139,87,0.1);
+      color: #fff;
+    }
+    .option-btn:active:not(:disabled) {
+      transform: translateY(0) scale(0.997);
+      box-shadow: 0 1px 6px rgba(0,0,0,0.22);
+    }
+    .option-btn:focus-visible { outline: 2px solid var(--science); outline-offset: 2px; }
+    .option-btn:disabled { cursor: default; }
+
+    /* 7. Answer states — smooth, premium */
+    .option-btn.selected {
+      background: rgba(46,139,87,0.1); border-color: rgba(46,139,87,0.4);
+      color: rgba(255,255,255,0.92);
+    }
+    .option-btn.correct {
+      background: rgba(68,170,68,0.1); border-color: rgba(68,170,68,0.52);
+      color: rgba(210,255,210,0.9);
+      box-shadow: 0 0 18px rgba(68,170,68,0.14), inset 0 0 28px rgba(68,170,68,0.04);
+      animation: correctPulse 0.85s ease-out;
+    }
+    .option-btn.incorrect {
+      background: rgba(214,69,80,0.08); border-color: rgba(214,69,80,0.32);
+      color: rgba(255,195,195,0.7);
+      box-shadow: 0 0 14px rgba(214,69,80,0.1);
+      animation: incorrectShake 0.42s ease-out;
+    }
+    .option-btn .opt-text { flex: 1; }
+    .opt-fb-icon {
+      flex-shrink: 0;
+      animation: iconPop 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) 0.05s both;
+    }
+    .opt-fb-icon.correct-icon { color: #5ecc5e; }
+    .opt-fb-icon.incorrect-icon { color: rgba(214,80,90,0.9); }
+
+    /* Option key badge */
+    .option-key {
+      font-family: var(--mono); font-size: 0.68rem; width: 22px; height: 22px;
+      border-radius: 2px; background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      transition: background 0.18s, border-color 0.18s, color 0.18s;
+    }
+    .option-btn.correct  .option-key { background: rgba(68,170,68,0.28); border-color: rgba(68,170,68,0.52); color: #7adf7a; }
+    .option-btn.incorrect .option-key { background: rgba(214,69,80,0.18); border-color: rgba(214,69,80,0.38); color: rgba(255,130,130,0.9); }
+
+    /* ── Feedback message ── */
+    .feedback-msg {
+      margin-top: 14px; padding: 10px 16px; border-radius: 3px;
+      font-size: 0.83rem; line-height: 1.55; display: none;
+    }
+    .feedback-msg.show { display: flex; align-items: flex-start; gap: 9px; }
+    .feedback-msg.correct  { background: rgba(68,170,68,0.08); border: 1px solid rgba(68,170,68,0.22); color: #7add7a; }
+    .feedback-msg.incorrect { background: rgba(214,69,80,0.06); border: 1px solid rgba(214,69,80,0.18); color: rgba(255,255,255,0.6); }
+    .feedback-dot { width: 6px; height: 6px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+    .feedback-msg.correct .feedback-dot { background: #5ecc5e; }
+    .feedback-msg.incorrect .feedback-dot { background: rgba(214,69,80,0.85); }
+
+    /* ── Nav ── */
+    .quiz-nav { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  </style>
+</head>
+<body>
+<div class="quiz-shell">
+  <header class="quiz-topbar">
+    <a href="/" class="quiz-topbar-logo">
+      <img src="/brand_assets/CeroLab PNG.png" alt="CeroLab" />
+      <span>CeroLab</span>
+    </a>
+    <div class="quiz-topbar-sep"></div>
+    <span style="font-family:var(--mono);font-size:0.65rem;color:rgba(255,255,255,0.4);letter-spacing:0.08em;">QUIZ — Indicadores de pH</span>
+    <div class="timer-display">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1"/><path d="M6 3v3.5l2 1.5" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+      <span id="timer">08:00</span>
+    </div>
+    <a href="/alumno/quimica" class="btn btn-ghost btn-sm" style="font-size:0.75rem;padding:5px 12px;margin-left:12px;">Salir</a>
+  </header>
+
+  <div class="quiz-body">
+    <div class="quiz-container">
+      <div class="quiz-progress">
+        <div class="q-header">
+          <span class="q-badge" id="q-num">Pregunta 1 de 5</span>
+          <span class="q-score" id="q-score">Puntaje: 0 / 5</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:20%"></div></div>
+      </div>
+
+      <div id="quiz-area"></div>
+
+      <div class="quiz-nav" id="quiz-nav">
+        <button class="btn btn-ghost btn-sm" id="btn-prev" onclick="prevQ()" disabled>← Anterior</button>
+        <button class="btn btn-primary" id="btn-next" onclick="nextQ()" disabled>Siguiente →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const questions = [
+    {
+      q: '¿Qué sucede cuando se aplica papel tornasol a una solución con pH 2?',
+      context: 'Durante el experimento observaste que el HCl y el jugo de limón tienen pH inferior a 7.',
+      options: ['El papel se vuelve rojo', 'El papel se vuelve azul', 'El papel no cambia de color', 'El papel se vuelve verde'],
+      answer: 0,
+      feedback: { correct: '¡Correcto! El papel tornasol vira a rojo en soluciones ácidas (pH < 7).', incorrect: 'El papel tornasol se torna rojo en medios ácidos (pH < 7) y azul en medios básicos (pH > 7).' }
+    },
+    {
+      q: '¿Qué indica una solución cuando la fenolftaleína no produce cambio de color?',
+      context: 'La fenolftaleína permanece incolora en ambientes de pH inferior a 8.',
+      options: ['La solución es neutra o ácida', 'La solución es muy básica', 'La solución tiene pH 14', 'El indicador está defectuoso'],
+      answer: 0,
+      feedback: { correct: '¡Muy bien! La fenolftaleína permanece incolora cuando el pH es inferior a 8 (medios ácidos o neutros).', incorrect: 'La fenolftaleína es incolora en medios ácidos o neutros y se torna rosada/fucsia en medios básicos (pH > 8).' }
+    },
+    {
+      q: 'En el experimento, ¿qué sustancia presenta el pH más cercano a la neutralidad?',
+      context: 'Las sustancias analizadas fueron: HCl (pH 1), Limón (pH 2), Vinagre (pH 3), H₂O destilada (pH 7), Bicarbonato (pH 8.5) y NaOH (pH 13).',
+      options: ['Agua destilada (pH 7)', 'Bicarbonato (pH 8.5)', 'Vinagre (pH 3)', 'Limón (pH 2)'],
+      answer: 0,
+      feedback: { correct: '¡Correcto! El agua destilada tiene pH 7, que es exactamente el valor neutro en la escala.', incorrect: 'El pH neutro es 7. El agua destilada es la sustancia más cercana con un pH exactamente igual a 7.' }
+    },
+    {
+      q: '¿Cuál de las siguientes sustancias es un ácido fuerte según la escala de pH?',
+      context: 'Los ácidos fuertes tienen pH muy bajo, cercano a 0, e ionizan completamente en solución.',
+      options: ['HCl (Ácido clorhídrico)', 'Vinagre (ácido acético)', 'Bicarbonato de sodio', 'NaOH (hidróxido de sodio)'],
+      answer: 0,
+      feedback: { correct: '¡Correcto! El HCl es un ácido fuerte con pH aproximadamente 1, que ioniza completamente en solución.', incorrect: 'El HCl (ácido clorhídrico) es el ácido fuerte. El vinagre es un ácido débil, el bicarbonato es una base débil y el NaOH es una base fuerte.' }
+    },
+    {
+      q: '¿Qué color produce el indicador universal en una solución con pH 13?',
+      context: 'El indicador universal muestra el espectro completo de colores según el pH: rojo (ácido), verde (neutro), violeta (base fuerte).',
+      options: ['Violeta o azul oscuro', 'Rojo brillante', 'Amarillo', 'Verde claro'],
+      answer: 0,
+      feedback: { correct: '¡Excelente! En medios muy básicos (pH > 11), el indicador universal vira a tonos violeta/azul oscuro.', incorrect: 'El indicador universal muestra tonos violeta o azul oscuro en soluciones muy básicas como el NaOH (pH 13).' }
+    }
+  ];
+
+  let current = 0, score = 0, answered = [];
+  const total = questions.length;
+
+  // SVG icons for answer feedback
+  const ICON_CHECK = `<svg class="opt-fb-icon correct-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg>`;
+  const ICON_X = `<svg class="opt-fb-icon incorrect-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg>`;
+
+  function _buildQuestionHTML(idx) {
+    const q = questions[idx];
+    const answered_this = answered[idx] !== undefined;
+
+    const optionsHTML = q.options.map((opt, i) => {
+      let cls = '';
+      let icon = '';
+      if (answered_this) {
+        if (i === q.answer)        { cls = 'correct';   icon = ICON_CHECK; }
+        else if (i === answered[idx]) { cls = 'incorrect'; icon = ICON_X; }
+      }
+      return `<button class="option-btn ${cls}" onclick="selectOption(${i})" ${answered_this ? 'disabled' : ''} aria-label="Opción ${String.fromCharCode(65+i)}: ${opt}">
+        <span class="option-key">${String.fromCharCode(65+i)}</span>
+        <span class="opt-text">${opt}</span>
+        ${icon}
+      </button>`;
+    }).join('');
+
+    const feedbackHTML = answered_this ? `
+      <div class="feedback-msg show ${answered[idx] === q.answer ? 'correct' : 'incorrect'}">
+        <span class="feedback-dot"></span>
+        <span>${answered[idx] === q.answer ? q.feedback.correct : q.feedback.incorrect}</span>
+      </div>` : '';
+
+    const contextHTML = q.context ? `
+      <div class="q-context">
+        <span class="q-context-label">Observación del laboratorio</span>
+        ${q.context}
+      </div>` : '';
+
+    return `
+      <div class="question-card">
+        ${contextHTML}
+        <div class="q-text">${q.q}</div>
+        <div class="options" role="group" aria-label="Opciones">${optionsHTML}</div>
+        ${feedbackHTML}
+      </div>`;
+  }
+
+  function _updateNav(idx) {
+    const answered_this = answered[idx] !== undefined;
+    document.getElementById('q-num').textContent = `Pregunta ${idx+1} de ${total}`;
+    document.getElementById('q-score').textContent = `Puntaje: ${score} / ${total}`;
+    document.getElementById('progress-fill').style.width = ((idx+1)/total*100) + '%';
+    document.getElementById('btn-prev').disabled = idx === 0;
+    document.getElementById('btn-next').disabled = !answered_this;
+    if (idx === total - 1 && answered_this) {
+      document.getElementById('btn-next').textContent = 'Ver resultados →';
+      document.getElementById('btn-next').onclick = () => {
+        window.location.href = '/experimento/acido-base/resultados?score='+score+'&total='+total;
+      };
+    } else {
+      document.getElementById('btn-next').textContent = 'Siguiente →';
+      document.getElementById('btn-next').onclick = nextQ;
+    }
+  }
+
+  // 1. Question transitions — fade + slide
+  function renderQ(idx) {
+    const area = document.getElementById('quiz-area');
+
+    function _paint() {
+      area.innerHTML = _buildQuestionHTML(idx);
+      _updateNav(idx);
+    }
+
+    const existingCard = area.querySelector('.question-card');
+    if (existingCard) {
+      existingCard.style.animation = 'questionOut 0.18s ease forwards';
+      setTimeout(_paint, 175);
+    } else {
+      _paint();
+    }
+  }
+
+  function selectOption(i) {
+    if (answered[current] !== undefined) return;
+    answered[current] = i;
+    if (i === questions[current].answer) score++;
+    renderQ(current);
+  }
+
+  function nextQ() {
+    if (current < total - 1) { current++; renderQ(current); }
+  }
+  function prevQ() {
+    if (current > 0) { current--; renderQ(current); }
+  }
+
+  // Timer
+  let seconds = 8 * 60;
+  const timer = document.getElementById('timer');
+  const tick = setInterval(() => {
+    seconds--;
+    if (seconds <= 0) {
+      clearInterval(tick);
+      window.location.href = '/experimento/acido-base/resultados?score='+score+'&total='+total;
+      return;
+    }
+    const m = String(Math.floor(seconds/60)).padStart(2,'0');
+    const s = String(seconds%60).padStart(2,'0');
+    timer.textContent = `${m}:${s}`;
+    if (seconds < 60) timer.style.color = 'var(--acid)';
+  }, 1000);
+
+  renderQ(0);
+</script>
+</body>
+</html>

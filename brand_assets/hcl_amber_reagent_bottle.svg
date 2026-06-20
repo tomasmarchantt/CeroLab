@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1536" viewBox="0 0 1024 1536" fill="none">
+  <defs>
+    <linearGradient id="amberGlass" x1="210" y1="180" x2="810" y2="1350" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#E7A23A" stop-opacity="0.82"/>
+      <stop offset="0.28" stop-color="#A95B12" stop-opacity="0.78"/>
+      <stop offset="0.55" stop-color="#8A3E09" stop-opacity="0.78"/>
+      <stop offset="1" stop-color="#36190A" stop-opacity="0.90"/>
+    </linearGradient>
+    <linearGradient id="amberSide" x1="180" y1="600" x2="850" y2="600" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.30"/>
+      <stop offset="0.12" stop-color="#F6C177" stop-opacity="0.35"/>
+      <stop offset="0.26" stop-color="#723006" stop-opacity="0.18"/>
+      <stop offset="0.48" stop-color="#ffffff" stop-opacity="0.10"/>
+      <stop offset="0.72" stop-color="#2D1305" stop-opacity="0.30"/>
+      <stop offset="0.88" stop-color="#F5B35E" stop-opacity="0.24"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.18"/>
+    </linearGradient>
+    <linearGradient id="capGrad" x1="240" y1="90" x2="790" y2="260" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F7F7F1"/>
+      <stop offset="0.22" stop-color="#D6D6CC"/>
+      <stop offset="0.55" stop-color="#FAFAF5"/>
+      <stop offset="1" stop-color="#BEBEB5"/>
+    </linearGradient>
+    <linearGradient id="whiteLabel" x1="260" y1="650" x2="760" y2="930" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="0.5" stop-color="#F1F1EC" stop-opacity="0.92"/>
+      <stop offset="1" stop-color="#DDDDD7" stop-opacity="0.94"/>
+    </linearGradient>
+    <radialGradient id="baseGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(512 1320) rotate(90) scale(145 315)">
+      <stop offset="0" stop-color="#F1A54B" stop-opacity="0.55"/>
+      <stop offset="0.65" stop-color="#803C0A" stop-opacity="0.25"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="softShadow" x="100" y="80" width="824" height="1360" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="30" stdDeviation="30" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+    <filter id="blur2" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2.5"/>
+    </filter>
+    <clipPath id="bottleClip">
+      <path d="M308 316C308 260 350 232 397 222H627C674 232 716 260 716 316V1198C716 1272 676 1325 616 1344C583 1355 441 1355 408 1344C348 1325 308 1272 308 1198V316Z"/>
+    </clipPath>
+  </defs>
+
+  <rect width="1024" height="1536" fill="transparent"/>
+
+  <g filter="url(#softShadow)">
+    <!-- Cap -->
+    <path d="M278 96C278 73 298 54 322 54H702C726 54 746 73 746 96V210C746 243 719 270 686 270H338C305 270 278 243 278 210V96Z" fill="url(#capGrad)" stroke="#9C9C93" stroke-width="4"/>
+    <rect x="300" y="78" width="424" height="155" rx="38" fill="url(#capGrad)"/>
+    <!-- cap ribs -->
+    <g opacity="0.42" stroke="#8B8B83" stroke-width="5">
+      <path d="M322 78V232"/><path d="M348 76V236"/><path d="M374 74V238"/><path d="M400 72V240"/><path d="M426 70V242"/><path d="M452 69V243"/><path d="M478 69V243"/><path d="M504 68V244"/><path d="M530 68V244"/><path d="M556 69V243"/><path d="M582 69V243"/><path d="M608 70V242"/><path d="M634 72V240"/><path d="M660 74V238"/><path d="M686 76V236"/><path d="M712 78V232"/>
+    </g>
+    <rect x="284" y="209" width="456" height="35" rx="17" fill="#B9B9B0" opacity="0.9"/>
+    <rect x="294" y="205" width="436" height="14" rx="7" fill="#FFFFFF" opacity="0.65"/>
+
+    <!-- Neck -->
+    <path d="M365 245H659V344C659 388 626 420 589 420H435C398 420 365 388 365 344V245Z" fill="url(#amberGlass)" stroke="#5D3514" stroke-opacity="0.35" stroke-width="4"/>
+    <path d="M372 278H652" stroke="#FFFFFF" stroke-opacity="0.48" stroke-width="8"/>
+    <path d="M376 348H648" stroke="#2C1607" stroke-opacity="0.25" stroke-width="10"/>
+
+    <!-- Bottle body -->
+    <path d="M308 316C308 260 350 232 397 222H627C674 232 716 260 716 316V1198C716 1272 676 1325 616 1344C583 1355 441 1355 408 1344C348 1325 308 1272 308 1198V316Z" fill="url(#amberGlass)" stroke="#4D2B10" stroke-opacity="0.55" stroke-width="6"/>
+    <g clip-path="url(#bottleClip)">
+      <rect x="308" y="222" width="408" height="1132" fill="url(#amberSide)"/>
+      <ellipse cx="512" cy="1240" rx="230" ry="108" fill="url(#baseGlow)"/>
+      <rect x="358" y="342" width="36" height="870" rx="18" fill="#FFFFFF" opacity="0.28" filter="url(#blur2)"/>
+      <rect x="626" y="360" width="24" height="800" rx="12" fill="#FFFFFF" opacity="0.16" filter="url(#blur2)"/>
+      <path d="M420 255C368 300 348 358 348 440V1195C348 1260 382 1300 428 1316" stroke="#FFFFFF" stroke-width="12" stroke-opacity="0.18"/>
+      <path d="M670 326C690 372 692 450 692 560V1194C692 1250 666 1294 610 1316" stroke="#000000" stroke-width="18" stroke-opacity="0.16"/>
+      <ellipse cx="512" cy="1228" rx="180" ry="42" stroke="#120801" stroke-opacity="0.35" stroke-width="9"/>
+      <ellipse cx="512" cy="1198" rx="170" ry="28" stroke="#FFFFFF" stroke-opacity="0.22" stroke-width="6"/>
+    </g>
+
+    <!-- Label -->
+    <g>
+      <rect x="264" y="613" width="496" height="288" rx="34" fill="url(#whiteLabel)" stroke="#FFFFFF" stroke-opacity="0.7" stroke-width="5"/>
+      <path d="M286 628C352 610 650 614 735 632" stroke="#FFFFFF" stroke-opacity="0.75" stroke-width="8"/>
+      <path d="M283 887C384 905 636 904 741 887" stroke="#B7B7AD" stroke-opacity="0.5" stroke-width="5"/>
+      <text x="512" y="735" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="118" font-weight="700" fill="#1F1F1F">HCl</text>
+      <text x="512" y="804" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="43" font-weight="500" fill="#2B2B2B">Hydrochloric Acid</text>
+    </g>
+
+    <!-- Glass contour highlights over label -->
+    <path d="M310 514C354 498 676 498 714 514" stroke="#FFFFFF" stroke-width="8" stroke-opacity="0.35"/>
+    <path d="M315 1160C360 1196 664 1196 709 1160" stroke="#FFFFFF" stroke-width="9" stroke-opacity="0.28"/>
+    <path d="M310 325C330 290 366 270 404 262" stroke="#FFFFFF" stroke-width="8" stroke-opacity="0.24"/>
+    <path d="M714 328C694 290 660 270 620 262" stroke="#000000" stroke-width="9" stroke-opacity="0.12"/>
+  </g>
+</svg>

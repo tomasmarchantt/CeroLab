@@ -1,0 +1,2352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CeroLab — Laboratorio Científico Virtual para Colegios</title>
+  <link rel="stylesheet" href="/shared/styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ── Tokens ── */
+    :root {
+      --c-bg:       #040d08;
+      --c-bg2:      #060f0a;
+      --c-bg3:      #03090506;
+      --c-card:     rgba(255,255,255,0.025);
+      --c-border:   rgba(46,139,87,0.16);
+      --c-border2:  rgba(46,139,87,0.26);
+      --c-sci:      #2E8B57;
+      --c-sci-hi:   rgba(52,211,153,0.9);
+      --c-accent:   #34d399;
+      --c-text:     rgba(255,255,255,0.82);
+      --c-muted:    rgba(255,255,255,0.42);
+      --c-dim:      rgba(255,255,255,0.18);
+      --r:          4px;
+      --font-head:  'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+      --font-mono:  'IBM Plex Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--c-bg); color: var(--c-text); font-family: var(--font-sans, 'Inter', sans-serif); -webkit-font-smoothing: antialiased; }
+
+    /* ── Layout helpers ── */
+    .w { max-width: 1160px; margin: 0 auto; padding: 0 28px; }
+    .section { padding: 96px 0; }
+    .section-alt { background: var(--c-bg2); }
+    .section-tag {
+      font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.16em;
+      text-transform: uppercase; color: var(--c-sci); display: inline-flex;
+      align-items: center; gap: 8px; margin-bottom: 20px;
+    }
+    .section-tag::before {
+      content: ''; width: 16px; height: 1px; background: var(--c-sci); opacity: 0.6;
+    }
+    .section-h {
+      font-family: var(--font-head); font-size: clamp(1.8rem, 3.2vw, 2.7rem);
+      font-weight: 700; line-height: 1.12; letter-spacing: -0.025em; color: #fff;
+    }
+    .section-h em { font-style: normal; color: var(--c-accent); }
+    .section-lead {
+      font-size: 0.95rem; line-height: 1.78; color: var(--c-muted); max-width: 560px;
+      margin-top: 16px;
+    }
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--c-card); border: 1px solid var(--c-border);
+      border-radius: var(--r); padding: 26px 24px;
+      transition: border-color 0.22s, box-shadow 0.22s;
+    }
+    .card:hover {
+      border-color: var(--c-border2);
+      box-shadow: 0 6px 28px rgba(0,0,0,0.4), 0 0 0 1px rgba(46,139,87,0.1);
+    }
+    .card-tag {
+      font-family: var(--font-mono); font-size: 0.57rem; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--c-sci); margin-bottom: 12px;
+    }
+    .card h3 { font-family: var(--font-head); font-size: 1rem; font-weight: 600; color: #fff; margin-bottom: 8px; }
+    .card p  { font-size: 0.84rem; line-height: 1.68; color: var(--c-muted); }
+
+    /* ── Animations ── */
+    /* Elements start visible; JS opt-in adds hidden state for scroll reveal */
+    .js-ready .anim-up { opacity: 0; transform: translateY(22px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .js-ready .anim-up.visible { opacity: 1; transform: translateY(0); }
+    .js-ready .anim-up.d1 { transition-delay: 0.1s; } .js-ready .anim-up.d2 { transition-delay: 0.18s; }
+    .js-ready .anim-up.d3 { transition-delay: 0.26s; } .js-ready .anim-up.d4 { transition-delay: 0.34s; }
+    .js-ready .anim-up.d5 { transition-delay: 0.42s; }
+    @keyframes floatY { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    .anim-float { animation: floatY 6s ease-in-out infinite; }
+
+    /* ══════════════════════════════════════════
+       NAV
+    ══════════════════════════════════════════ */
+    #navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(4,13,8,0.92); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--c-border);
+    }
+    .nav-inner {
+      max-width: 1160px; margin: 0 auto; padding: 0 28px;
+      height: 62px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo img { height: 30px; filter: drop-shadow(0 0 6px rgba(52,211,153,0.2)); }
+    .nav-logo-text { font-family: var(--font-head); font-size: 1.05rem; font-weight: 700; color: #edfff4; letter-spacing: -0.02em; }
+    .nav-actions { display: flex; align-items: center; gap: 10px; }
+
+    /* ── Tubelight floating section nav ── */
+    #tl-nav {
+      position: fixed;
+      top: 9px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 110;
+      pointer-events: none;
+    }
+    .tl-pill {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      background: rgba(7,22,13,0.96);
+      border: 1px solid rgba(52,211,153,0.22);
+      border-radius: 100px;
+      padding: 5px 6px;
+      box-shadow:
+        0 4px 32px rgba(0,0,0,0.65),
+        0 0 0 1px rgba(52,211,153,0.08),
+        inset 0 1px 0 rgba(52,211,153,0.09);
+      pointer-events: all;
+    }
+    /* Sliding indicator (moves behind active item) */
+    .tl-indicator {
+      position: absolute;
+      top: 5px;
+      height: calc(100% - 10px);
+      border-radius: 100px;
+      background: rgba(52,211,153,0.13);
+      border: 1px solid rgba(52,211,153,0.32);
+      transition:
+        left  0.40s cubic-bezier(0.34,1.48,0.64,1),
+        width 0.40s cubic-bezier(0.34,1.48,0.64,1);
+      pointer-events: none;
+      z-index: 0;
+      overflow: visible;
+    }
+    /* Tubelight bar + glow sitting on top of indicator */
+    .tl-lamp {
+      position: absolute;
+      top: -1px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 36px;
+      height: 2px;
+      background: rgba(52,211,153,1);
+      border-radius: 0 0 4px 4px;
+      box-shadow: 0 0 8px rgba(52,211,153,0.7), 0 0 18px rgba(52,211,153,0.35);
+      pointer-events: none;
+    }
+    .tl-lamp::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%; transform: translateX(-50%);
+      width: 60px; height: 28px;
+      background: radial-gradient(ellipse at 50% 0%, rgba(52,211,153,0.28) 0%, transparent 68%);
+      filter: blur(6px);
+    }
+    .tl-lamp::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%; transform: translateX(-50%);
+      width: 30px; height: 14px;
+      background: radial-gradient(ellipse at 50% 0%, rgba(52,211,153,0.50) 0%, transparent 68%);
+      filter: blur(3px);
+    }
+    /* Nav items */
+    .tl-item {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 100px;
+      text-decoration: none;
+      font-family: var(--font-head);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.52);
+      transition: color 0.22s ease;
+      z-index: 1;
+      white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .tl-item:hover { color: rgba(255,255,255,0.85); }
+    .tl-item.tl-active { color: rgba(52,211,153,1); }
+    .tl-icon {
+      display: flex; align-items: center; flex-shrink: 0;
+      opacity: 0.85;
+    }
+    .tl-item.tl-active .tl-icon { opacity: 1; }
+    .tl-label { display: inline; }
+
+    /* Mobile: dock to bottom, icons only */
+    @media (max-width: 640px) {
+      #tl-nav { top: auto; bottom: 20px; }
+      .tl-label { display: none; }
+      .tl-item { padding: 10px 13px; }
+      /* Lamp flips to bottom */
+      .tl-lamp {
+        top: auto;
+        bottom: -1px;
+        border-radius: 3px 3px 0 0;
+      }
+      .tl-lamp::before { top: auto; bottom: 0; }
+      .tl-lamp::after  { top: auto; bottom: 0; }
+    }
+
+    /* ══════════════════════════════════════════
+       AURORA BACKGROUND EFFECT
+       Adapted from 21st.dev AuroraBackground →
+       CeroLab dark-green scientific identity
+    ══════════════════════════════════════════ */
+
+    /* Keyframe: moves background-position for GPU-optimised flow */
+    @keyframes cerolab-aurora {
+      from { background-position: 50% 50%, 50% 50%; }
+      to   { background-position: 350% 50%, 350% 50%; }
+    }
+
+    .aurora-bg {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Primary aurora layer — wider bands, slower loop */
+    .aurora-bg::before {
+      content: '';
+      position: absolute;
+      inset: -12%;
+      filter: blur(20px);
+      opacity: 0.28;
+      will-change: background-position;
+      background-image:
+        repeating-linear-gradient(100deg,
+          rgba(3,25,14,0)    0%,  rgba(3,25,14,0)    7%,
+          rgba(3,25,14,0.45) 10%, rgba(3,25,14,0.45) 12%,
+          rgba(3,25,14,0)    16%),
+        repeating-linear-gradient(100deg,
+          rgba(5,150,105,1)    10%,
+          rgba(16,185,129,0.8) 15%,
+          rgba(52,211,153,0.6) 20%,
+          rgba(45,212,191,0.5) 25%,
+          rgba(6,95,70,0.9)    30%);
+      background-size: 300% 300%, 200% 200%;
+      animation: cerolab-aurora 65s linear infinite;
+    }
+
+    /* Secondary layer — tighter bands, faster loop, screen blend */
+    .aurora-bg::after {
+      content: '';
+      position: absolute;
+      inset: -12%;
+      filter: blur(28px);
+      opacity: 0.15;
+      will-change: background-position;
+      background-image:
+        repeating-linear-gradient(100deg,
+          rgba(2,14,8,0)   0%,  rgba(2,14,8,0)   7%,
+          rgba(2,14,8,0.3) 10%, rgba(2,14,8,0.3) 12%,
+          rgba(2,14,8,0)   16%),
+        repeating-linear-gradient(100deg,
+          rgba(16,185,129,0.75) 10%,
+          rgba(52,211,153,0.55) 15%,
+          rgba(45,212,191,0.42) 20%,
+          rgba(34,197,94,0.65)  25%,
+          rgba(5,150,105,0.8)   30%);
+      background-size: 200% 200%, 100% 100%;
+      animation: cerolab-aurora 45s linear infinite;
+      animation-delay: -22s;
+      mix-blend-mode: screen;
+    }
+
+    /* Hero: focus glow on orbital side (right ~65%) */
+    .aurora-hero::before {
+      mask-image: radial-gradient(ellipse 78% 85% at 66% 48%,
+        black 8%, rgba(0,0,0,0.5) 42%, transparent 68%);
+    }
+    .aurora-hero::after {
+      mask-image: radial-gradient(ellipse 68% 75% at 64% 50%,
+        black 12%, transparent 60%);
+    }
+
+    /* Product: spread evenly across the section */
+    .aurora-product::before {
+      mask-image: radial-gradient(ellipse 92% 82% at 50% 42%,
+        black 12%, rgba(0,0,0,0.4) 52%, transparent 75%);
+      opacity: 0.22;
+    }
+    .aurora-product::after {
+      mask-image: radial-gradient(ellipse 82% 72% at 50% 46%,
+        black 18%, transparent 66%);
+      opacity: 0.12;
+    }
+
+    /* Benefits: left-of-center emphasis */
+    .aurora-benefits::before {
+      mask-image: radial-gradient(ellipse 88% 80% at 38% 50%,
+        black 10%, rgba(0,0,0,0.35) 48%, transparent 70%);
+      opacity: 0.20;
+    }
+    .aurora-benefits::after {
+      mask-image: radial-gradient(ellipse 78% 68% at 42% 54%,
+        black 14%, transparent 62%);
+      opacity: 0.11;
+    }
+
+    /* Benefits section needs position:relative to contain aurora */
+    #beneficios { position: relative; }
+
+    /* Accessibility: freeze animation for users who prefer reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      .aurora-bg::before,
+      .aurora-bg::after { animation: none; }
+    }
+
+    /* Mobile: reduce cost — lower opacity, more blur */
+    @media (max-width: 640px) {
+      .aurora-bg::before { opacity: 0.15; filter: blur(26px); }
+      .aurora-bg::after  { opacity: 0.08; filter: blur(34px); }
+    }
+
+    /* ══════════════════════════════════════════
+       HERO v2 — Lab Card + Spline-ready scene
+    ══════════════════════════════════════════ */
+    #inicio {
+      min-height: 100vh; padding-top: 62px; padding-bottom: 52px;
+      background: var(--c-bg); position: relative; overflow: hidden;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    #hero-particles {
+      position: absolute; inset: 0; z-index: 0; pointer-events: none;
+      width: 100%; height: 100%;
+    }
+    .hero-grid-hud {
+      position: absolute; inset: 0; z-index: 1; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(46,139,87,0.032) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(46,139,87,0.032) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+    .hero-atmo {
+      position: absolute; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 75% 65% at 68% 42%, rgba(18,74,48,0.28) 0%, transparent 68%),
+        radial-gradient(ellipse 40% 55% at 8% 88%, rgba(46,139,87,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 45% 38% at 85% 8%, rgba(52,211,153,0.04) 0%, transparent 60%);
+    }
+    .hero-w { position: relative; z-index: 2; padding-top: 36px; padding-bottom: 44px; }
+
+    /* ── The lab card ── */
+    .hero-card {
+      background: rgba(3,13,8,0.97);
+      border: 1px solid rgba(46,139,87,0.22);
+      border-radius: 12px;
+      box-shadow:
+        0 0 0 1px rgba(52,211,153,0.05),
+        0 36px 100px rgba(0,0,0,0.8),
+        0 0 90px rgba(18,74,48,0.1),
+        inset 0 1px 0 rgba(52,211,153,0.09),
+        inset 0 -1px 0 rgba(0,0,0,0.65);
+      position: relative; overflow: hidden;
+    }
+    /* Mouse-tracked spotlight */
+    .hero-spotlight {
+      position: absolute; inset: 0; z-index: 0; pointer-events: none;
+      background: radial-gradient(700px circle at 28% 48%, rgba(52,211,153,0.055) 0%, rgba(46,139,87,0.02) 40%, transparent 70%);
+    }
+    /* HUD corner brackets */
+    .hud-corner { position: absolute; width: 20px; height: 20px; z-index: 2; pointer-events: none; }
+    .hud-corner::before, .hud-corner::after { content: ''; position: absolute; background: rgba(52,211,153,0.5); }
+    .hud-corner::before { width: 100%; height: 1px; top: 0; left: 0; }
+    .hud-corner::after  { width: 1px; height: 100%; top: 0; left: 0; }
+    .hud-tl { top: 14px; left: 14px; }
+    .hud-tr { top: 14px; right: 14px; transform: scaleX(-1); }
+    .hud-bl { bottom: 14px; left: 14px; transform: scaleY(-1); }
+    .hud-br { bottom: 14px; right: 14px; transform: scale(-1); }
+
+    /* ── Split layout ── */
+    .hero-split {
+      display: grid; grid-template-columns: 1fr 1fr; min-height: 560px;
+      position: relative; z-index: 1;
+    }
+    /* Left panel */
+    .hero-left {
+      padding: 52px 44px; display: flex; flex-direction: column; justify-content: center;
+      border-right: 1px solid rgba(46,139,87,0.12);
+    }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px;
+      background: rgba(46,139,87,0.09); border: 1px solid rgba(46,139,87,0.26);
+      border-radius: 2px; margin-bottom: 22px;
+      font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--c-sci); width: fit-content;
+    }
+    .hero-eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--c-sci); animation: pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .hero-h1 {
+      font-family: var(--font-head); font-size: clamp(2.8rem, 4.8vw, 4.4rem);
+      font-weight: 700; line-height: 1.0; letter-spacing: -0.03em; color: #fff;
+      margin-bottom: 10px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .hero-logo-mark {
+      height: 1.4em;
+      width: auto;
+      flex-shrink: 0;
+      display: block;
+      filter: drop-shadow(0 0 10px rgba(52,211,153,0.22));
+    }
+    .hero-sub {
+      font-family: var(--font-head); font-size: clamp(0.95rem, 1.6vw, 1.1rem);
+      font-weight: 500; color: rgba(255,255,255,0.52); letter-spacing: -0.01em;
+      line-height: 1.3; margin-bottom: 20px;
+    }
+    .hero-desc { font-size: 0.88rem; line-height: 1.8; color: var(--c-muted); max-width: 400px; margin-bottom: 32px; }
+    .hero-ctas { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 28px; }
+    /* Floating chip badges */
+    .hero-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+    .chip {
+      font-family: var(--font-mono); font-size: 0.57rem; letter-spacing: 0.09em;
+      padding: 5px 11px; border-radius: 20px;
+      border: 1px solid rgba(52,211,153,0.22);
+      background: rgba(52,211,153,0.05);
+      color: rgba(52,211,153,0.7);
+    }
+    .chip.c1 { animation: chipFloat 4.2s ease-in-out 0s    infinite; }
+    .chip.c2 { animation: chipFloat 4.5s ease-in-out 0.4s  infinite; }
+    .chip.c3 { animation: chipFloat 3.9s ease-in-out 0.8s  infinite; }
+    .chip.c4 { animation: chipFloat 4.8s ease-in-out 1.2s  infinite; }
+    .chip.c5 { animation: chipFloat 4.1s ease-in-out 1.6s  infinite; }
+    @keyframes chipFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+
+    /* ── Right: 3D scene panel ── */
+    .hero-scene { position: relative; overflow: hidden; background: rgba(2,9,5,0.7); }
+    #lab-canvas  { width: 100%; height: 100%; display: block; position: absolute; inset: 0; }
+    /* Spline mount point — swap canvas for <canvas id="spline-canvas"> when custom scene ready */
+    .spline-mount { position: absolute; inset: 0; z-index: 2; pointer-events: auto; }
+    /* Scene HUD overlay */
+    .scene-hud-tr {
+      position: absolute; top: 16px; right: 16px;
+      display: flex; flex-direction: column; gap: 7px; z-index: 4; pointer-events: none;
+    }
+    .hud-block {
+      background: rgba(3,13,8,0.88); border: 1px solid rgba(46,139,87,0.24);
+      border-radius: 3px; padding: 7px 11px; min-width: 72px;
+      backdrop-filter: blur(10px);
+    }
+    .hud-block-label { font-family: var(--font-mono); font-size: 0.43rem; letter-spacing: 0.14em; color: rgba(46,139,87,0.58); text-transform: uppercase; display: block; margin-bottom: 3px; }
+    .hud-block-val   { font-family: var(--font-mono); font-size: 1.05rem; font-weight: 500; color: #fff; line-height: 1; }
+    .hud-block-val.acid    { color: rgba(214,80,60,0.9); }
+    .hud-block-val.base    { color: rgba(80,140,220,0.9); }
+    .hud-block-val.neutral { color: rgba(52,211,153,0.9); }
+    .hud-block-sub  { font-family: var(--font-mono); font-size: 0.45rem; color: rgba(255,255,255,0.28); margin-top: 2px; display: block; letter-spacing: 0.06em; }
+    /* pH bar inside hud-block */
+    .hud-ph-bar { height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+    .hud-ph-fill { height: 100%; border-radius: 2px; }
+    /* Bottom bar */
+    .scene-hud-bot {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: linear-gradient(transparent, rgba(2,8,5,0.92));
+      padding: 20px 16px 12px; z-index: 4; pointer-events: none;
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+    .hud-bot-tag { font-family: var(--font-mono); font-size: 0.48rem; letter-spacing: 0.12em; color: rgba(52,211,153,0.5); text-transform: uppercase; }
+    .hud-bot-val { font-family: var(--font-mono); font-size: 0.52rem; color: rgba(52,211,153,0.75); }
+    .hud-bot-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(52,211,153,0.7); animation: pulse 1.5s ease-in-out infinite; }
+    /* Scene top gradient */
+    .scene-glow-top { position: absolute; top: 0; left: 0; right: 0; height: 70px; background: linear-gradient(rgba(15,50,30,0.4), transparent); pointer-events: none; z-index: 3; }
+    /* Scene left gradient (blends into left panel) */
+    .scene-glow-left { position: absolute; top: 0; left: 0; bottom: 0; width: 60px; background: linear-gradient(90deg, rgba(3,13,8,0.6), transparent); pointer-events: none; z-index: 3; }
+    /* Loading ring (shown during Spline load) */
+    .scene-loader-ring { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; z-index: 5; }
+    .loader-ring { width: 44px; height: 44px; border-radius: 50%; border: 2px solid rgba(46,139,87,0.15); border-top-color: rgba(52,211,153,0.7); animation: spin 1s linear infinite; }
+    .loader-ring-text { font-family: var(--font-mono); font-size: 0.55rem; letter-spacing: 0.12em; color: rgba(52,211,153,0.45); text-transform: uppercase; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Scroll hint */
+    .hero-scroll-hint { position: relative; margin-top: 22px; text-align: center; z-index: 5; flex-shrink: 0; }
+    .scroll-hint-text { font-family: var(--font-mono); font-size: 0.5rem; letter-spacing: 0.18em; color: rgba(255,255,255,0.2); display: block; margin-bottom: 7px; text-transform: uppercase; }
+
+    /* ── Animated rotating phrase ── */
+    .hero-phrase-wrap {
+      height: 1.65rem; /* fixed height — prevents layout shift on phrase change */
+      position: relative;
+      overflow: hidden;
+      margin: 6px 0 12px;
+    }
+    .hero-phrase {
+      position: absolute;
+      left: 0; top: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.09em;
+      color: rgba(52,211,153,0.85);
+      text-shadow: 0 0 18px rgba(52,211,153,0.30);
+      white-space: nowrap;
+      /* start state: invisible, below */
+      opacity: 0;
+      transform: translateY(18px);
+      transition:
+        opacity  0.52s ease,
+        transform 0.52s cubic-bezier(0.22,1.28,0.36,1);
+    }
+    .hero-phrase::before {
+      content: '→';
+      font-size: 0.7rem;
+      opacity: 0.55;
+      flex-shrink: 0;
+    }
+    /* active: fully visible, at rest */
+    .hero-phrase.ph-in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    /* exiting: slide up and fade */
+    .hero-phrase.ph-out {
+      opacity: 0;
+      transform: translateY(-18px);
+      transition:
+        opacity  0.32s ease,
+        transform 0.32s ease;
+    }
+
+    /* Entrance animations */
+    .he1 { animation: heIn 0.75s cubic-bezier(0.16,1,0.3,1) 0.05s both; }
+    .he2 { animation: heIn 0.75s cubic-bezier(0.16,1,0.3,1) 0.17s both; }
+    .he3 { animation: heIn 0.75s cubic-bezier(0.16,1,0.3,1) 0.29s both; }
+    .he4 { animation: heIn 0.75s cubic-bezier(0.16,1,0.3,1) 0.41s both; }
+    .he5 { animation: heIn 0.75s cubic-bezier(0.16,1,0.3,1) 0.53s both; }
+    .heR { animation: heInR 0.9s  cubic-bezier(0.16,1,0.3,1) 0.25s both; }
+    @keyframes heIn  { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes heInR { from { opacity:0; transform:translateX(24px); } to { opacity:1; transform:translateX(0); } }
+
+    /* Responsive */
+    @media (max-width: 860px) {
+      .hero-split { grid-template-columns: 1fr; min-height: auto; }
+      .hero-left { padding: 36px 26px; border-right: none; border-bottom: 1px solid rgba(46,139,87,0.12); }
+      .hero-scene { min-height: 340px; }
+    }
+    @media (min-width: 860px) and (max-width: 1080px) {
+      .hero-split { grid-template-columns: 55% 45%; }
+      .hero-left { padding: 44px 36px; }
+    }
+
+    /* ══════════════════════════════════════════
+       PROBLEM
+    ══════════════════════════════════════════ */
+    .problem-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 48px; }
+    .problem-card {
+      background: var(--c-card); border: 1px solid var(--c-border);
+      border-radius: var(--r); padding: 26px 24px;
+      transition: border-color 0.22s, box-shadow 0.22s;
+    }
+    .problem-card:hover { border-color: var(--c-border2); box-shadow: 0 6px 24px rgba(0,0,0,0.4); }
+    .problem-stat {
+      font-family: var(--font-mono); font-size: 2.2rem; font-weight: 500;
+      color: var(--c-sci); line-height: 1; margin-bottom: 10px;
+    }
+    .problem-stat.warn { color: rgba(214,69,80,0.85); }
+    .problem-card h3 { font-family: var(--font-head); font-size: 1rem; font-weight: 600; color: #fff; margin-bottom: 8px; }
+    .problem-card p  { font-size: 0.84rem; line-height: 1.68; color: var(--c-muted); }
+
+    /* ══════════════════════════════════════════
+       SOLUTION
+    ══════════════════════════════════════════ */
+    .solution-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 48px; }
+    .solution-grid .card:nth-child(4),
+    .solution-grid .card:nth-child(5) { grid-column: span 1; }
+    .sol-icon { width: 40px; height: 40px; margin-bottom: 16px; color: var(--c-sci); }
+
+    /* ══════════════════════════════════════════
+       OBJECTIVES
+    ══════════════════════════════════════════ */
+    .obj-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 48px; }
+    .obj-num {
+      font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.14em;
+      color: var(--c-sci); margin-bottom: 12px; opacity: 0.7;
+    }
+
+    /* ══════════════════════════════════════════
+       BENEFITS
+    ══════════════════════════════════════════ */
+    .benefits-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 48px; }
+
+    /* ══════════════════════════════════════════
+       MARKET
+    ══════════════════════════════════════════ */
+    .market-wrap {
+      margin-top: 48px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start;
+    }
+    .market-target {
+      background: rgba(46,139,87,0.06); border: 1px solid rgba(46,139,87,0.2);
+      border-radius: var(--r); padding: 28px;
+    }
+    .market-target p { font-size: 0.9rem; line-height: 1.75; color: var(--c-muted); }
+    .pain-list { display: flex; flex-direction: column; gap: 10px; }
+    .pain-item {
+      display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px;
+      background: var(--c-card); border: 1px solid var(--c-border);
+      border-radius: var(--r); font-size: 0.85rem; color: var(--c-muted);
+    }
+    .pain-icon { color: rgba(214,69,80,0.7); flex-shrink: 0; margin-top: 1px; }
+
+    /* ══════════════════════════════════════════
+       BUSINESS MODEL
+    ══════════════════════════════════════════ */
+    .biz-flow {
+      margin-top: 52px; display: flex; align-items: stretch; gap: 0;
+      border: 1px solid var(--c-border); border-radius: var(--r); overflow: hidden;
+    }
+    .biz-step {
+      flex: 1; padding: 32px 28px; position: relative;
+      border-right: 1px solid var(--c-border);
+    }
+    .biz-step:last-child { border-right: none; }
+    .biz-step::after {
+      content: '→'; position: absolute; right: -13px; top: 50%; transform: translateY(-50%);
+      font-size: 0.9rem; color: rgba(46,139,87,0.55); z-index: 1;
+      background: var(--c-bg); padding: 4px 2px;
+    }
+    .biz-step:last-child::after { display: none; }
+    .biz-num {
+      font-family: var(--font-mono); font-size: 0.58rem; letter-spacing: 0.14em;
+      color: var(--c-sci); text-transform: uppercase; margin-bottom: 14px;
+    }
+    .biz-step h3 { font-family: var(--font-head); font-size: 1.1rem; font-weight: 600; color: #fff; margin-bottom: 8px; }
+    .biz-step p  { font-size: 0.84rem; line-height: 1.65; color: var(--c-muted); }
+    .biz-sub { margin-top: 36px; font-size: 0.9rem; line-height: 1.75; color: var(--c-muted); max-width: 680px; }
+
+    /* ══════════════════════════════════════════
+       TEAM
+    ══════════════════════════════════════════ */
+    .team-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-top: 48px; }
+    .team-card {
+      background: var(--c-card); border: 1px solid var(--c-border);
+      border-radius: var(--r); padding: 24px 16px 20px; text-align: center;
+      transition: border-color 0.22s, transform 0.22s;
+    }
+    .team-card:hover { border-color: var(--c-border2); transform: translateY(-2px); }
+    .team-avatar {
+      width: 52px; height: 52px; border-radius: 50%; margin: 0 auto 14px;
+      background: rgba(46,139,87,0.15); border: 1px solid rgba(46,139,87,0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-head); font-size: 1.1rem; font-weight: 700; color: var(--c-sci);
+    }
+    .team-name { font-family: var(--font-head); font-size: 0.88rem; font-weight: 600; color: #fff; margin-bottom: 4px; }
+    .team-role { font-family: var(--font-mono); font-size: 0.58rem; letter-spacing: 0.08em; color: var(--c-sci); text-transform: uppercase; margin-bottom: 6px; }
+    .team-area { font-size: 0.78rem; color: var(--c-muted); }
+
+    /* ══════════════════════════════════════════
+       PRODUCT SCROLL REVEAL
+    ══════════════════════════════════════════ */
+    #producto {
+      height: 1200px;
+      background: var(--c-bg);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding-top: 136px;
+    }
+    #producto::before {
+      content: '';
+      position: absolute;
+      top: 15%; left: 50%; transform: translateX(-50%);
+      width: 860px; height: 500px;
+      background: radial-gradient(ellipse, rgba(46,139,87,0.07) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+    /* Centered title */
+    .prd-title-wrap {
+      text-align: center;
+      max-width: 680px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+      will-change: transform;
+    }
+    .prd-h {
+      font-family: var(--font-head);
+      font-size: clamp(2rem, 3.4vw, 3.1rem);
+      font-weight: 700;
+      letter-spacing: -0.032em;
+      color: #fff;
+      line-height: 1.12;
+      margin: 14px 0 0;
+    }
+    .prd-h em { font-style: normal; color: rgba(52,211,153,0.9); }
+    .prd-sub {
+      margin: 16px auto 0;
+      font-size: 1.0rem;
+      line-height: 1.72;
+      color: var(--c-muted);
+      max-width: 540px;
+    }
+    /* 3-D perspective container */
+    .prd-perspective {
+      perspective: 1050px;
+      perspective-origin: 50% 5%;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin-top: 12px;
+      position: relative;
+      z-index: 2;
+    }
+    /* Card wrapper — scroll-animated */
+    .prd-card-3d {
+      width: 88%;
+      max-width: 1080px;
+      height: 640px;
+      transform-origin: 50% 0%;
+      transform: rotateX(18deg) scale(1.05);
+      will-change: transform;
+      border-radius: 20px;
+      border: 1.5px solid rgba(52,211,153,0.20);
+      background: #020c06;
+      box-shadow:
+        0 0 0 1px rgba(52,211,153,0.045),
+        0 9px 24px rgba(0,0,0,0.65),
+        0 37px 64px rgba(0,0,0,0.55),
+        0 90px 90px rgba(0,0,0,0.32),
+        0 0 120px rgba(20,100,55,0.09);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    /* ---- Lab mockup ---- */
+    .lab-tb {
+      height: 40px;
+      background: rgba(3,15,9,0.98);
+      border-bottom: 1px solid rgba(46,139,87,0.16);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+    }
+    .lab-tb-l { display: flex; align-items: center; gap: 8px; }
+    .lab-tb-brand { font-family: var(--font-head); font-size: 0.8rem; font-weight: 700; color: rgba(52,211,153,0.88); }
+    .lab-tb-sep { color: rgba(52,211,153,0.28); font-size: 0.7rem; }
+    .lab-tb-exp { font-family: var(--font-mono); font-size: 0.53rem; letter-spacing: 0.08em; color: rgba(255,255,255,0.28); }
+    .lab-tb-r { display: flex; align-items: center; gap: 7px; }
+    .lab-ph-chip {
+      display: flex; align-items: center; gap: 5px;
+      background: rgba(52,211,153,0.09);
+      border: 1px solid rgba(52,211,153,0.22);
+      border-radius: 20px;
+      padding: 2px 9px;
+    }
+    .lab-ph-num { font-family: var(--font-mono); font-size: 0.78rem; font-weight: 600; color: rgba(52,211,153,0.9); }
+    .lab-ph-lbl { font-family: var(--font-mono); font-size: 0.46rem; letter-spacing: 0.13em; color: rgba(52,211,153,0.55); }
+    .lab-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(52,211,153,0.65); animation: dotBlink 2.2s ease-in-out infinite; }
+    @keyframes dotBlink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .lab-body {
+      height: calc(100% - 40px - 42px);
+      display: grid;
+      grid-template-columns: 176px 1fr 196px;
+    }
+    /* Left: Reagent inventory */
+    .lab-inv {
+      border-right: 1px solid rgba(46,139,87,0.13);
+      background: rgba(2,10,6,0.92);
+      padding: 11px 10px;
+      overflow: hidden;
+      display: flex; flex-direction: column; gap: 0;
+    }
+    .lab-panel-hd {
+      font-family: var(--font-mono);
+      font-size: 0.47rem; letter-spacing: 0.15em;
+      color: rgba(46,139,87,0.55);
+      text-transform: uppercase;
+      margin-bottom: 9px; padding-bottom: 6px;
+      border-bottom: 1px solid rgba(46,139,87,0.1);
+    }
+    .lab-reagent {
+      display: flex; align-items: center; gap: 7px;
+      padding: 5px 7px; border-radius: 6px;
+      background: rgba(3,18,10,0.55);
+      border: 1px solid rgba(46,139,87,0.09);
+      margin-bottom: 4px;
+    }
+    .lab-r-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .lab-r-info { flex: 1; min-width: 0; }
+    .lab-r-name { font-size: 0.69rem; font-weight: 600; color: rgba(255,255,255,0.72); }
+    .lab-r-sub { font-family: var(--font-mono); font-size: 0.43rem; color: rgba(255,255,255,0.28); letter-spacing: 0.05em; }
+    .lab-r-amt { font-family: var(--font-mono); font-size: 0.57rem; color: rgba(52,211,153,0.48); white-space: nowrap; }
+
+    /* Center: Bench */
+    .lab-bench {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 18px 20px; gap: 16px;
+      background: rgba(2,8,5,0.82);
+      position: relative;
+    }
+    .lab-bench::after {
+      content: '';
+      position: absolute; bottom: 88px; left: 8%; width: 84%;
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(46,139,87,0.22), transparent);
+    }
+    .lab-beakers-row { display: flex; align-items: flex-end; gap: 28px; }
+    .lab-bk-wrap { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+    .lab-bk-lbl { font-family: var(--font-mono); font-size: 0.45rem; letter-spacing: 0.1em; color: rgba(255,255,255,0.28); text-transform: uppercase; }
+    /* pH meter panel */
+    .lab-phm {
+      background: rgba(3,15,9,0.88);
+      border: 1px solid rgba(46,139,87,0.18);
+      border-radius: 8px;
+      padding: 10px 20px;
+      display: flex; flex-direction: column; align-items: center; gap: 5px;
+      min-width: 160px;
+    }
+    .lab-phm-tag { font-family: var(--font-mono); font-size: 0.44rem; letter-spacing: 0.14em; color: rgba(46,139,87,0.5); }
+    .lab-phm-big {
+      font-family: var(--font-mono); font-size: 2.2rem; font-weight: 700;
+      color: rgba(52,211,153,0.95);
+      text-shadow: 0 0 18px rgba(52,211,153,0.35);
+      line-height: 1;
+    }
+    .lab-phm-bar { width: 120px; height: 4px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; }
+    .lab-phm-fill { height: 100%; width: 50%; background: linear-gradient(to right, rgba(214,69,80,0.7), rgba(52,211,153,0.7), rgba(58,110,200,0.7)); border-radius: 2px; }
+    .lab-phm-needle-wrap { width: 120px; position: relative; }
+    .lab-phm-needle { position: absolute; top: -8px; left: 50%; transform: translateX(-50%); width: 2px; height: 14px; background: rgba(255,255,255,0.7); border-radius: 1px; }
+    .lab-state-tag {
+      font-family: var(--font-mono); font-size: 0.49rem; letter-spacing: 0.13em;
+      color: rgba(52,211,153,0.72);
+      background: rgba(52,211,153,0.07);
+      border: 1px solid rgba(52,211,153,0.18);
+      border-radius: 20px; padding: 2px 9px;
+    }
+
+    /* Right: Bitácora */
+    .lab-bita {
+      border-left: 1px solid rgba(46,139,87,0.13);
+      background: rgba(2,10,6,0.92);
+      padding: 11px 10px;
+      overflow: hidden;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .lab-log {
+      display: flex; gap: 7px;
+      padding: 4px 7px; border-radius: 5px;
+      background: rgba(3,18,10,0.4);
+    }
+    .lab-log-t { font-family: var(--font-mono); font-size: 0.46rem; color: rgba(46,139,87,0.48); white-space: nowrap; padding-top: 1px; }
+    .lab-log-tx { font-size: 0.63rem; color: rgba(255,255,255,0.55); line-height: 1.4; }
+    .lab-result-box {
+      margin-top: auto;
+      background: rgba(52,211,153,0.06);
+      border: 1px solid rgba(52,211,153,0.17);
+      border-radius: 7px; padding: 9px 10px; text-align: center;
+    }
+    .lab-result-lbl { font-family: var(--font-mono); font-size: 0.44rem; letter-spacing: 0.12em; color: rgba(52,211,153,0.48); margin-bottom: 3px; }
+    .lab-result-val { font-family: var(--font-mono); font-size: 0.95rem; font-weight: 600; color: rgba(52,211,153,0.9); }
+
+    /* Bottom instruction bar */
+    .lab-instr {
+      height: 42px;
+      background: rgba(3,15,9,0.98);
+      border-top: 1px solid rgba(46,139,87,0.13);
+      display: flex; align-items: center; gap: 11px; padding: 0 14px;
+    }
+    .lab-instr-step { font-family: var(--font-mono); font-size: 0.49rem; letter-spacing: 0.1em; color: rgba(52,211,153,0.55); white-space: nowrap; }
+    .lab-instr-tx { font-size: 0.66rem; color: rgba(255,255,255,0.45); flex: 1; }
+    .lab-instr-pg { width: 72px; height: 3px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; flex-shrink: 0; }
+    .lab-instr-pf { height: 100%; width: 40%; background: rgba(52,211,153,0.45); border-radius: 2px; }
+
+    /* Callouts row */
+    .prd-callouts {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      max-width: 960px;
+      width: 88%;
+      margin-top: 28px;
+      position: relative; z-index: 2;
+    }
+    .prd-callout {
+      background: rgba(3,15,9,0.75);
+      border: 1px solid rgba(46,139,87,0.17);
+      border-radius: 10px;
+      padding: 16px 18px;
+      opacity: 0;
+      transform: translateY(14px);
+      transition: opacity 0.5s ease, transform 0.5s ease, border-color 0.3s ease;
+    }
+    .prd-callout.prd-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .prd-callout:hover {
+      border-color: rgba(52,211,153,0.28);
+      background: rgba(3,18,10,0.88);
+    }
+    .prd-cl-icon { color: rgba(52,211,153,0.72); margin-bottom: 9px; }
+    .prd-cl-title { font-family: var(--font-head); font-size: 0.88rem; font-weight: 600; color: rgba(255,255,255,0.9); margin-bottom: 4px; letter-spacing: -0.01em; }
+    .prd-cl-desc { font-size: 0.78rem; line-height: 1.55; color: rgba(255,255,255,0.44); }
+
+    @media (max-width: 900px) {
+      #producto { height: auto; min-height: 920px; padding-top: 72px; }
+      .prd-card-3d { height: 480px; }
+      .lab-body { grid-template-columns: 0 1fr 0; }
+      .lab-inv, .lab-bita { display: none; }
+      .prd-callouts { grid-template-columns: 1fr; max-width: 480px; }
+    }
+    @media (max-width: 600px) {
+      .prd-card-3d { height: 380px; }
+      .prd-h { font-size: 1.7rem; }
+    }
+
+    /* ══════════════════════════════════════════
+       DISPLAY CARDS
+    ══════════════════════════════════════════ */
+    #destacados {
+      padding: 72px 0 80px;
+      background: var(--c-bg);
+      position: relative;
+      overflow: visible;
+    }
+    .dc-section-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: center;
+      overflow: visible;
+    }
+    /* Left column */
+    .dc-text { padding-right: 24px; }
+    .dc-lead {
+      font-size: 1.0rem;
+      line-height: 1.75;
+      color: var(--c-muted);
+      margin-top: 18px;
+      max-width: 400px;
+    }
+    /* Right column – stacking area */
+    .dc-scene {
+      display: flex;
+      justify-content: flex-start;
+      padding: 80px 0 140px 32px; /* extra room so hover animations don't clip */
+      overflow: visible;
+    }
+    /* CSS-grid stacking trick */
+    .dc-grid {
+      display: grid;
+      grid-template-areas: 'stack';
+      place-items: center start;
+      overflow: visible;
+    }
+    /* Card base */
+    .dc-card {
+      grid-area: stack;
+      position: relative;
+      width: 23rem;
+      height: 9.5rem;
+      transform: skewY(-8deg);
+      border-radius: 10px;
+      border: 1px solid rgba(46,139,87,0.22);
+      background: rgba(3,15,9,0.92);
+      backdrop-filter: blur(14px);
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition:
+        transform 0.65s cubic-bezier(0.34,1.4,0.64,1),
+        box-shadow 0.45s ease,
+        border-color 0.4s ease;
+      box-shadow:
+        0 4px 28px rgba(0,0,0,0.55),
+        0 0 0 1px rgba(52,211,153,0.04),
+        inset 0 1px 0 rgba(52,211,153,0.07);
+      overflow: hidden;
+    }
+    /* Right-edge depth fade (card vanishes into depth) */
+    .dc-card::after {
+      content: '';
+      position: absolute;
+      right: -1px; top: -6%; width: 38%; height: 112%;
+      background: linear-gradient(to left, rgba(4,13,8,0.95) 0%, transparent 100%);
+      pointer-events: none;
+      z-index: 3;
+      transition: opacity 0.4s ease;
+    }
+    /* On hover: reveal full card, remove depth fade, float above siblings */
+    .dc-card:hover::after { opacity: 0; }
+    /* Dim overlay on back/middle cards — lifted on hover */
+    .dc-card-overlay {
+      position: absolute; inset: 0; border-radius: 10px;
+      background: rgba(2,8,5,0.50);
+      transition: opacity 0.55s ease;
+      z-index: 1;
+      pointer-events: none;
+    }
+    .dc-card:hover .dc-card-overlay { opacity: 0; }
+
+    /* Stacking positions */
+    .dc-c1 { z-index: 1; }
+    .dc-c2 { z-index: 2; transform: skewY(-8deg) translate(3.2rem, 2.4rem); }
+    .dc-c3 { z-index: 3; transform: skewY(-8deg) translate(6.4rem, 4.8rem); }
+    .dc-c3 .dc-card-overlay { display: none; }
+
+    /* Hover: float card above all siblings, glow, full text visible */
+    .dc-c1:hover {
+      z-index: 10;
+      transform: skewY(-8deg) translateY(-2.8rem);
+      border-color: rgba(52,211,153,0.38);
+      box-shadow: 0 20px 56px rgba(0,0,0,0.65), 0 0 32px rgba(46,139,87,0.18), 0 0 0 1px rgba(52,211,153,0.22);
+    }
+    .dc-c2:hover {
+      z-index: 10;
+      transform: skewY(-8deg) translate(3.2rem, -0.3rem);
+      border-color: rgba(52,211,153,0.38);
+      box-shadow: 0 20px 56px rgba(0,0,0,0.65), 0 0 32px rgba(46,139,87,0.18), 0 0 0 1px rgba(52,211,153,0.22);
+    }
+    .dc-c3:hover {
+      z-index: 10;
+      transform: skewY(-8deg) translate(6.4rem, 5.4rem);
+      border-color: rgba(52,211,153,0.38);
+      box-shadow: 0 20px 56px rgba(0,0,0,0.65), 0 0 32px rgba(46,139,87,0.18);
+    }
+
+    /* Card content */
+    .dc-row { display: flex; align-items: center; gap: 10px; position: relative; z-index: 2; }
+    .dc-icon-wrap {
+      width: 30px; height: 30px; border-radius: 7px; flex-shrink: 0;
+      background: rgba(46,139,87,0.18);
+      border: 1px solid rgba(52,211,153,0.32);
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(52,211,153,1.0);
+    }
+    .dc-title {
+      font-family: var(--font-head); font-size: 0.98rem; font-weight: 600;
+      color: rgba(52,211,153,0.88); letter-spacing: -0.01em;
+    }
+    .dc-desc {
+      font-size: 0.875rem; line-height: 1.5;
+      color: rgba(255,255,255,0.68);
+      position: relative; z-index: 2;
+    }
+    .dc-label {
+      font-family: var(--font-mono); font-size: 0.54rem; letter-spacing: 0.12em;
+      color: rgba(46,139,87,0.60); text-transform: uppercase;
+      position: relative; z-index: 2;
+    }
+    /* Hover: brighten text */
+    .dc-card:hover .dc-title { color: rgba(52,211,153,1); }
+    .dc-card:hover .dc-desc  { color: rgba(255,255,255,0.88); }
+    .dc-card:hover .dc-label { color: rgba(52,211,153,0.80); }
+
+    @media (max-width: 900px) {
+      .dc-section-wrap { grid-template-columns: 1fr; gap: 56px; }
+      .dc-text { padding-right: 0; }
+      .dc-scene { padding: 64px 0 80px; justify-content: center; }
+    }
+    @media (max-width: 540px) {
+      .dc-card { width: 17rem; }
+      .dc-c2 { transform: skewY(-8deg) translate(2.6rem, 2rem); }
+      .dc-c3 { transform: skewY(-8deg) translate(5.2rem, 4rem); }
+      .dc-c2:hover { transform: skewY(-8deg) translate(2.6rem, -0.3rem); }
+      .dc-c3:hover { transform: skewY(-8deg) translate(5.2rem, 4.5rem); }
+    }
+
+    /* ══════════════════════════════════════════
+       CTA
+    ══════════════════════════════════════════ */
+    .cta-section {
+      padding: 100px 0; text-align: center; position: relative; overflow: hidden;
+      background: var(--c-bg);
+    }
+    .cta-glow {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      width: 700px; height: 350px;
+      background: radial-gradient(ellipse, rgba(46,139,87,0.14) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cta-grid { position: absolute; inset: 0; pointer-events: none;
+      background-image: linear-gradient(rgba(46,139,87,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(46,139,87,0.03) 1px, transparent 1px);
+      background-size: 52px 52px; }
+    .cta-h { font-family: var(--font-head); font-size: clamp(1.9rem,3.5vw,3rem); font-weight: 700; letter-spacing: -0.025em; color: #fff; }
+    .cta-sub { margin-top: 14px; font-size: 1rem; color: var(--c-muted); }
+    .cta-actions { margin-top: 36px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+    /* ══════════════════════════════════════════
+       FOOTER
+    ══════════════════════════════════════════ */
+    footer { background: #030a06; border-top: 1px solid rgba(46,139,87,0.1); padding: 36px 0; }
+    .footer-inner {
+      max-width: 1160px; margin: 0 auto; padding: 0 28px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+    }
+    .footer-logo { display: flex; align-items: center; gap: 9px; text-decoration: none; }
+    .footer-logo img { height: 24px; }
+    .footer-logo span { font-family: var(--font-head); font-size: 0.95rem; font-weight: 700; color: #fff; }
+
+    /* ══════════════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════════════ */
+    @media (max-width: 900px) {
+      .hero-inner  { grid-template-columns: 1fr; }
+      .hero-mockup { display: none; }
+      .split       { grid-template-columns: 1fr; gap: 28px; }
+      .problem-grid, .solution-grid, .obj-grid, .benefits-grid, .team-grid { grid-template-columns: 1fr; }
+      .biz-flow    { flex-direction: column; }
+      .biz-step    { border-right: none; border-bottom: 1px solid var(--c-border); }
+      .biz-step::after { content: '↓'; right: auto; left: 50%; transform: translateX(-50%); top: auto; bottom: -18px; }
+      .market-wrap { grid-template-columns: 1fr; }
+    }
+    @media (min-width: 640px) and (max-width: 900px) {
+      .problem-grid, .obj-grid, .benefits-grid { grid-template-columns: 1fr 1fr; }
+      .team-grid { grid-template-columns: repeat(3,1fr); }
+    }
+    @media (min-width: 900px) {
+      .solution-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════ NAV ═══════ -->
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">
+      <img src="/brand_assets/CeroLab PNG.png" alt="CeroLab" />
+      <span class="nav-logo-text">CeroLab</span>
+    </a>
+    <div class="nav-actions">
+      <a href="/login" class="btn btn-ghost btn-sm">Ingresar</a>
+      <a href="/login" class="btn btn-primary btn-sm">Solicitar demo</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Tubelight section nav ── -->
+<div id="tl-nav" role="navigation" aria-label="Secciones de la página">
+  <div class="tl-pill">
+    <span class="tl-indicator" id="tl-indicator" aria-hidden="true">
+      <span class="tl-lamp" id="tl-lamp"></span>
+    </span>
+    <a href="#inicio" class="tl-item tl-active" data-tl-id="inicio">
+      <span class="tl-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+      <span class="tl-label">Inicio</span>
+    </a>
+    <a href="#producto" class="tl-item" data-tl-id="producto">
+      <span class="tl-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/></svg></span>
+      <span class="tl-label">Producto</span>
+    </a>
+    <a href="#problema" class="tl-item" data-tl-id="problema">
+      <span class="tl-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+      <span class="tl-label">Problema</span>
+    </a>
+    <a href="#beneficios" class="tl-item" data-tl-id="beneficios">
+      <span class="tl-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></span>
+      <span class="tl-label">Beneficios</span>
+    </a>
+    <a href="#modelo" class="tl-item" data-tl-id="modelo">
+      <span class="tl-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="7" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>
+      <span class="tl-label">Modelo</span>
+    </a>
+    <a href="#equipo" class="tl-item" data-tl-id="equipo">
+      <span class="tl-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+      <span class="tl-label">Equipo</span>
+    </a>
+  </div>
+</div>
+
+<!-- ═══════ HERO ═══════ -->
+<section id="inicio">
+  <!-- Aurora energy field — behind all content -->
+  <div class="aurora-bg aurora-hero" aria-hidden="true"></div>
+  <!-- Background layers -->
+  <canvas id="hero-particles" aria-hidden="true"></canvas>
+  <div class="hero-grid-hud" aria-hidden="true"></div>
+  <div class="hero-atmo"     aria-hidden="true"></div>
+
+  <div class="w hero-w">
+    <!-- ── Lab card ── -->
+    <div class="hero-card" id="hero-card">
+      <!-- Mouse spotlight -->
+      <div class="hero-spotlight" id="hero-spotlight" aria-hidden="true"></div>
+      <!-- HUD corner brackets -->
+      <div class="hud-corner hud-tl" aria-hidden="true"></div>
+      <div class="hud-corner hud-tr" aria-hidden="true"></div>
+      <div class="hud-corner hud-bl" aria-hidden="true"></div>
+      <div class="hud-corner hud-br" aria-hidden="true"></div>
+
+      <div class="hero-split">
+
+        <!-- ── LEFT: copy ── -->
+        <div class="hero-left">
+          <div class="hero-eyebrow he1">
+            <span class="hero-eyebrow-dot"></span>
+            Laboratorio virtual · Colegios Chile
+          </div>
+          <h1 class="hero-h1 he2">
+            <img src="/brand_assets/CeroLab PNG.png" alt="" aria-hidden="true" class="hero-logo-mark">
+            CeroLab
+          </h1>
+          <p class="hero-sub he3">Acercando la ciencia experimental a los estudiantes</p>
+          <!-- Rotating value-prop phrase -->
+          <div class="hero-phrase-wrap he3" aria-live="polite" aria-atomic="true" id="hero-phrases"></div>
+          <p class="hero-desc he3">
+            Un laboratorio virtual interactivo que permite a estudiantes experimentar con Química, Física y Biología de forma segura, accesible y alineada con el currículum escolar.
+          </p>
+          <div class="hero-ctas he4">
+            <a href="/login" class="btn btn-primary btn-lg">Entrar a la plataforma</a>
+          </div>
+          <div class="hero-chips he5">
+            <span class="chip c1">100% Digital</span>
+            <span class="chip c2">Sin Riesgos Físicos</span>
+            <span class="chip c3">Reportes Docentes</span>
+            <span class="chip c4">7° Básico a 4° Medio</span>
+            <span class="chip c5">Alineado al Currículum</span>
+          </div>
+        </div>
+
+        <!-- ── RIGHT: 3D lab scene ── -->
+        <!--
+          SPLINE INTEGRATION:
+          When a custom CeroLab Spline scene is ready, replace the <canvas id="lab-canvas">
+          below with the Spline runtime initialization targeting <canvas id="spline-canvas">.
+          Set SPLINE_SCENE_URL constant in the script section to activate.
+          The .spline-mount div is the designated swap point.
+        -->
+        <div class="hero-scene heR" aria-label="Laboratorio virtual 3D CeroLab">
+          <!-- CeroLab lab animation (active until custom Spline scene is loaded) -->
+          <canvas id="lab-canvas"></canvas>
+
+          <!-- Spline mount point (uncomment to activate) -->
+          <!-- <div class="spline-mount"><canvas id="spline-canvas"></canvas></div> -->
+
+          <!-- Scene decorative overlays -->
+          <div class="scene-glow-top"  aria-hidden="true"></div>
+          <div class="scene-glow-left" aria-hidden="true"></div>
+
+        </div>
+
+      </div><!-- .hero-split -->
+    </div><!-- .hero-card -->
+  </div><!-- .hero-w -->
+
+  <!-- Scroll hint -->
+  <div class="hero-scroll-hint" aria-hidden="true">
+    <span class="scroll-hint-text">Explorar</span>
+    <svg width="14" height="22" viewBox="0 0 14 22" fill="none" opacity="0.28">
+      <rect x="1" y="1" width="12" height="20" rx="6" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+      <rect x="5.5" y="5" width="3" height="6" rx="1.5" fill="rgba(52,211,153,0.8)">
+        <animate attributeName="y" from="5" to="11" dur="1.4s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" from="1" to="0" dur="1.4s" repeatCount="indefinite"/>
+      </rect>
+    </svg>
+  </div>
+</section>
+
+
+<!-- ═══════ PRODUCT SCROLL REVEAL ═══════ -->
+<section id="producto">
+  <!-- Aurora energy field -->
+  <div class="aurora-bg aurora-product" aria-hidden="true"></div>
+
+  <!-- Title -->
+  <div class="prd-title-wrap" id="prd-title">
+    <span class="section-tag">Producto</span>
+    <h2 class="prd-h">Explora un laboratorio virtual<br><em>en tiempo real</em></h2>
+    <p class="prd-sub" style="font-family:var(--font-mono);font-size:0.62rem;letter-spacing:0.14em;color:rgba(52,211,153,0.55);text-transform:uppercase;margin-top:14px;">Vista previa · Indicadores de pH</p>
+  </div>
+
+  <!-- 3D card -->
+  <div class="prd-perspective">
+    <div class="prd-card-3d" id="prd-card">
+
+      <!-- Real CeroLab laboratory screenshot -->
+      <img
+        src="/brand_assets/lab-preview.png"
+        alt="CeroLab — Laboratorio virtual interactivo con beakers, pH metro e inventario de reactivos"
+        style="width:100%;height:100%;object-fit:cover;object-position:top center;display:block;border-radius:inherit;"
+        loading="lazy"
+      />
+
+      <!-- Lab top bar (hidden — replaced by real screenshot) -->
+      <div class="lab-tb" style="display:none;">
+        <div class="lab-tb-l">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(52,211,153,0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/></svg>
+          <span class="lab-tb-brand">CeroLab</span>
+          <span class="lab-tb-sep">·</span>
+          <span class="lab-tb-exp">Indicadores de pH — Experimento 01</span>
+        </div>
+        <div class="lab-tb-r">
+          <div class="lab-ph-chip">
+            <span class="lab-ph-num">7.00</span>
+            <span class="lab-ph-lbl">NEUTRO</span>
+          </div>
+          <span style="font-family:var(--font-mono);font-size:0.5rem;color:rgba(255,255,255,0.25);">25.3°C</span>
+          <div class="lab-dot" aria-hidden="true"></div>
+        </div>
+      </div>
+
+      <!-- Lab body: 3 columns (hidden — replaced by real screenshot) -->
+      <div class="lab-body" style="display:none;">
+
+        <!-- Left: Reagent inventory -->
+        <div class="lab-inv">
+          <div class="lab-panel-hd">Inventario</div>
+          <div class="lab-reagent">
+            <div class="lab-r-dot" style="background:rgba(214,69,80,0.8);"></div>
+            <div class="lab-r-info">
+              <div class="lab-r-name">HCl</div>
+              <div class="lab-r-sub">Ácido fuerte</div>
+            </div>
+            <span class="lab-r-amt">50 mL</span>
+          </div>
+          <div class="lab-reagent">
+            <div class="lab-r-dot" style="background:rgba(58,110,200,0.8);"></div>
+            <div class="lab-r-info">
+              <div class="lab-r-name">NaOH</div>
+              <div class="lab-r-sub">Base fuerte</div>
+            </div>
+            <span class="lab-r-amt">50 mL</span>
+          </div>
+          <div class="lab-reagent">
+            <div class="lab-r-dot" style="background:rgba(52,211,153,0.5);"></div>
+            <div class="lab-r-info">
+              <div class="lab-r-name">H₂O dest.</div>
+              <div class="lab-r-sub">Agua destilada</div>
+            </div>
+            <span class="lab-r-amt">100 mL</span>
+          </div>
+          <div class="lab-panel-hd" style="margin-top:12px;">Indicadores</div>
+          <div class="lab-reagent">
+            <div class="lab-r-dot" style="background:rgba(200,100,220,0.7);"></div>
+            <div class="lab-r-info">
+              <div class="lab-r-name">Fenolftaleína</div>
+              <div class="lab-r-sub">pH 8.2 – 10</div>
+            </div>
+            <span class="lab-r-amt">10 mL</span>
+          </div>
+          <div class="lab-reagent">
+            <div class="lab-r-dot" style="background:rgba(255,200,50,0.7);"></div>
+            <div class="lab-r-info">
+              <div class="lab-r-name">Azul de timol</div>
+              <div class="lab-r-sub">pH 1.2 – 8.0</div>
+            </div>
+            <span class="lab-r-amt">10 mL</span>
+          </div>
+          <div class="lab-panel-hd" style="margin-top:12px;">Muestra</div>
+          <div class="lab-reagent" style="border-color:rgba(52,211,153,0.2);">
+            <div class="lab-r-dot" style="background:rgba(52,211,153,0.65);box-shadow:0 0 6px rgba(52,211,153,0.4);"></div>
+            <div class="lab-r-info">
+              <div class="lab-r-name">Muestra A</div>
+              <div class="lab-r-sub">En análisis</div>
+            </div>
+            <span class="lab-r-amt" style="color:rgba(52,211,153,0.7);">●</span>
+          </div>
+        </div>
+
+        <!-- Center: Lab bench -->
+        <div class="lab-bench">
+          <div class="lab-beakers-row">
+            <!-- HCl beaker (small, acid) -->
+            <div class="lab-bk-wrap">
+              <svg viewBox="0 0 70 100" width="56" height="80" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 6 L62 6 L68 98 L2 98 Z" fill="rgba(0,12,6,0.55)" stroke="rgba(214,69,80,0.38)" stroke-width="1.2"/>
+                <path d="M5 63 Q35 61 65 63 L68 98 L2 98 Z" fill="rgba(214,69,80,0.18)"/>
+                <path d="M5 63 Q35 60 65 63" stroke="rgba(214,69,80,0.6)" stroke-width="1" fill="none"/>
+                <rect x="0" y="0" width="70" height="9" rx="2" fill="rgba(214,69,80,0.14)" stroke="rgba(214,69,80,0.3)" stroke-width="1"/>
+                <text x="35" y="82" text-anchor="middle" fill="rgba(214,69,80,0.55)" font-size="8" font-family="monospace">pH 1.2</text>
+              </svg>
+              <span class="lab-bk-lbl">HCl</span>
+            </div>
+            <!-- Main sample beaker (large, neutral) -->
+            <div class="lab-bk-wrap">
+              <svg viewBox="0 0 100 150" width="88" height="130" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 8 L88 8 L99 148 L1 148 Z" fill="rgba(0,15,8,0.6)" stroke="rgba(52,211,153,0.42)" stroke-width="1.5"/>
+                <path d="M6 95 Q50 92 94 95 L99 148 L1 148 Z" fill="rgba(52,211,153,0.22)"/>
+                <path d="M6 95 Q50 91 94 95" stroke="rgba(52,211,153,0.7)" stroke-width="1.5" fill="none"/>
+                <!-- Bubble -->
+                <circle cx="35" cy="110" r="2.5" fill="rgba(52,211,153,0.25)" stroke="rgba(52,211,153,0.4)" stroke-width="0.8">
+                  <animate attributeName="cy" from="140" to="95" dur="2.8s" repeatCount="indefinite"/>
+                  <animate attributeName="opacity" from="0.6" to="0" dur="2.8s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="60" cy="125" r="1.8" fill="rgba(52,211,153,0.2)" stroke="rgba(52,211,153,0.35)" stroke-width="0.6">
+                  <animate attributeName="cy" from="145" to="95" dur="3.4s" begin="1.2s" repeatCount="indefinite"/>
+                  <animate attributeName="opacity" from="0.5" to="0" dur="3.4s" begin="1.2s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="48" cy="130" r="1.5" fill="rgba(52,211,153,0.18)" stroke="rgba(52,211,153,0.3)" stroke-width="0.5">
+                  <animate attributeName="cy" from="148" to="95" dur="2.2s" begin="0.6s" repeatCount="indefinite"/>
+                  <animate attributeName="opacity" from="0.4" to="0" dur="2.2s" begin="0.6s" repeatCount="indefinite"/>
+                </circle>
+                <rect x="0" y="0" width="100" height="11" rx="3" fill="rgba(46,139,87,0.22)" stroke="rgba(52,211,153,0.35)" stroke-width="1.2"/>
+                <!-- inner glass shine -->
+                <line x1="22" y1="11" x2="18" y2="148" stroke="rgba(255,255,255,0.035)" stroke-width="5"/>
+              </svg>
+              <span class="lab-bk-lbl">Muestra A</span>
+            </div>
+            <!-- NaOH beaker (small, base) -->
+            <div class="lab-bk-wrap">
+              <svg viewBox="0 0 70 100" width="56" height="80" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 6 L62 6 L68 98 L2 98 Z" fill="rgba(0,12,6,0.55)" stroke="rgba(58,110,200,0.38)" stroke-width="1.2"/>
+                <path d="M5 48 Q35 46 65 48 L68 98 L2 98 Z" fill="rgba(58,110,200,0.22)"/>
+                <path d="M5 48 Q35 45 65 48" stroke="rgba(58,110,200,0.65)" stroke-width="1" fill="none"/>
+                <rect x="0" y="0" width="70" height="9" rx="2" fill="rgba(58,110,200,0.14)" stroke="rgba(58,110,200,0.3)" stroke-width="1"/>
+                <text x="35" y="82" text-anchor="middle" fill="rgba(58,110,200,0.55)" font-size="8" font-family="monospace">pH 13</text>
+              </svg>
+              <span class="lab-bk-lbl">NaOH</span>
+            </div>
+          </div>
+
+          <!-- pH Meter panel -->
+          <div class="lab-phm">
+            <span class="lab-phm-tag">pH METRO DIGITAL</span>
+            <div class="lab-phm-big">7.00</div>
+            <div class="lab-phm-needle-wrap">
+              <div class="lab-phm-bar"></div>
+              <div class="lab-phm-fill" style="position:relative;top:-4px;left:0;height:4px;width:50%;background:linear-gradient(to right,rgba(214,69,80,0.6),rgba(52,211,153,0.7),rgba(58,110,200,0.6));border-radius:2px;"></div>
+              <div class="lab-phm-needle"></div>
+            </div>
+            <span class="lab-state-tag">● NEUTRO</span>
+          </div>
+        </div>
+
+        <!-- Right: Bitácora -->
+        <div class="lab-bita">
+          <div class="lab-panel-hd">Bitácora</div>
+          <div class="lab-log">
+            <span class="lab-log-t">09:12</span>
+            <span class="lab-log-tx">Experimento iniciado. Muestra A preparada.</span>
+          </div>
+          <div class="lab-log">
+            <span class="lab-log-t">09:14</span>
+            <span class="lab-log-tx">Se agrega HCl (5 mL). pH → 3.2</span>
+          </div>
+          <div class="lab-log" style="border:1px solid rgba(52,211,153,0.12);">
+            <span class="lab-log-t">09:17</span>
+            <span class="lab-log-tx">Se agrega NaOH gota a gota. pH → 7.0</span>
+          </div>
+          <div class="lab-log">
+            <span class="lab-log-t">09:19</span>
+            <span class="lab-log-tx">Fenolftaleína sin cambio de color → NEUTRO</span>
+          </div>
+          <div class="lab-log">
+            <span class="lab-log-t">09:20</span>
+            <span class="lab-log-tx">Temperatura estable: 25.3°C</span>
+          </div>
+          <div class="lab-result-box">
+            <div class="lab-result-lbl">Resultado</div>
+            <div class="lab-result-val">NEUTRO</div>
+            <div style="font-family:var(--font-mono);font-size:0.58rem;color:rgba(52,211,153,0.5);margin-top:4px;">pH = 7.00</div>
+          </div>
+        </div>
+
+      </div><!-- /lab-body -->
+
+      <!-- Bottom instruction bar (hidden — replaced by real screenshot) -->
+      <div class="lab-instr" style="display:none;">
+        <span class="lab-instr-step">Paso 2 / 5</span>
+        <span class="lab-instr-tx">Agrega NaOH gota a gota hasta neutralizar la muestra. Observa el cambio de color del indicador.</span>
+        <div class="lab-instr-pg"><div class="lab-instr-pf"></div></div>
+      </div>
+
+    </div><!-- /prd-card-3d -->
+  </div><!-- /prd-perspective -->
+
+  <!-- Callouts -->
+  <div class="prd-callouts" aria-label="Características del laboratorio">
+
+    <div class="prd-callout" data-delay="0">
+      <div class="prd-cl-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/></svg>
+      </div>
+      <div class="prd-cl-title">Indicadores de pH</div>
+      <div class="prd-cl-desc">Visualiza cambios de color en tiempo real al agregar indicadores como fenolftaleína y azul de timol.</div>
+    </div>
+
+    <div class="prd-callout" data-delay="1">
+      <div class="prd-cl-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 7h2v6H7zM12 7h2v4h-2zM17 7h2v2h-2z"/></svg>
+      </div>
+      <div class="prd-cl-title">Medición digital</div>
+      <div class="prd-cl-desc">Analiza muestras con pH metro interactivo que entrega lecturas en tiempo real con precisión de dos decimales.</div>
+    </div>
+
+    <div class="prd-callout" data-delay="2">
+      <div class="prd-cl-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      </div>
+      <div class="prd-cl-title">Bitácora automática</div>
+      <div class="prd-cl-desc">Registra automáticamente cada acción y resultado del experimento para revisión docente.</div>
+    </div>
+
+  </div><!-- /prd-callouts -->
+
+</section><!-- /#producto -->
+
+
+<!-- ═══════ DISPLAY CARDS ═══════ -->
+<section id="destacados" class="anim-up">
+  <div class="w">
+    <div class="dc-section-wrap">
+
+      <!-- Left: section text -->
+      <div class="dc-text">
+        <span class="section-tag">Ventajas clave</span>
+        <h2 class="section-h" style="margin-top:14px;">Lo que hace a CeroLab diferente</h2>
+        <p class="dc-lead">Un entorno de aprendizaje científico diseñado para la realidad de los colegios chilenos — sin barreras, sin riesgos, con datos reales.</p>
+        <div style="margin-top:32px;display:flex;gap:10px;flex-wrap:wrap;">
+          <a href="/experimento/acido-base/" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:8px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/><path d="M8.5 2h7"/></svg>
+            Alumno demo
+          </a>
+          <a href="/login" class="btn btn-ghost" style="display:inline-flex;align-items:center;gap:8px;border-color:rgba(46,139,87,0.35);">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            Profesor demo
+          </a>
+        </div>
+      </div>
+
+      <!-- Right: stacked display cards -->
+      <div class="dc-scene">
+        <div class="dc-grid" aria-label="Ventajas de CeroLab">
+
+          <!-- Card 1: back (Acceso experimental) -->
+          <div class="dc-card dc-c1" tabindex="0">
+            <div class="dc-card-overlay" aria-hidden="true"></div>
+            <div class="dc-row">
+              <span class="dc-icon-wrap" aria-hidden="true">
+                <!-- FlaskConical -->
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/>
+                  <path d="M8.5 2h7"/>
+                  <path d="M7 16h10"/>
+                </svg>
+              </span>
+              <span class="dc-title">Acceso experimental</span>
+            </div>
+            <p class="dc-desc">Laboratorios virtuales para colegios sin infraestructura</p>
+            <p class="dc-label">7° básico a 4° medio</p>
+          </div>
+
+          <!-- Card 2: middle (Cero riesgos) -->
+          <div class="dc-card dc-c2" tabindex="0">
+            <div class="dc-card-overlay" aria-hidden="true"></div>
+            <div class="dc-row">
+              <span class="dc-icon-wrap" aria-hidden="true">
+                <!-- ShieldCheck -->
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  <polyline points="9 12 11 14 15 10"/>
+                </svg>
+              </span>
+              <span class="dc-title">Cero riesgos</span>
+            </div>
+            <p class="dc-desc">Experimentación segura sin reactivos físicos</p>
+            <p class="dc-label">Entorno protegido</p>
+          </div>
+
+          <!-- Card 3: front (Reportes docentes) -->
+          <div class="dc-card dc-c3" tabindex="0">
+            <div class="dc-row">
+              <span class="dc-icon-wrap" aria-hidden="true">
+                <!-- BarChart3 -->
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 3v18h18"/>
+                  <path d="M18 17V9"/>
+                  <path d="M13 17V5"/>
+                  <path d="M8 17v-3"/>
+                </svg>
+              </span>
+              <span class="dc-title">Reportes docentes</span>
+            </div>
+            <p class="dc-desc">Resultados automáticos para seguimiento del aprendizaje</p>
+            <p class="dc-label">Datos en tiempo real</p>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════ PROBLEM ═══════ -->
+<section id="problema" class="section section-alt">
+  <div class="w">
+    <div class="split anim-up">
+      <div>
+        <span class="section-tag">El problema</span>
+        <h2 class="section-h">Miles de estudiantes sin acceso a la ciencia experimental</h2>
+      </div>
+      <p class="section-lead" style="margin-top:40px;">
+        En Chile, la mayoría de los colegios públicos y particulares subvencionados no cuentan con laboratorios equipados. La ciencia queda reducida a libros de texto, privando a los estudiantes de la experimentación práctica que el método científico exige.
+      </p>
+    </div>
+
+    <div class="problem-grid">
+      <div class="problem-card anim-up d1">
+        <div class="card-tag">Acceso</div>
+        <div class="problem-stat">~60%</div>
+        <h3>Colegios sin laboratorio funcional</h3>
+        <p>La mayoría de los establecimientos municipales y particulares subvencionados carecen de infraestructura para realizar prácticas de laboratorio de forma regular durante el año escolar.</p>
+      </div>
+      <div class="problem-card anim-up d2">
+        <div class="card-tag">Costo</div>
+        <div class="problem-stat warn">$12M+</div>
+        <h3>Costo de implementar un laboratorio físico</h3>
+        <p>Un laboratorio escolar tradicional requiere alrededor de $12.000.000 CLP por sala, más costos continuos en insumos, mantenimiento, reactivos y protocolos de seguridad.</p>
+      </div>
+      <div class="problem-card anim-up d3">
+        <div class="card-tag">Aprendizaje</div>
+        <div class="problem-stat">3×</div>
+        <h3>Mayor retención al experimentar vs. solo leer</h3>
+        <p>La experimentación activa produce hasta tres veces más retención de conceptos que la instrucción pasiva. Sin laboratorio, los estudiantes pierden esa ventaja cognitiva.</p>
+      </div>
+      <div class="problem-card anim-up d4">
+        <div class="card-tag">Seguridad</div>
+        <div class="problem-stat warn" style="font-size:1.4rem;">Riesgo</div>
+        <h3>Reactivos peligrosos fuera del alcance escolar</h3>
+        <p>Muchos procedimientos esenciales del currículum involucran ácidos, bases fuertes y gases tóxicos. Su manejo seguro requiere protocolos y equipamiento que la mayoría de los colegios no tiene.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════ SOLUTION ═══════ -->
+<section id="solucion" class="section">
+  <div class="w">
+    <div class="split anim-up">
+      <div>
+        <span class="section-tag">La solución CeroLab</span>
+        <h2 class="section-h">Un laboratorio en cualquier computador de colegio</h2>
+      </div>
+      <p class="section-lead" style="margin-top:40px;">
+        CeroLab reemplaza las barreras físicas con un laboratorio virtual interactivo donde los estudiantes pueden experimentar, equivocarse, observar reacciones y aprender de forma segura — sin reactivos, sin infraestructura, sin riesgo.
+      </p>
+    </div>
+
+    <div class="solution-grid">
+      <div class="card anim-up d1">
+        <svg class="sol-icon" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+          <path d="M16 4V18L4 34H36L24 18V4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M14 4H26" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="13" cy="27" r="1.5" fill="currentColor" opacity="0.6"/>
+          <circle cx="20" cy="29" r="1.5" fill="currentColor" opacity="0.8"/>
+          <circle cx="27" cy="26" r="1.5" fill="currentColor" opacity="0.6"/>
+        </svg>
+        <div class="card-tag">Core</div>
+        <h3>Laboratorio virtual interactivo</h3>
+        <p>Arrastra sustancias, aplica indicadores, usa el pH metro y observa reacciones en tiempo real — todo dentro del navegador, sin instalaciones.</p>
+      </div>
+      <div class="card anim-up d2">
+        <svg class="sol-icon" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+          <path d="M20 4L4 14v12l16 10 16-10V14L20 4z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M20 4v22M4 14l16 8 16-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <div class="card-tag">Seguridad</div>
+        <h3>Simulaciones sin riesgo físico</h3>
+        <p>Los estudiantes pueden interactuar con HCl, NaOH y otras sustancias peligrosas de forma completamente segura, aprendiendo los mismos conceptos sin exposición real.</p>
+      </div>
+      <div class="card anim-up d3">
+        <svg class="sol-icon" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+          <rect x="4" y="8" width="32" height="24" rx="3" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M10 20h4v8h-4zM17 16h4v12h-4zM24 22h4v6h-4z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+        </svg>
+        <div class="card-tag">Resultados</div>
+        <h3>Aprendizaje práctico medible</h3>
+        <p>Cada experimento incluye un quiz evaluativo. Los docentes reciben reportes automáticos con puntajes, tiempos y áreas débiles por estudiante.</p>
+      </div>
+      <div class="card anim-up d4">
+        <svg class="sol-icon" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+          <rect x="4" y="6" width="32" height="22" rx="3" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M14 28v6M26 28v6M10 34h20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="20" cy="17" r="4" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+        <div class="card-tag">Acceso</div>
+        <h3>Diseñado para computadores escolares</h3>
+        <p>Funciona en cualquier navegador moderno. No requiere hardware potente, instalaciones ni permisos especiales de red. Solo un computador y conexión a internet.</p>
+      </div>
+      <div class="card anim-up d5">
+        <svg class="sol-icon" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+          <circle cx="20" cy="20" r="14" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M20 8v6M20 26v6M8 20h6M26 20h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="20" cy="20" r="3" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+        <div class="card-tag">Cobertura</div>
+        <h3>Química, Física y Biología</h3>
+        <p>El MVP incluye experimentos de Química alineados a 3° y 4° medio. Física y Biología están en desarrollo para ampliar la cobertura curricular completa.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════ OBJECTIVES ═══════ -->
+<section class="section section-alt">
+  <div class="w">
+    <div class="anim-up" style="max-width:560px;">
+      <span class="section-tag">Objetivos</span>
+      <h2 class="section-h">Lo que CeroLab busca lograr</h2>
+    </div>
+
+    <div class="obj-grid" style="margin-top:48px;">
+      <div class="card anim-up d1">
+        <div class="obj-num">01 — ACCESO</div>
+        <h3>Acceso a la experimentación</h3>
+        <p>Entregar a los alumnos acceso a un entorno virtual donde puedan aplicar el método científico de forma práctica, independiente del equipamiento físico de su colegio.</p>
+      </div>
+      <div class="card anim-up d2">
+        <div class="obj-num">02 — SEGURIDAD</div>
+        <h3>Experimentación segura</h3>
+        <p>Permitir la simulación de procedimientos complejos — mezclas ácido-base, neutralizaciones, reacciones con indicadores — sin exposición a reactivos peligrosos ni riesgos físicos.</p>
+      </div>
+      <div class="card anim-up d3">
+        <div class="obj-num">03 — DOCENTES</div>
+        <h3>Apoyo docente integral</h3>
+        <p>Entregar herramientas para monitorear progreso, visualizar resultados del quiz y detectar áreas débiles de cada estudiante, reduciendo la carga evaluativa del profesor.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════ BENEFITS ═══════ -->
+<section id="beneficios" class="section">
+  <!-- Aurora energy field -->
+  <div class="aurora-bg aurora-benefits" aria-hidden="true"></div>
+  <div class="w">
+    <div class="split anim-up">
+      <div>
+        <span class="section-tag">Por qué CeroLab</span>
+        <h2 class="section-h">La ventaja de un laboratorio <em>sin barreras</em></h2>
+      </div>
+      <p class="section-lead" style="margin-top:40px;">
+        CeroLab fue diseñado desde el inicio pensando en la realidad de los colegios chilenos: conectividad limitada, presupuestos ajustados y docentes con poca disponibilidad para gestionar infraestructura.
+      </p>
+    </div>
+
+    <div class="benefits-grid" style="margin-top:48px;">
+      <div class="card anim-up d1">
+        <div class="card-tag" style="margin-bottom:14px;">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="display:inline;margin-right:4px;vertical-align:-2px;color:var(--c-sci);"><path d="M8 2v12M3 7l5-5 5 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Sin Materiales
+        </div>
+        <h3>Cero Materiales</h3>
+        <p>Al ser 100% digital, elimina el costo de reactivos, materiales de laboratorio, mantenimiento y reposición de insumos.</p>
+      </div>
+      <div class="card anim-up d2">
+        <div class="card-tag" style="margin-bottom:14px;">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="display:inline;margin-right:4px;vertical-align:-2px;color:var(--c-sci);"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Currículum
+        </div>
+        <h3>Alineación Curricular</h3>
+        <p>Todas las experiencias están alineadas al Currículum Nacional del Mineduc, cubriendo los OA de Química, Física y Biología.</p>
+      </div>
+      <div class="card anim-up d3">
+        <div class="card-tag" style="margin-bottom:14px;">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="display:inline;margin-right:4px;vertical-align:-2px;color:var(--c-sci);"><path d="M2 12V4h4v8H2zM6.5 12V7h4v5h-4zM11 12V9h3v3h-3z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+          Reportes
+        </div>
+        <h3>Estadísticas Docentes</h3>
+        <p>Reportes automáticos después de cada experiencia: puntaje, tiempo, respuestas correctas e incorrectas, por curso y por estudiante.</p>
+      </div>
+      <div class="card anim-up d4">
+        <div class="card-tag" style="margin-bottom:14px;">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="display:inline;margin-right:4px;vertical-align:-2px;color:var(--c-sci);"><path d="M8 2a6 6 0 100 12A6 6 0 008 2z" stroke="currentColor" stroke-width="1.3"/><path d="M8 6v4M8 10.5v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Seguridad
+        </div>
+        <h3>Libre de Riesgos</h3>
+        <p>Los estudiantes pueden equivocarse, mezclar sustancias y explorar sin consecuencias físicas — el error es parte del proceso de aprendizaje.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════ MARKET ═══════ -->
+<section class="section section-alt">
+  <div class="w">
+    <div class="anim-up">
+      <span class="section-tag">Mercado objetivo</span>
+      <h2 class="section-h">Diseñado para colegios</h2>
+    </div>
+
+    <div class="market-wrap">
+      <div class="market-target anim-up d1">
+        <div class="card-tag" style="margin-bottom:14px;">Perfil del cliente</div>
+        <h3 style="font-family:var(--font-head);font-size:1.1rem;font-weight:600;color:#fff;margin-bottom:12px;">Colegios públicos y particulares subvencionados</h3>
+        <p>Con estudiantes desde 7° básico hasta 4° medio que no cuentan con laboratorios físicos y buscan mejorar sus indicadores de ciencias sin inversión en infraestructura.</p>
+        <div style="margin-top:20px;display:flex;flex-wrap:wrap;gap:6px;">
+          <span style="font-family:var(--font-mono);font-size:0.58rem;padding:4px 9px;background:rgba(46,139,87,0.1);border:1px solid rgba(46,139,87,0.25);border-radius:2px;color:var(--c-sci);">7° básico → 4° medio</span>
+          <span style="font-family:var(--font-mono);font-size:0.58rem;padding:4px 9px;background:rgba(46,139,87,0.1);border:1px solid rgba(46,139,87,0.25);border-radius:2px;color:var(--c-sci);">Sin laboratorio físico</span>
+          <span style="font-family:var(--font-mono);font-size:0.58rem;padding:4px 9px;background:rgba(46,139,87,0.1);border:1px solid rgba(46,139,87,0.25);border-radius:2px;color:var(--c-sci);">Colegios subvencionados</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="card-tag" style="margin-bottom:14px;" class="anim-up d2">Problemas que resolvemos</div>
+        <div class="pain-list">
+          <div class="pain-item anim-up d1">
+            <svg class="pain-icon" width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M7 4v3.5M7 9v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            Altos costos de insumos y reactivos de laboratorio
+          </div>
+          <div class="pain-item anim-up d2">
+            <svg class="pain-icon" width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M7 4v3.5M7 9v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            Falta de espacio físico para laboratorios escolares
+          </div>
+          <div class="pain-item anim-up d3">
+            <svg class="pain-icon" width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M7 4v3.5M7 9v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            Imposibilidad de realizar ramos prácticos de ciencias
+          </div>
+          <div class="pain-item anim-up d4">
+            <svg class="pain-icon" width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M7 4v3.5M7 9v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            Exceso de enseñanza teórica y baja motivación estudiantil
+          </div>
+          <div class="pain-item anim-up d5">
+            <svg class="pain-icon" width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M7 4v3.5M7 9v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            Falta de herramientas de seguimiento individual por docente
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════ BUSINESS MODEL ═══════ -->
+<section id="modelo" class="section">
+  <div class="w">
+    <div class="split anim-up">
+      <div>
+        <span class="section-tag">Modelo de negocio</span>
+        <h2 class="section-h">SaaS B2B para instituciones educativas</h2>
+      </div>
+      <p class="section-lead" style="margin-top:40px;">
+        CeroLab se comercializa mediante suscripción anual para colegios, sostenedores y municipios, ajustando el valor según la cantidad de estudiantes activos. Sin costos por implementación, sin instalaciones.
+      </p>
+    </div>
+
+    <div class="biz-flow anim-up" style="margin-top:52px;">
+      <div class="biz-step">
+        <div class="biz-num">Fase 01</div>
+        <h3>Piloto gratuito</h3>
+        <p>El colegio accede a una experiencia completa sin costo — laboratorio, quiz y reportes docentes — para evaluar el impacto antes de comprometerse.</p>
+      </div>
+      <div class="biz-step">
+        <div class="biz-num">Fase 02</div>
+        <h3>Licencia anual</h3>
+        <p>Suscripción B2B anual con acceso completo a todos los experimentos disponibles. El precio escala con la cantidad de estudiantes del establecimiento.</p>
+      </div>
+      <div class="biz-step">
+        <div class="biz-num">Fase 03</div>
+        <h3>Renovación y expansión</h3>
+        <p>Con cada renovación el colegio accede a los nuevos experimentos (Física, Biología) sin costo adicional. Se ofrecen descuentos por sostenedores con múltiples establecimientos.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════ TEAM ═══════ -->
+<section id="equipo" class="section section-alt">
+  <div class="w">
+    <div class="anim-up" style="max-width:540px;">
+      <span class="section-tag">Equipo</span>
+      <h2 class="section-h">Las personas detrás de CeroLab</h2>
+    </div>
+
+    <div class="team-grid" style="margin-top:48px;">
+      <div class="team-card anim-up d1">
+        <div class="team-avatar">FZ</div>
+        <div class="team-name">Fernando Zúñiga</div>
+        <div class="team-role">CEO</div>
+        <div class="team-area">Ingeniería Industrial</div>
+      </div>
+      <div class="team-card anim-up d2">
+        <div class="team-avatar">BA</div>
+        <div class="team-name">Benjamín Aguilar</div>
+        <div class="team-role">CMO</div>
+        <div class="team-area">Ingeniería Industrial</div>
+      </div>
+      <div class="team-card anim-up d3">
+        <div class="team-avatar">AS</div>
+        <div class="team-name">Agustín Salgado</div>
+        <div class="team-role">CFO</div>
+        <div class="team-area">Matemáticas</div>
+      </div>
+      <div class="team-card anim-up d4">
+        <div class="team-avatar">GS</div>
+        <div class="team-name">Gabriel Sepúlveda</div>
+        <div class="team-role">CSO</div>
+        <div class="team-area">Física</div>
+      </div>
+      <div class="team-card anim-up d5">
+        <div class="team-avatar">TM</div>
+        <div class="team-name">Tomás Marchant</div>
+        <div class="team-role">CTO</div>
+        <div class="team-area">Ingeniería en Software</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════ CTA FINAL ═══════ -->
+<section class="cta-section">
+  <div class="cta-glow"></div>
+  <div class="cta-grid"></div>
+  <div class="w" style="position:relative;">
+    <div class="anim-up">
+      <h2 class="cta-h">Lleva la experimentación científica<br/>a tu colegio.</h2>
+      <p class="cta-sub">Sin laboratorio físico. Sin reactivos. Solo un computador y conexión a internet.</p>
+      <div class="cta-actions">
+        <a href="/login" class="btn btn-primary btn-lg">Entrar a la plataforma</a>
+        <a href="mailto:contacto@cerolab.cl" class="btn btn-ghost btn-lg">Solicitar demo personalizada</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════ FOOTER ═══════ -->
+<footer>
+  <div class="footer-inner">
+    <a href="/" class="footer-logo">
+      <img src="/brand_assets/CeroLab PNG.png" alt="CeroLab" />
+      <span>CeroLab</span>
+    </a>
+    <span style="font-family:var(--font-mono);font-size:0.62rem;color:rgba(255,255,255,0.22);letter-spacing:0.08em;">Acercando la ciencia experimental a los estudiantes · Chile · 2026</span>
+    <span style="font-family:var(--font-mono);font-size:0.62rem;color:rgba(255,255,255,0.18);">Alineado al currículum MINEDUC</span>
+  </div>
+</footer>
+
+
+<script>
+/* ─────────────────────────────────────────────────────────
+   SPLINE INTEGRATION POINT
+   ────────────────────────────────────────────────────────
+   Set SPLINE_SCENE_URL to your custom CeroLab scene URL to
+   activate the 3D scene. While null, the built-in lab canvas
+   animation runs as the hero visual.
+
+   Steps to activate:
+   1. Create a CeroLab scene at spline.design
+   2. Publish the scene and copy the .splinecode URL
+   3. Set SPLINE_SCENE_URL below to that URL
+   4. Uncomment the spline-mount div in the hero HTML
+
+   The @splinetool/runtime package is already structured below.
+   ───────────────────────────────────────────────────────── */
+  const SPLINE_SCENE_URL = null;
+  // const SPLINE_SCENE_URL = 'https://prod.spline.design/YOUR-SCENE-ID/scene.splinecode';
+
+  if (SPLINE_SCENE_URL) {
+    import('https://esm.sh/@splinetool/runtime').then(({ Application }) => {
+      const splineCanvas = document.getElementById('spline-canvas');
+      if (!splineCanvas) return;
+      const app = new Application(splineCanvas);
+      app.load(SPLINE_SCENE_URL).then(() => {
+        document.getElementById('lab-canvas').style.display = 'none';
+      });
+    }).catch(() => {});
+  }
+
+  /* ── Scroll-triggered animations ── */
+  document.documentElement.classList.add('js-ready');
+  const scrollObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); scrollObserver.unobserve(e.target); }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -20px 0px' });
+  document.querySelectorAll('.anim-up').forEach(el => scrollObserver.observe(el));
+
+  /* ── Background particle canvas ── */
+  (function initParticles() {
+    const c = document.getElementById('hero-particles');
+    if (!c) return;
+    const ctx = c.getContext('2d');
+    function rsz() { c.width = window.innerWidth; c.height = c.parentElement.offsetHeight || window.innerHeight; }
+    rsz(); window.addEventListener('resize', rsz);
+    const N = 55;
+    const pts = Array.from({ length: N }, () => ({
+      x: Math.random(), y: Math.random(),
+      r: 0.8 + Math.random() * 1.4,
+      vx: (Math.random() - 0.5) * 0.00014,
+      vy: (Math.random() - 0.5) * 0.00014,
+      o: 0.04 + Math.random() * 0.10,
+    }));
+    function frame() {
+      ctx.clearRect(0, 0, c.width, c.height);
+      pts.forEach(p => {
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0) p.x = 1; if (p.x > 1) p.x = 0;
+        if (p.y < 0) p.y = 1; if (p.y > 1) p.y = 0;
+        ctx.beginPath();
+        ctx.arc(p.x * c.width, p.y * c.height, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(52,211,153,${p.o})`;
+        ctx.fill();
+      });
+      requestAnimationFrame(frame);
+    }
+    frame();
+  })();
+
+  /* ── Spotlight (mouse-tracking green glow) ── */
+  (function initSpotlight() {
+    const card = document.getElementById('hero-card');
+    const sl   = document.getElementById('hero-spotlight');
+    if (!card || !sl) return;
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      const x = ((e.clientX - r.left) / r.width)  * 100;
+      const y = ((e.clientY - r.top)  / r.height) * 100;
+      sl.style.background =
+        `radial-gradient(650px circle at ${x}% ${y}%,` +
+          `rgba(52,211,153,0.065) 0%,` +
+          `rgba(20,90,55,0.025) 38%,` +
+          `transparent 65%)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      sl.style.background =
+        `radial-gradient(700px circle at 28% 48%,` +
+          `rgba(52,211,153,0.042) 0%, rgba(46,139,87,0.015) 40%, transparent 70%)`;
+    });
+  })();
+
+  /* ── Lab canvas animation (orbital atom — enlarged, centered, clean) ── */
+  (function initLabCanvas() {
+    const c = document.getElementById('lab-canvas');
+    if (!c) return;
+    const ctx = c.getContext('2d');
+    const par = c.parentElement;
+
+    function rsz() { c.width = par.clientWidth; c.height = par.clientHeight; }
+    rsz();
+    new ResizeObserver(rsz).observe(par);
+
+    /* Orbital rings — 2.2× larger than before, 4 rings for depth */
+    const orbits = [
+      { rxF:0.42, ryF:0.14, tilt:0,    spd: 0.00080, n:80  },
+      { rxF:0.34, ryF:0.26, tilt:1.05, spd:-0.00060, n:65  },
+      { rxF:0.24, ryF:0.36, tilt:2.09, spd: 0.00095, n:50  },
+      { rxF:0.14, ryF:0.12, tilt:0.52, spd:-0.00110, n:30  },
+    ];
+    const oAngles = orbits.map(() => Math.random() * Math.PI * 2);
+
+    /* Particles per orbit — larger sizes, higher opacity */
+    const particles = [];
+    orbits.forEach((o, oi) => {
+      for (let i = 0; i < o.n; i++) {
+        particles.push({
+          oi,
+          a: (i / o.n) * Math.PI * 2 + Math.random() * 0.4,
+          sz: 1.4 + Math.random() * 2.6,
+          op: 0.35 + Math.random() * 0.60,
+          col: Math.random() > 0.40 ? [52,211,153] : [46,139,87],
+          bright: Math.random() > 0.85, // occasional bright spark
+        });
+      }
+    });
+
+    /* Background drift particles — denser, covers full panel */
+    const atoms = Array.from({ length: 38 }, () => ({
+      x: Math.random(), y: Math.random(),
+      r: 1.0 + Math.random() * 2.0,
+      vx: (Math.random() - 0.5) * 0.00013,
+      vy: (Math.random() - 0.5) * 0.00013,
+      o: 0.05 + Math.random() * 0.11,
+    }));
+
+    let t = 0;
+    function frame() {
+      ctx.clearRect(0, 0, c.width, c.height);
+      t += 0.01;
+      const W = c.width, H = c.height;
+      /* nucleus dead-center of panel */
+      const cx = W * 0.50, cy = H * 0.50;
+
+      /* Ambient background particles */
+      atoms.forEach(a => {
+        a.x += a.vx; a.y += a.vy;
+        if (a.x < 0) a.x = 1; if (a.x > 1) a.x = 0;
+        if (a.y < 0) a.y = 1; if (a.y > 1) a.y = 0;
+        ctx.beginPath();
+        ctx.arc(a.x * W, a.y * H, a.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(46,139,87,${a.o})`;
+        ctx.fill();
+      });
+
+      /* Large ambient glow emanating from nucleus */
+      const gAmb = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.min(W, H) * 0.55);
+      gAmb.addColorStop(0, 'rgba(20,90,55,0.22)');
+      gAmb.addColorStop(0.5, 'rgba(10,50,30,0.08)');
+      gAmb.addColorStop(1, 'transparent');
+      ctx.beginPath(); ctx.arc(cx, cy, Math.min(W, H) * 0.55, 0, Math.PI * 2);
+      ctx.fillStyle = gAmb; ctx.fill();
+
+      /* Orbital rings */
+      orbits.forEach((o, i) => {
+        oAngles[i] += o.spd;
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(oAngles[i] * 0.07 + o.tilt * 0.28);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, o.rxF * W, o.ryF * H, 0, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(46,139,87,${i === 0 ? 0.28 : i === 1 ? 0.22 : 0.16})`;
+        ctx.lineWidth = i === 0 ? 1.0 : 0.7;
+        ctx.stroke();
+        ctx.restore();
+      });
+
+      /* Particles on orbits */
+      particles.forEach(p => {
+        p.a += orbits[p.oi].spd * 1.9;
+        const o  = orbits[p.oi];
+        const oa = oAngles[p.oi];
+        const a  = p.a + oa;
+        const ox = Math.cos(a) * o.rxF * W;
+        const oy = Math.sin(a) * o.ryF * H * Math.cos(o.tilt);
+        const depth = (Math.sin(a) * Math.sin(o.tilt) + 1) * 0.5;
+        const [r, g, b] = p.col;
+        const sz = p.sz * (0.4 + depth * 0.6);
+        const op = p.op * (0.28 + depth * 0.72);
+
+        if (p.bright) {
+          /* bright spark — tiny cross glow */
+          const sgrd = ctx.createRadialGradient(cx+ox, cy+oy, 0, cx+ox, cy+oy, sz*3);
+          sgrd.addColorStop(0, `rgba(200,255,225,${op * 0.9})`);
+          sgrd.addColorStop(1, 'transparent');
+          ctx.beginPath(); ctx.arc(cx+ox, cy+oy, sz*3, 0, Math.PI*2);
+          ctx.fillStyle = sgrd; ctx.fill();
+        }
+
+        ctx.beginPath();
+        ctx.arc(cx + ox, cy + oy, sz, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${r},${g},${b},${op})`;
+        ctx.fill();
+      });
+
+      /* Nucleus — large outer glow */
+      const gOut = ctx.createRadialGradient(cx, cy, 0, cx, cy, 52);
+      gOut.addColorStop(0,   'rgba(52,211,153,0.65)');
+      gOut.addColorStop(0.3, 'rgba(30,150,90,0.32)');
+      gOut.addColorStop(0.65,'rgba(12,60,36,0.10)');
+      gOut.addColorStop(1,   'transparent');
+      ctx.beginPath(); ctx.arc(cx, cy, 52, 0, Math.PI * 2);
+      ctx.fillStyle = gOut; ctx.fill();
+
+      /* Nucleus mid ring */
+      const gMid = ctx.createRadialGradient(cx, cy, 0, cx, cy, 22);
+      gMid.addColorStop(0, 'rgba(140,255,200,0.9)');
+      gMid.addColorStop(0.5,'rgba(52,211,153,0.7)');
+      gMid.addColorStop(1,  'rgba(20,110,65,0.2)');
+      ctx.beginPath(); ctx.arc(cx, cy, 22, 0, Math.PI * 2);
+      ctx.fillStyle = gMid; ctx.fill();
+
+      /* Nucleus core (bright white-green) */
+      const gIn = ctx.createRadialGradient(cx, cy, 0, cx, cy, 10);
+      gIn.addColorStop(0, 'rgba(220,255,235,1.0)');
+      gIn.addColorStop(0.5,'rgba(52,211,153,0.85)');
+      gIn.addColorStop(1,  'rgba(30,140,80,0.5)');
+      ctx.beginPath(); ctx.arc(cx, cy, 10, 0, Math.PI * 2);
+      ctx.fillStyle = gIn; ctx.fill();
+
+      /* Pulsing outer ring (two phases) */
+      const p1 = (Math.sin(t * 1.6)       + 1) * 0.5;
+      const p2 = (Math.sin(t * 1.6 + 1.5) + 1) * 0.5;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 26 + p1 * 18, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(52,211,153,${0.28 - p1 * 0.24})`;
+      ctx.lineWidth = 1.2; ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(cx, cy, 38 + p2 * 22, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(52,211,153,${0.14 - p2 * 0.12})`;
+      ctx.lineWidth = 0.8; ctx.stroke();
+
+      /* Holographic scan line */
+      const scanY = ((t * 55) % (H + 50)) - 25;
+      const sg = ctx.createLinearGradient(0, scanY - 8, 0, scanY + 8);
+      sg.addColorStop(0, 'transparent');
+      sg.addColorStop(0.5, 'rgba(52,211,153,0.045)');
+      sg.addColorStop(1, 'transparent');
+      ctx.fillStyle = sg;
+      ctx.fillRect(0, scanY - 8, W, 16);
+
+      requestAnimationFrame(frame);
+    }
+    frame();
+  })();
+
+  /* ── Tubelight section nav ── */
+  (function initTubelightNav() {
+    const nav      = document.getElementById('tl-nav');
+    const indicator= document.getElementById('tl-indicator');
+    if (!nav || !indicator) return;
+
+    const pill  = nav.querySelector('.tl-pill');
+    const items = Array.from(nav.querySelectorAll('.tl-item'));
+    let cur = items[0];
+
+    function moveIndicator(item) {
+      const pillRect = pill.getBoundingClientRect();
+      const itemRect = item.getBoundingClientRect();
+      indicator.style.left  = (itemRect.left - pillRect.left) + 'px';
+      indicator.style.width = itemRect.width + 'px';
+    }
+
+    function activate(item, animate) {
+      if (item === cur && item.classList.contains('tl-active')) return;
+      cur.classList.remove('tl-active');
+      cur = item;
+      cur.classList.add('tl-active');
+      if (!animate) {
+        indicator.style.transition = 'none';
+        moveIndicator(cur);
+        requestAnimationFrame(() => { indicator.style.transition = ''; });
+      } else {
+        moveIndicator(cur);
+      }
+    }
+
+    items.forEach(item => {
+      item.addEventListener('click', e => {
+        e.preventDefault();
+        activate(item, true);
+        const id = item.getAttribute('href').slice(1);
+        const target = document.getElementById(id);
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+
+    /* Scroll-spy: find the last section whose top is at/above scroll position */
+    const sectionIds = items.map(i => i.getAttribute('href').slice(1));
+
+    function tlUpdateActive() {
+      const threshold = window.scrollY + 80; /* ~nav height buffer */
+      let found = sectionIds[0];
+      for (const id of sectionIds) {
+        const el = document.getElementById(id);
+        if (el && el.offsetTop <= threshold) found = id;
+      }
+      const match = items.find(i => i.getAttribute('href') === '#' + found);
+      if (match) activate(match, true);
+    }
+
+    window.addEventListener('scroll', tlUpdateActive, { passive: true });
+    window.addEventListener('resize', () => { moveIndicator(cur); tlUpdateActive(); }, { passive: true });
+
+    requestAnimationFrame(() => { moveIndicator(cur); tlUpdateActive(); });
+  })();
+
+  /* ── Animated rotating phrase ── */
+  (function initAnimatedPhrase() {
+    const wrap = document.getElementById('hero-phrases');
+    if (!wrap) return;
+
+    const phrases = [
+      'sin laboratorios físicos',
+      'sin riesgos',
+      'con reportes docentes',
+      'con experimentación real',
+      'alineado al currículum',
+    ];
+
+    // Build spans
+    const spans = phrases.map(text => {
+      const s = document.createElement('span');
+      s.className = 'hero-phrase';
+      s.textContent = text;
+      wrap.appendChild(s);
+      return s;
+    });
+
+    let cur = 0;
+
+    function enter(idx) {
+      spans[idx].classList.add('ph-in');
+    }
+
+    function exit(idx, cb) {
+      spans[idx].classList.add('ph-out');
+      spans[idx].classList.remove('ph-in');
+      setTimeout(() => {
+        spans[idx].classList.remove('ph-out');
+        if (cb) cb();
+      }, 340); // matches ph-out transition
+    }
+
+    // First phrase appears after hero entrance animation finishes
+    setTimeout(() => {
+      enter(0);
+      setInterval(() => {
+        exit(cur, () => {
+          cur = (cur + 1) % spans.length;
+          enter(cur);
+        });
+      }, 2600);
+    }, 850);
+  })();
+
+  /* ── Product scroll reveal ── */
+  (function initScrollProduct() {
+    const section = document.getElementById('producto');
+    const card    = document.getElementById('prd-card');
+    const title   = document.getElementById('prd-title');
+    const callouts = Array.from(document.querySelectorAll('.prd-callout'));
+    if (!section || !card) return;
+
+    function update() {
+      const scrolled      = window.scrollY - section.offsetTop;
+      const totalScroll   = section.offsetHeight - window.innerHeight;
+      const progress      = Math.max(0, Math.min(1, scrolled / Math.max(1, totalScroll)));
+      const isMobile      = window.innerWidth <= 768;
+
+      const startRotate   = isMobile ? 10 : 18;
+      const startScale    = isMobile ? 0.88 : 1.05;
+      const endScale      = isMobile ? 0.96 : 1.0;
+
+      const rotateX = startRotate * (1 - progress);
+      const scale   = startScale + (endScale - startScale) * progress;
+      const titleTY = -55 * progress;
+
+      card.style.transform  = `rotateX(${rotateX}deg) scale(${scale})`;
+      if (title) title.style.transform = `translateY(${titleTY}px)`;
+
+      callouts.forEach((c, i) => {
+        const threshold = 0.38 + i * 0.12;
+        const p = Math.max(0, Math.min(1, (progress - threshold) / 0.18));
+        c.style.opacity   = p;
+        c.style.transform = `translateY(${(1 - p) * 14}px)`;
+        if (p > 0) c.classList.add('prd-visible');
+      });
+    }
+
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update, { passive: true });
+    update();
+  })();
+</script>
+</body>
+</html>

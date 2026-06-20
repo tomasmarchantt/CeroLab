@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none">
+  <defs>
+    <linearGradient id="glassAmber" x1="250" y1="130" x2="790" y2="900" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#D7A95E" stop-opacity="0.28"/>
+      <stop offset="0.22" stop-color="#9A6127" stop-opacity="0.42"/>
+      <stop offset="0.58" stop-color="#5C3216" stop-opacity="0.50"/>
+      <stop offset="1" stop-color="#2B160A" stop-opacity="0.64"/>
+    </linearGradient>
+    <linearGradient id="glassEdge" x1="276" y1="185" x2="770" y2="850" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFF7DD" stop-opacity="0.75"/>
+      <stop offset="0.3" stop-color="#E7B76F" stop-opacity="0.16"/>
+      <stop offset="0.7" stop-color="#1E0E05" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#FFF0C0" stop-opacity="0.25"/>
+    </linearGradient>
+    <linearGradient id="capGrad" x1="370" y1="70" x2="650" y2="200" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.35" stop-color="#EDEDED"/>
+      <stop offset="0.7" stop-color="#BFC2C5"/>
+      <stop offset="1" stop-color="#7F858B"/>
+    </linearGradient>
+    <linearGradient id="capRib" x1="390" y1="84" x2="633" y2="178" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F9FAFA"/>
+      <stop offset="1" stop-color="#AEB3B8"/>
+    </linearGradient>
+    <linearGradient id="liquidClear" x1="290" y1="490" x2="740" y2="820" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#CFFAFF" stop-opacity="0.14"/>
+      <stop offset="0.55" stop-color="#E8FFFF" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#B7F4FF" stop-opacity="0.16"/>
+    </linearGradient>
+    <linearGradient id="labelGrad" x1="330" y1="420" x2="700" y2="665" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.55" stop-color="#F3F5EF"/>
+      <stop offset="1" stop-color="#DCDDCF"/>
+    </linearGradient>
+    <filter id="softShadow" x="140" y="50" width="760" height="910" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="28" stdDeviation="30" flood-color="#000000" flood-opacity="0.32"/>
+    </filter>
+    <filter id="innerGlow" x="220" y="160" width="600" height="710" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0.9  0 1 0 0 0.55  0 0 1 0 0.18  0 0 0 0.28 0"/>
+      <feBlend in="SourceGraphic" mode="screen"/>
+    </filter>
+    <clipPath id="bottleClip">
+      <path d="M410 178C410 158 426 142 446 142H578C598 142 614 158 614 178V286C614 318 635 344 662 364C705 395 730 446 730 502V772C730 840 675 895 607 895H417C349 895 294 840 294 772V502C294 446 319 395 362 364C389 344 410 318 410 286V178Z"/>
+    </clipPath>
+  </defs>
+
+  <rect width="1024" height="1024" fill="none"/>
+  <g filter="url(#softShadow)">
+    <!-- Bottle silhouette -->
+    <path d="M410 178C410 158 426 142 446 142H578C598 142 614 158 614 178V286C614 318 635 344 662 364C705 395 730 446 730 502V772C730 840 675 895 607 895H417C349 895 294 840 294 772V502C294 446 319 395 362 364C389 344 410 318 410 286V178Z" fill="url(#glassAmber)" stroke="#E2A75B" stroke-opacity="0.38" stroke-width="9"/>
+
+    <!-- clear solution inside amber bottle -->
+    <g clip-path="url(#bottleClip)">
+      <path d="M300 612C360 590 426 604 486 600C564 595 630 572 728 604V846H300V612Z" fill="url(#liquidClear)"/>
+      <path d="M305 603C370 585 430 608 493 600C570 590 643 575 724 603" stroke="#EFFFFF" stroke-opacity="0.23" stroke-width="7" stroke-linecap="round"/>
+      <ellipse cx="520" cy="605" rx="205" ry="23" fill="#D9FFFF" fill-opacity="0.06"/>
+      <path d="M292 230C382 187 510 188 615 208C685 222 731 253 756 310V159H292V230Z" fill="#FFF1C8" fill-opacity="0.10"/>
+      <path d="M337 220C327 372 326 563 337 807" stroke="#FFF3C7" stroke-opacity="0.42" stroke-width="19" stroke-linecap="round"/>
+      <path d="M374 202C363 352 360 570 373 836" stroke="#FFFFFF" stroke-opacity="0.14" stroke-width="8" stroke-linecap="round"/>
+      <path d="M675 284C706 390 706 651 683 802" stroke="#1B0C05" stroke-opacity="0.20" stroke-width="20" stroke-linecap="round"/>
+      <path d="M707 445C714 545 713 673 698 778" stroke="#FFF0BC" stroke-opacity="0.18" stroke-width="7" stroke-linecap="round"/>
+    </g>
+
+    <!-- Neck glass rings -->
+    <path d="M416 198H608" stroke="#F3C276" stroke-opacity="0.34" stroke-width="8" stroke-linecap="round"/>
+    <path d="M418 251H606" stroke="#160A05" stroke-opacity="0.18" stroke-width="7" stroke-linecap="round"/>
+    <path d="M408 295H616" stroke="#FFD58B" stroke-opacity="0.22" stroke-width="7" stroke-linecap="round"/>
+
+    <!-- Cap -->
+    <path d="M386 86C386 67 402 52 421 52H603C622 52 638 67 638 86V161C638 182 621 199 600 199H424C403 199 386 182 386 161V86Z" fill="url(#capGrad)" stroke="#FFFFFF" stroke-opacity="0.38" stroke-width="4"/>
+    <path d="M397 76H627V184H397V76Z" fill="url(#capRib)" opacity="0.36"/>
+    <g opacity="0.35">
+      <path d="M415 62V190" stroke="#80878E" stroke-width="5"/>
+      <path d="M446 58V194" stroke="#7E858C" stroke-width="5"/>
+      <path d="M478 57V196" stroke="#7E858C" stroke-width="5"/>
+      <path d="M511 56V197" stroke="#7E858C" stroke-width="5"/>
+      <path d="M544 57V196" stroke="#7E858C" stroke-width="5"/>
+      <path d="M576 58V194" stroke="#7E858C" stroke-width="5"/>
+      <path d="M609 62V190" stroke="#7E858C" stroke-width="5"/>
+    </g>
+    <path d="M404 70C462 51 565 52 621 72" stroke="#FFFFFF" stroke-opacity="0.75" stroke-width="8" stroke-linecap="round"/>
+    <path d="M397 181C456 196 571 198 626 181" stroke="#7E858C" stroke-opacity="0.4" stroke-width="6" stroke-linecap="round"/>
+
+    <!-- label -->
+    <g transform="translate(0 0)">
+      <path d="M331 427C331 407 347 391 367 391H657C677 391 693 407 693 427V648C693 668 677 684 657 684H367C347 684 331 668 331 648V427Z" fill="url(#labelGrad)" stroke="#FFFFFF" stroke-width="5"/>
+      <path d="M352 414H672" stroke="#CABF9D" stroke-opacity="0.65" stroke-width="3"/>
+      <path d="M352 662H672" stroke="#CABF9D" stroke-opacity="0.65" stroke-width="3"/>
+      <text x="512" y="520" text-anchor="middle" font-family="Inter, Arial, Helvetica, sans-serif" font-size="104" font-weight="800" fill="#1D211E" letter-spacing="-2">NaOH</text>
+      <text x="512" y="585" text-anchor="middle" font-family="Inter, Arial, Helvetica, sans-serif" font-size="33" font-weight="650" fill="#3D443F">Sodium Hydroxide</text>
+      <rect x="375" y="614" width="274" height="10" rx="5" fill="#1B5E3F" fill-opacity="0.72"/>
+    </g>
+
+    <!-- outer glass highlights -->
+    <path d="M410 178C410 158 426 142 446 142H578C598 142 614 158 614 178V286C614 318 635 344 662 364C705 395 730 446 730 502V772C730 840 675 895 607 895H417C349 895 294 840 294 772V502C294 446 319 395 362 364C389 344 410 318 410 286V178Z" fill="none" stroke="url(#glassEdge)" stroke-width="6"/>
+    <path d="M345 410C324 488 322 687 343 771C357 828 393 856 427 866" stroke="#FFF6D3" stroke-opacity="0.32" stroke-width="12" stroke-linecap="round"/>
+    <path d="M658 395C692 468 697 677 668 794" stroke="#FFFFFF" stroke-opacity="0.16" stroke-width="8" stroke-linecap="round"/>
+  </g>
+  <ellipse cx="512" cy="924" rx="205" ry="31" fill="#000000" fill-opacity="0.18"/>
+</svg>

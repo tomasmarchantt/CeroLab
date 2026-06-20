@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="1024" viewBox="500 70 360 860" fill="none">
+  <defs>
+    <filter id="pipetteShadow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000" flood-opacity="0.22"/>
+    </filter>
+    <linearGradient id="pipetteGrad" x1="610" y1="108" x2="795" y2="850" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f7fbff" stop-opacity="0.92"/>
+      <stop offset="0.28" stop-color="#dfeaf2" stop-opacity="0.78"/>
+      <stop offset="0.66" stop-color="#fbfdff" stop-opacity="0.72"/>
+      <stop offset="1" stop-color="#d6e2ec" stop-opacity="0.88"/>
+    </linearGradient>
+    <linearGradient id="pipetteStroke" x1="615" y1="120" x2="830" y2="860" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="0.5" stop-color="#9fb0bd" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.7"/>
+    </linearGradient>
+    <linearGradient id="innerPlastic" x1="635" y1="150" x2="735" y2="315" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffffff" stop-opacity="0.38"/>
+      <stop offset="1" stop-color="#d5e2eb" stop-opacity="0.18"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="500" y="70" width="360" height="860" fill="transparent"/>
+
+  <!-- Standalone realistic translucent Pasteur pipette -->
+  <g filter="url(#pipetteShadow)" transform="rotate(-20 690 475)">
+    <path d="M687 120C641 120 604 157 604 203V274C604 301 616 326 637 342C650 352 658 367 658 383V810C658 831 669 852 682 870C686 876 690 876 694 870C707 852 718 831 718 810V383C718 367 726 352 739 342C760 326 772 301 772 274V203C772 157 734 120 687 120Z" fill="url(#pipetteGrad)" stroke="url(#pipetteStroke)" stroke-width="5"/>
+    <path d="M635 196C635 171 654 151 679 151H696C721 151 741 171 741 196V270C741 295 721 315 696 315H679C654 315 635 295 635 270V196Z" fill="url(#innerPlastic)"/>
+    <path d="M678 348H698V781C698 799 693 819 688 831C683 818 678 799 678 781V348Z" fill="#ffffff" fill-opacity="0.30"/>
+    <path d="M647 160C657 148 674 141 690 143" stroke="#fff" stroke-width="7" stroke-linecap="round" opacity="0.62"/>
+    <path d="M665 195V300" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity="0.65"/>
+    <path d="M690 370V772" stroke="#aab9c4" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
+    <path d="M682 842C684 853 688 864 691 869" stroke="#f9fdff" stroke-width="4" stroke-linecap="round" opacity="0.55"/>
+    <path d="M704 185C722 205 721 268 703 292" stroke="#ffffff" stroke-width="4" stroke-linecap="round" opacity="0.28"/>
+    <path d="M681 388C676 480 675 678 680 770" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.26"/>
+  </g>
+</svg>

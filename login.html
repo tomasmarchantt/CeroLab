@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ingresar — CeroLab</title>
+  <link rel="stylesheet" href="/shared/styles.css" />
+  <style>
+    body {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; background: #060f0a;
+    }
+
+    /* ── Aurora ── */
+    @keyframes aurora-login {
+      from { background-position: 50% 50%, 50% 50%; }
+      to   { background-position: 350% 50%, 350% 50%; }
+    }
+    .login-aurora {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+    }
+    .login-aurora::before {
+      content: ''; position: absolute; inset: -12%;
+      filter: blur(20px); opacity: 0.18; will-change: background-position;
+      background-image:
+        repeating-linear-gradient(100deg,rgba(3,25,14,0) 0%,rgba(3,25,14,0) 7%,rgba(3,25,14,0.45) 10%,rgba(3,25,14,0.45) 12%,rgba(3,25,14,0) 16%),
+        repeating-linear-gradient(100deg,rgba(5,150,105,1) 10%,rgba(16,185,129,0.8) 15%,rgba(52,211,153,0.6) 20%,rgba(45,212,191,0.5) 25%,rgba(6,95,70,0.9) 30%);
+      background-size: 300% 300%, 200% 200%;
+      animation: aurora-login 55s linear infinite;
+    }
+    .login-aurora::after {
+      content: ''; position: absolute; inset: -12%;
+      filter: blur(36px); opacity: 0.09; mix-blend-mode: screen;
+      will-change: background-position;
+      background-image:
+        repeating-linear-gradient(100deg,rgba(3,25,14,0) 0%,rgba(3,25,14,0) 7%,rgba(3,25,14,0.45) 10%,rgba(3,25,14,0.45) 12%,rgba(3,25,14,0) 16%),
+        repeating-linear-gradient(100deg,rgba(5,150,105,1) 10%,rgba(16,185,129,0.8) 15%,rgba(52,211,153,0.6) 20%,rgba(45,212,191,0.5) 25%,rgba(6,95,70,0.9) 30%);
+      background-size: 200% 200%, 150% 150%;
+      animation: aurora-login 40s linear infinite reverse;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .login-aurora::before, .login-aurora::after { animation: none; }
+    }
+
+    /* ── Grid overlay ── */
+    .login-grid {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background-image:
+        linear-gradient(rgba(46,139,87,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(46,139,87,0.025) 1px, transparent 1px);
+      background-size: 44px 44px;
+    }
+
+    /* ── Card shell ── */
+    .login-shell {
+      display: grid; grid-template-columns: 1fr 1fr;
+      width: 100%; max-width: 940px; min-height: 590px;
+      background: rgba(6,16,11,0.90);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(46,139,87,0.22);
+      border-radius: 12px; overflow: hidden;
+      position: relative; z-index: 1;
+      box-shadow:
+        0 32px 80px rgba(0,0,0,0.75),
+        0 0 0 1px rgba(46,139,87,0.07),
+        inset 0 1px 0 rgba(52,211,153,0.06);
+    }
+
+    /* ─────────────────────────── LEFT PANEL ─────────────────────────── */
+    .login-visual {
+      background: rgba(4,10,7,0.55);
+      border-right: 1px solid rgba(46,139,87,0.14);
+      display: flex; flex-direction: column;
+      padding: 30px 26px 28px;
+      position: relative; overflow: hidden;
+    }
+    .login-visual::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 65% at 38% 58%, rgba(27,94,63,0.22) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 35% at 65% 25%, rgba(46,139,87,0.09) 0%, transparent 60%);
+    }
+
+    .login-visual-logo {
+      display: flex; align-items: center; gap: 9px;
+      text-decoration: none; position: relative; z-index: 2; flex-shrink: 0;
+    }
+    .login-visual-logo img { height: 26px; }
+    .login-visual-logo span {
+      font-family: var(--display); font-size: 1.0rem;
+      font-weight: 800; color: #fff; letter-spacing: -0.02em;
+    }
+
+    /* ── Scene ── */
+    @keyframes sci-float  { from { transform: translateY(0px); } to { transform: translateY(-11px); } }
+    @keyframes meter-float{ from { transform: translateY(0px) rotate(12deg); } to { transform: translateY(-8px) rotate(9deg); } }
+    @keyframes hud-float  { from { transform: translateX(-50%) translateY(0); } to { transform: translateX(-50%) translateY(-6px); } }
+    @keyframes ptcl       { from { transform: translateY(0) scale(1); opacity: 0.7; } to { transform: translateY(-14px) scale(0.7); opacity: 0.18; } }
+
+    .lab-scene {
+      flex: 1; position: relative;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 2; min-height: 0;
+    }
+    .scene-glow-bg {
+      position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(ellipse 72% 62% at 40% 54%, rgba(46,139,87,0.22) 0%, transparent 72%);
+    }
+
+    /* Orbit ring */
+    .scene-orbit {
+      position: absolute; top: 50%; left: 42%;
+      transform: translate(-50%, -50%);
+      width: 230px; height: 105px; pointer-events: none; z-index: 1;
+    }
+    .scene-orbit-svg {
+      width: 100%; height: 100%;
+      animation: orbit-spin 24s linear infinite;
+      transform-origin: center center;
+    }
+    @keyframes orbit-spin {
+      from { transform: rotate(0deg); } to { transform: rotate(360deg); }
+    }
+
+    .scene-beaker {
+      width: 178px; position: relative; z-index: 3;
+      filter: drop-shadow(0 14px 38px rgba(46,139,87,0.40)) drop-shadow(0 0 14px rgba(52,211,153,0.12));
+      animation: sci-float 4.2s ease-in-out infinite alternate;
+    }
+    .scene-beaker svg { width: 100%; height: auto; display: block; }
+
+    .scene-phmeter {
+      position: absolute; right: 10%; top: 20%; width: 58px;
+      z-index: 4;
+      filter: drop-shadow(0 6px 18px rgba(0,0,0,0.45));
+      animation: meter-float 5.2s ease-in-out 0.7s infinite alternate;
+    }
+    .scene-phmeter svg { width: 100%; height: auto; display: block; }
+
+    .scene-hud-chip {
+      position: absolute; top: 8%; left: 44%; transform: translateX(-50%);
+      background: rgba(4,14,9,0.84); border: 1px solid rgba(52,211,153,0.40);
+      border-radius: 7px; padding: 5px 12px 6px;
+      display: flex; align-items: baseline; gap: 5px;
+      backdrop-filter: blur(10px);
+      animation: hud-float 4.8s ease-in-out 1.1s infinite alternate;
+      box-shadow: 0 0 20px rgba(52,211,153,0.14), inset 0 1px 0 rgba(52,211,153,0.12);
+      z-index: 5;
+    }
+    .hud-label { font-family: var(--mono); font-size: 0.48rem; letter-spacing: 0.2em; color: rgba(52,211,153,0.6); text-transform: uppercase; }
+    .hud-val   { font-family: var(--mono); font-size: 1.25rem; font-weight: 500; color: #fff; line-height: 1; letter-spacing: -0.02em; }
+    .hud-unit  { font-family: var(--mono); font-size: 0.48rem; color: rgba(214,69,80,0.85); letter-spacing: 0.1em; }
+
+    .particle {
+      position: absolute; border-radius: 50%;
+      background: rgba(52,211,153,0.75);
+      box-shadow: 0 0 8px rgba(52,211,153,0.6), 0 0 16px rgba(52,211,153,0.3);
+      animation: ptcl var(--dur, 3.2s) ease-in-out infinite alternate;
+      z-index: 5;
+    }
+    .p1 { width: 5px; height: 5px; top: 20%; left: 12%; --dur: 3.4s; }
+    .p2 { width: 3px; height: 3px; top: 60%; left:  9%; --dur: 4.2s; opacity: 0.55; }
+    .p3 { width: 4px; height: 4px; top: 36%; right: 7%; --dur: 2.9s; opacity: 0.8; }
+    .p4 { width: 6px; height: 6px; top: 72%; right:15%; --dur: 3.8s; opacity: 0.45; }
+    .p5 { width: 3px; height: 3px; top: 50%; left:  6%; --dur: 5.1s; opacity: 0.6; }
+
+    /* ── Left copy ── */
+    .login-visual-copy { position: relative; z-index: 2; padding-top: 6px; flex-shrink: 0; }
+    .login-visual-copy .ph-scale-bar { height: 4px; border-radius: 1.5px; margin-bottom: 16px; opacity: 0.38; }
+    .login-visual-copy h2 {
+      font-family: var(--display); font-size: 1.42rem; font-weight: 800;
+      letter-spacing: -0.025em; line-height: 1.2; color: #fff;
+    }
+    .login-visual-copy h2 em { font-style: normal; color: var(--science); }
+    .login-visual-copy p { margin-top: 7px; font-size: 0.80rem; line-height: 1.7; color: rgba(255,255,255,0.38); }
+
+    /* ─────────────────────────── RIGHT PANEL ─────────────────────────── */
+    .login-form-panel {
+      padding: 36px 32px;
+      display: flex; flex-direction: column; justify-content: center;
+    }
+
+    /* ── Tabs ── */
+    .login-tabs {
+      display: flex; gap: 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 24px;
+    }
+    .login-tab {
+      font-family: var(--display); font-size: 0.87rem; font-weight: 600;
+      padding: 10px 18px; cursor: pointer; color: rgba(255,255,255,0.32);
+      border: none; background: none;
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+      transition: color 0.18s, border-color 0.18s;
+      position: relative;
+    }
+    .login-tab:hover { color: rgba(255,255,255,0.65); }
+    .login-tab.active { color: #fff; border-bottom-color: rgba(52,211,153,0.85); }
+    .login-tab.active::after {
+      content: ''; position: absolute; bottom: -2px; left: 18px; right: 18px; height: 2px;
+      background: rgba(52,211,153,0.85);
+      box-shadow: 0 0 10px rgba(52,211,153,0.55), 0 0 22px rgba(52,211,153,0.2);
+      border-radius: 2px;
+    }
+    .login-tab:focus-visible { outline: 2px solid rgba(52,211,153,0.5); outline-offset: 2px; border-radius: 3px; }
+
+    /* ── Form stack ── */
+    .form-stack { display: flex; flex-direction: column; gap: 14px; }
+    .form-error {
+      font-family: var(--mono); font-size: 0.72rem; color: var(--acid);
+      padding: 9px 12px; background: rgba(214,69,80,0.08); border: 1px solid rgba(214,69,80,0.2);
+      border-radius: 7px; display: none;
+    }
+
+    /* ── Icon wrappers ── */
+    .field-wrap { position: relative; }
+    .field-wrap .field-icon {
+      position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+      color: rgba(46,139,87,0.58); pointer-events: none;
+      display: flex; align-items: center; transition: color 0.18s;
+    }
+    .field-wrap:focus-within .field-icon { color: rgba(52,211,153,0.75); }
+    .field-wrap .eye-btn {
+      position: absolute; right: 11px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; padding: 3px;
+      color: rgba(255,255,255,0.28); display: flex; align-items: center;
+      transition: color 0.18s; border-radius: 3px;
+    }
+    .field-wrap .eye-btn:hover { color: rgba(255,255,255,0.65); }
+    .field-wrap .eye-btn:focus-visible { outline: 2px solid rgba(52,211,153,0.5); outline-offset: 1px; }
+
+    /* ── Input overrides for login page ── */
+    .login-form-panel .form-input {
+      padding-left: 42px; border-radius: 8px;
+      background: rgba(10,26,17,0.58);
+      border-color: rgba(46,139,87,0.22);
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+    .login-form-panel .form-input:focus {
+      border-color: rgba(52,211,153,0.52);
+      background: rgba(12,32,21,0.72);
+      box-shadow: 0 0 0 3px rgba(52,211,153,0.08), 0 0 22px rgba(52,211,153,0.06);
+    }
+    .login-form-panel .form-input.has-eye { padding-right: 42px; }
+
+    /* ── Footer / button area ── */
+    .form-footer { margin-top: 4px; display: flex; flex-direction: column; gap: 11px; }
+
+    /* ── Primary CTA ── */
+    .btn-login-main {
+      width: 100%; justify-content: center;
+      background: linear-gradient(135deg, #1c7845 0%, #2E8B57 58%, #21a358 100%);
+      border-radius: 8px;
+      box-shadow: 0 4px 22px rgba(46,139,87,0.34), 0 0 0 1px rgba(52,211,153,0.10);
+      font-size: 0.88rem; letter-spacing: 0.01em;
+      transition: transform 0.22s cubic-bezier(0.22,1,0.36,1), box-shadow 0.22s;
+    }
+    .btn-login-main:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(46,139,87,0.44), 0 0 0 1px rgba(52,211,153,0.18);
+    }
+    .btn-login-main:active { transform: translateY(0); box-shadow: 0 2px 10px rgba(46,139,87,0.2); }
+    .btn-login-main:focus-visible { outline: 2px solid rgba(52,211,153,0.6); outline-offset: 2px; }
+
+    /* ── Divider ── */
+    .form-divider {
+      display: flex; align-items: center; gap: 12px;
+      font-family: var(--mono); font-size: 0.6rem;
+      color: rgba(255,255,255,0.18); letter-spacing: 0.1em;
+    }
+    .form-divider::before, .form-divider::after {
+      content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.07);
+    }
+
+    /* ── Demo glass buttons ── */
+    .demo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+    .demo-btn {
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      padding: 9px 12px;
+      background: rgba(46,139,87,0.06);
+      border: 1px solid rgba(46,139,87,0.22);
+      border-radius: 8px;
+      color: rgba(255,255,255,0.58);
+      font-family: var(--display); font-size: 0.79rem; font-weight: 600;
+      text-decoration: none; cursor: pointer;
+      transition: background 0.18s, border-color 0.18s, color 0.18s, box-shadow 0.18s, transform 0.15s;
+    }
+    .demo-btn:hover {
+      background: rgba(46,139,87,0.14); border-color: rgba(52,211,153,0.4);
+      color: rgba(255,255,255,0.9); box-shadow: 0 0 16px rgba(46,139,87,0.14);
+      transform: translateY(-1px);
+    }
+    .demo-btn:active { transform: translateY(0); }
+    .demo-btn:focus-visible { outline: 2px solid rgba(52,211,153,0.5); outline-offset: 2px; border-radius: 8px; }
+
+    /* ── Register secondary button ── */
+    .btn-register-main {
+      width: 100%; justify-content: center;
+      background: rgba(46,139,87,0.14);
+      border: 1px solid rgba(46,139,87,0.28);
+      border-radius: 8px; color: rgba(255,255,255,0.88);
+      font-size: 0.88rem;
+      transition: background 0.18s, border-color 0.18s, transform 0.15s;
+    }
+    .btn-register-main:hover {
+      background: rgba(46,139,87,0.24); border-color: rgba(52,211,153,0.38);
+      transform: translateY(-1px);
+    }
+    .btn-register-main:active { transform: translateY(0); }
+    .btn-register-main:focus-visible { outline: 2px solid rgba(52,211,153,0.5); outline-offset: 2px; }
+
+    .terms-text {
+      font-family: var(--mono); font-size: 0.63rem;
+      color: rgba(255,255,255,0.26); text-align: center; line-height: 1.7;
+    }
+
+    /* ── Mobile ── */
+    @media (max-width: 680px) {
+      .login-shell { grid-template-columns: 1fr; min-height: auto; }
+      .login-visual { display: none; }
+      .login-form-panel { padding: 36px 26px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-aurora" aria-hidden="true"></div>
+  <div class="login-grid"  aria-hidden="true"></div>
+
+  <div class="login-shell">
+
+    <!-- ══════════════ LEFT PANEL ══════════════ -->
+    <div class="login-visual">
+      <a href="/" class="login-visual-logo">
+        <img src="/brand_assets/CeroLab PNG.png" alt="CeroLab" />
+        <span>CeroLab</span>
+      </a>
+
+      <!-- Scientific scene -->
+      <div class="lab-scene" aria-hidden="true">
+        <div class="scene-glow-bg"></div>
+
+        <!-- Orbit ring -->
+        <div class="scene-orbit">
+          <svg class="scene-orbit-svg" viewBox="0 0 230 105" fill="none">
+            <ellipse cx="115" cy="52" rx="112" ry="49"
+              stroke="rgba(52,211,153,0.11)" stroke-width="1" stroke-dasharray="4 7"/>
+            <circle cx="226" cy="52" r="3.5" fill="rgba(52,211,153,0.55)"/>
+            <circle cx="4"   cy="52" r="2.5" fill="rgba(52,211,153,0.35)"/>
+          </svg>
+        </div>
+
+        <!-- Beaker (inline SVG, green liquid activated) -->
+        <div class="scene-beaker">
+          <svg viewBox="0 0 1200 1600" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="bk-shadow" x="-40%" y="-40%" width="180%" height="180%">
+                <feDropShadow dx="0" dy="28" stdDeviation="26" flood-color="#000" flood-opacity="0.20"/>
+              </filter>
+              <filter id="bk-blur" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="2.2"/>
+              </filter>
+              <filter id="bk-liq-glow" x="-30%" y="-30%" width="160%" height="160%">
+                <feDropShadow dx="0" dy="0" stdDeviation="20" flood-color="#2ed278" flood-opacity="0.55"/>
+              </filter>
+              <linearGradient id="bk-glass" x1="224" y1="228" x2="973" y2="1261" gradientUnits="userSpaceOnUse">
+                <stop offset="0"    stop-color="#fff" stop-opacity="0.62"/>
+                <stop offset="0.12" stop-color="#dfe8ee" stop-opacity="0.18"/>
+                <stop offset="0.36" stop-color="#fff" stop-opacity="0.07"/>
+                <stop offset="0.62" stop-color="#a9bbc7" stop-opacity="0.09"/>
+                <stop offset="1"    stop-color="#fff" stop-opacity="0.42"/>
+              </linearGradient>
+              <linearGradient id="bk-edge" x1="253" y1="292" x2="949" y2="1238" gradientUnits="userSpaceOnUse">
+                <stop offset="0"    stop-color="#fff" stop-opacity="0.92"/>
+                <stop offset="0.23" stop-color="#7f8c93" stop-opacity="0.70"/>
+                <stop offset="0.5"  stop-color="#fff" stop-opacity="0.45"/>
+                <stop offset="0.78" stop-color="#65737d" stop-opacity="0.72"/>
+                <stop offset="1"    stop-color="#fff" stop-opacity="0.85"/>
+              </linearGradient>
+              <linearGradient id="bk-rim" x1="262" y1="266" x2="932" y2="332" gradientUnits="userSpaceOnUse">
+                <stop offset="0"    stop-color="#87929a" stop-opacity="0.6"/>
+                <stop offset="0.18" stop-color="#fff" stop-opacity="0.95"/>
+                <stop offset="0.52" stop-color="#cfd8de" stop-opacity="0.25"/>
+                <stop offset="0.82" stop-color="#fff" stop-opacity="0.95"/>
+                <stop offset="1"    stop-color="#67747e" stop-opacity="0.7"/>
+              </linearGradient>
+              <radialGradient id="bk-btm" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(600 1217) rotate(90) scale(78 335)">
+                <stop offset="0"    stop-color="#fff" stop-opacity="0.62"/>
+                <stop offset="0.42" stop-color="#c8d2d9" stop-opacity="0.22"/>
+                <stop offset="0.75" stop-color="#82909a" stop-opacity="0.35"/>
+                <stop offset="1"    stop-color="#fff" stop-opacity="0.68"/>
+              </radialGradient>
+              <linearGradient id="bk-hl" x1="347" y1="308" x2="347" y2="1168" gradientUnits="userSpaceOnUse">
+                <stop offset="0"    stop-color="#fff" stop-opacity="0.88"/>
+                <stop offset="0.42" stop-color="#fff" stop-opacity="0.18"/>
+                <stop offset="1"    stop-color="#fff" stop-opacity="0.62"/>
+              </linearGradient>
+              <linearGradient id="bk-rhl" x1="853" y1="318" x2="853" y2="1140" gradientUnits="userSpaceOnUse">
+                <stop offset="0"   stop-color="#fff" stop-opacity="0.65"/>
+                <stop offset="0.5" stop-color="#fff" stop-opacity="0.12"/>
+                <stop offset="1"   stop-color="#fff" stop-opacity="0.46"/>
+              </linearGradient>
+              <linearGradient id="bk-liq-grad" x1="286" y1="1048" x2="913" y2="1238" gradientUnits="userSpaceOnUse">
+                <stop offset="0"   stop-color="#2dd278" stop-opacity="0.68"/>
+                <stop offset="0.5" stop-color="#34d399" stop-opacity="0.74"/>
+                <stop offset="1"   stop-color="#10b981" stop-opacity="0.58"/>
+              </linearGradient>
+              <clipPath id="bk-clip">
+                <path d="M266 336C272 453 277 706 283 1024C286 1178 336 1230 600 1230C864 1230 914 1178 917 1024C923 706 928 453 934 336C895 357 317 357 266 336Z"/>
+              </clipPath>
+            </defs>
+            <ellipse cx="600" cy="1288" rx="374" ry="64" fill="#1b242a" opacity="0.16" filter="url(#bk-blur)"/>
+            <ellipse cx="600" cy="1272" rx="314" ry="32" fill="#fff"    opacity="0.23" filter="url(#bk-blur)"/>
+            <g filter="url(#bk-shadow)">
+              <path d="M260 331C271 473 274 789 283 1033C287 1158 307 1217 422 1248C463 1259 523 1264 600 1264C677 1264 737 1259 778 1248C893 1217 913 1158 917 1033C926 789 929 473 940 331C902 363 300 363 260 331Z" fill="url(#bk-glass)"/>
+              <path d="M260 331C271 473 274 789 283 1033C287 1158 307 1217 422 1248C463 1259 523 1264 600 1264C677 1264 737 1259 778 1248C893 1217 913 1158 917 1033C926 789 929 473 940 331C902 363 300 363 260 331Z" stroke="url(#bk-edge)" stroke-width="9" stroke-linejoin="round"/>
+            </g>
+            <!-- Green acid liquid -->
+            <g clip-path="url(#bk-clip)" filter="url(#bk-liq-glow)">
+              <path d="M286 1048C372 1018 467 1078 565 1044C684 1002 775 1068 913 1032V1238H286V1048Z" fill="url(#bk-liq-grad)"/>
+              <path d="M286 1048C372 1018 467 1078 565 1044C684 1002 775 1068 913 1032" stroke="rgba(52,211,153,0.9)" stroke-width="8" stroke-linecap="round"/>
+            </g>
+            <path d="M307 382C309 536 312 843 319 1044C322 1146 363 1186 433 1204" stroke="#fff" stroke-opacity="0.34" stroke-width="11" stroke-linecap="round"/>
+            <path d="M883 382C881 536 878 843 871 1044C868 1146 827 1186 757 1204" stroke="#53606a" stroke-opacity="0.28" stroke-width="10" stroke-linecap="round"/>
+            <rect x="388" y="355" width="96" height="786" rx="46" fill="#fff" opacity="0.115"/>
+            <rect x="742" y="367" width="82" height="750" rx="41"  fill="#fff" opacity="0.10"/>
+            <path d="M242 320C242 284 399 256 593 256C781 256 935 284 949 320C954 333 947 346 926 357C847 396 353 394 274 358C257 351 247 342 242 320Z" fill="#fff" fill-opacity="0.22" stroke="url(#bk-rim)" stroke-width="8"/>
+            <path d="M264 331C332 351 872 352 929 329" stroke="#fff" stroke-opacity="0.82" stroke-width="5" stroke-linecap="round"/>
+            <path d="M242 320C222 324 200 333 178 351C214 354 245 350 275 335C264 333 252 329 242 320Z" fill="#f7fbff" fill-opacity="0.42" stroke="#7b8790" stroke-opacity="0.75" stroke-width="7" stroke-linejoin="round"/>
+            <ellipse cx="600" cy="1208" rx="298" ry="67" fill="url(#bk-btm)" opacity="0.74"/>
+            <ellipse cx="600" cy="1203" rx="271" ry="45" stroke="#fff" stroke-opacity="0.72" stroke-width="5"/>
+            <path d="M332 357C327 490 324 835 331 1034C335 1137 367 1185 445 1209" stroke="url(#bk-hl)" stroke-width="14" stroke-linecap="round" opacity="0.78"/>
+            <path d="M863 364C868 512 869 862 862 1041C858 1134 826 1178 758 1204" stroke="url(#bk-rhl)" stroke-width="10" stroke-linecap="round" opacity="0.58"/>
+            <path d="M258 335C335 384 865 386 941 334" stroke="#fff" stroke-opacity="0.46" stroke-width="3"/>
+          </svg>
+        </div>
+
+        <!-- pH meter pen -->
+        <div class="scene-phmeter">
+          <svg viewBox="0 0 900 1300" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="pm-body" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0"    stop-color="#e8e4d6"/>
+                <stop offset="0.16" stop-color="#fffbed"/>
+                <stop offset="0.48" stop-color="#f4efd9"/>
+                <stop offset="0.78" stop-color="#d9d2bd"/>
+                <stop offset="1"    stop-color="#fdf9e9"/>
+              </linearGradient>
+              <linearGradient id="pm-cap" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0"    stop-color="#1f3340"/>
+                <stop offset="0.45" stop-color="#314b5c"/>
+                <stop offset="1"    stop-color="#14242e"/>
+              </linearGradient>
+              <linearGradient id="pm-rubber" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0"   stop-color="#1a2c36"/>
+                <stop offset="0.5" stop-color="#425b68"/>
+                <stop offset="1"   stop-color="#152630"/>
+              </linearGradient>
+              <linearGradient id="pm-screen" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0"    stop-color="#b9f070"/>
+                <stop offset="0.45" stop-color="#7bc44a"/>
+                <stop offset="1"    stop-color="#315e2c"/>
+              </linearGradient>
+              <linearGradient id="pm-panel" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#536070"/>
+                <stop offset="1" stop-color="#2d3542"/>
+              </linearGradient>
+              <filter id="pm-shadow" x="-30%" y="-30%" width="160%" height="160%">
+                <feDropShadow dx="0" dy="25" stdDeviation="28" flood-color="#000" flood-opacity="0.25"/>
+              </filter>
+              <radialGradient id="pm-btn" cx="35%" cy="25%" r="70%">
+                <stop offset="0"    stop-color="#fff"/>
+                <stop offset="0.45" stop-color="#d8dde3"/>
+                <stop offset="1"    stop-color="#87909b"/>
+              </radialGradient>
+            </defs>
+            <g filter="url(#pm-shadow)">
+              <path d="M443 82C443 46 457 36 477 36C498 36 511 48 511 82" fill="none" stroke="#263743" stroke-width="20" stroke-linecap="round"/>
+              <path d="M323 92C323 63 346 49 374 49L580 49C608 49 631 63 631 92L631 164C631 187 612 203 589 203L365 203C342 203 323 187 323 164Z" fill="url(#pm-cap)"/>
+              <path d="M339 185C319 207 307 232 307 270L307 842C307 889 334 930 374 948L389 1154C391 1195 425 1227 466 1227L488 1227C529 1227 563 1195 565 1154L580 948C620 930 647 889 647 842L647 270C647 232 635 207 615 185Z" fill="url(#pm-body)"/>
+              <path d="M355 802L599 802L599 903C599 921 584 936 566 936L388 936C370 936 355 921 355 903Z" fill="url(#pm-rubber)"/>
+              <path d="M354 264C354 244 370 228 390 228L564 228C584 228 600 244 600 264L600 704C600 724 584 740 564 740L390 740C370 740 354 724 354 704Z" fill="url(#pm-panel)"/>
+              <rect x="384" y="268" width="186" height="238" rx="18" fill="#1b2630"/>
+              <rect x="397" y="282" width="160" height="210" rx="11" fill="url(#pm-screen)"/>
+              <text x="477" y="350" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#1d3921">pH</text>
+              <text x="478" y="425" text-anchor="middle" font-family="monospace" font-size="104" fill="#122617" font-weight="700">7.0</text>
+              <circle cx="477" cy="554" r="33" fill="url(#pm-btn)" stroke="#1f2933" stroke-width="3"/>
+              <text x="477" y="561" text-anchor="middle" font-family="Arial" font-size="17" fill="#23313b" font-weight="700">ON</text>
+              <circle cx="477" cy="628" r="31" fill="url(#pm-btn)" stroke="#1f2933" stroke-width="3"/>
+              <text x="477" y="634" text-anchor="middle" font-family="Arial" font-size="15" fill="#23313b" font-weight="700">MODE</text>
+              <path d="M365 207C342 270 345 793 360 875C371 922 407 928 407 928" fill="none" stroke="#fff" stroke-width="15" stroke-opacity="0.32" stroke-linecap="round"/>
+              <ellipse cx="477" cy="1242" rx="150" ry="23" fill="#000" opacity="0.13"/>
+            </g>
+          </svg>
+        </div>
+
+        <!-- pH HUD chip -->
+        <div class="scene-hud-chip">
+          <span class="hud-label">pH</span>
+          <span class="hud-val">4.2</span>
+          <span class="hud-unit">· ácido</span>
+        </div>
+
+        <!-- Particles -->
+        <div class="particle p1"></div>
+        <div class="particle p2"></div>
+        <div class="particle p3"></div>
+        <div class="particle p4"></div>
+        <div class="particle p5"></div>
+      </div>
+
+      <!-- Bottom copy -->
+      <div class="login-visual-copy">
+        <div class="ph-scale-bar"></div>
+        <h2>El laboratorio<br/><em>en tu pantalla.</em></h2>
+        <p>Experimentos interactivos de ciencias, alineados al currículum MINEDUC, disponibles desde cualquier computador de colegio.</p>
+      </div>
+    </div>
+
+    <!-- ══════════════ RIGHT PANEL ══════════════ -->
+    <div class="login-form-panel">
+      <div class="login-tabs" role="tablist">
+        <button class="login-tab active" role="tab" aria-selected="true"  onclick="switchTab('login',this)">Iniciar sesión</button>
+        <button class="login-tab"        role="tab" aria-selected="false" onclick="switchTab('register',this)">Crear cuenta</button>
+      </div>
+
+      <!-- Login form -->
+      <form id="form-login" class="form-stack" novalidate onsubmit="handleLogin(event)">
+        <div class="form-error" id="login-error">Correo o contraseña incorrectos.</div>
+
+        <div class="form-field">
+          <label class="form-label" for="login-email">Correo electrónico</label>
+          <div class="field-wrap">
+            <span class="field-icon">
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="1" y="2.5" width="13" height="10" rx="1.5" stroke="currentColor" stroke-width="1.25"/><path d="M1 5l6.5 4.5L14 5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
+            </span>
+            <input id="login-email" class="form-input" type="email" placeholder="alumno@colegio.cl" autocomplete="email" required />
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="login-pass">Contraseña</label>
+          <div class="field-wrap">
+            <span class="field-icon">
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="2.5" y="6.5" width="10" height="7.5" rx="1.5" stroke="currentColor" stroke-width="1.25"/><path d="M4.5 6.5V5a3 3 0 0 1 6 0v1.5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/><circle cx="7.5" cy="10.5" r="1.1" fill="currentColor"/></svg>
+            </span>
+            <input id="login-pass" class="form-input has-eye" type="password" placeholder="••••••••" autocomplete="current-password" required />
+            <button type="button" class="eye-btn" onclick="togglePw('login-pass',this)" aria-label="Mostrar contraseña">
+              <svg class="eye-show" width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M1 7.5C2.5 4 4.8 2.5 7.5 2.5S12.5 4 14 7.5C12.5 11 10.2 12.5 7.5 12.5S2.5 11 1 7.5Z" stroke="currentColor" stroke-width="1.25"/><circle cx="7.5" cy="7.5" r="1.8" stroke="currentColor" stroke-width="1.25"/></svg>
+              <svg class="eye-hide" width="15" height="15" viewBox="0 0 15 15" fill="none" style="display:none"><path d="M2 2l11 11M5.5 5.7A2 2 0 0 0 9.5 9M3 3.5C1.8 4.6 1.2 5.9 1 7.5c1.5 3.5 3.8 5 6.5 5 1.2 0 2.3-.3 3.2-.8M6.5 2.8A6 6 0 0 1 7.5 2.7c2.7 0 5 1.5 6.5 4.8a9 9 0 0 1-1.5 2.4" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <button type="submit" class="btn btn-primary btn-login-main">
+            Ingresar al laboratorio
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M2 6.5H11M7.5 3L11 6.5L7.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="form-divider">o ingresar como</div>
+          <div class="demo-grid">
+            <a href="/role-select" class="demo-btn">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="7" cy="4" r="2.8" stroke="currentColor" stroke-width="1.2"/><path d="M2 13c0-2.8 2.2-4.8 5-4.8S12 10.2 12 13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+              Alumno demo
+            </a>
+            <a href="/profesor" class="demo-btn">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><rect x="1.5" y="1.5" width="11" height="8" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 13h6M7 9.5v3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+              Docente demo
+            </a>
+          </div>
+        </div>
+      </form>
+
+      <!-- Register form -->
+      <form id="form-register" class="form-stack" style="display:none;" novalidate onsubmit="handleRegister(event)">
+        <div class="form-field">
+          <label class="form-label" for="reg-name">Nombre completo</label>
+          <div class="field-wrap">
+            <span class="field-icon">
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="5" r="2.8" stroke="currentColor" stroke-width="1.25"/><path d="M2 14c0-3 2.5-5 5.5-5S13 11 13 14" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
+            </span>
+            <input id="reg-name" class="form-input" type="text" placeholder="Valentina González" autocomplete="name" required />
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="reg-email">Correo electrónico</label>
+          <div class="field-wrap">
+            <span class="field-icon">
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="1" y="2.5" width="13" height="10" rx="1.5" stroke="currentColor" stroke-width="1.25"/><path d="M1 5l6.5 4.5L14 5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
+            </span>
+            <input id="reg-email" class="form-input" type="email" placeholder="alumno@colegio.cl" autocomplete="email" required />
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="reg-pass">Contraseña</label>
+          <div class="field-wrap">
+            <span class="field-icon">
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="2.5" y="6.5" width="10" height="7.5" rx="1.5" stroke="currentColor" stroke-width="1.25"/><path d="M4.5 6.5V5a3 3 0 0 1 6 0v1.5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/><circle cx="7.5" cy="10.5" r="1.1" fill="currentColor"/></svg>
+            </span>
+            <input id="reg-pass" class="form-input has-eye" type="password" placeholder="Mínimo 8 caracteres" autocomplete="new-password" required minlength="8" />
+            <button type="button" class="eye-btn" onclick="togglePw('reg-pass',this)" aria-label="Mostrar contraseña">
+              <svg class="eye-show" width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M1 7.5C2.5 4 4.8 2.5 7.5 2.5S12.5 4 14 7.5C12.5 11 10.2 12.5 7.5 12.5S2.5 11 1 7.5Z" stroke="currentColor" stroke-width="1.25"/><circle cx="7.5" cy="7.5" r="1.8" stroke="currentColor" stroke-width="1.25"/></svg>
+              <svg class="eye-hide" width="15" height="15" viewBox="0 0 15 15" fill="none" style="display:none"><path d="M2 2l11 11M5.5 5.7A2 2 0 0 0 9.5 9M3 3.5C1.8 4.6 1.2 5.9 1 7.5c1.5 3.5 3.8 5 6.5 5 1.2 0 2.3-.3 3.2-.8M6.5 2.8A6 6 0 0 1 7.5 2.7c2.7 0 5 1.5 6.5 4.8a9 9 0 0 1-1.5 2.4" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <button type="submit" class="btn btn-register-main">Crear cuenta</button>
+          <p class="terms-text">Al crear una cuenta aceptas los<br/>términos de uso de CeroLab.</p>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(tab, btn) {
+      document.querySelectorAll('.login-tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
+      btn.classList.add('active'); btn.setAttribute('aria-selected','true');
+      document.getElementById('form-login').style.display    = tab === 'login'    ? 'flex' : 'none';
+      document.getElementById('form-register').style.display = tab === 'register' ? 'flex' : 'none';
+    }
+    function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value;
+      const pass  = document.getElementById('login-pass').value;
+      if ((email === 'alumno@demo.cl' && pass === 'demo1234') || email.includes('@')) {
+        window.location.href = '/role-select';
+      } else {
+        document.getElementById('login-error').style.display = 'block';
+      }
+    }
+    function handleRegister(e) {
+      e.preventDefault();
+      window.location.href = '/role-select';
+    }
+    function togglePw(id, btn) {
+      const input = document.getElementById(id);
+      const hidden = input.type === 'password';
+      input.type = hidden ? 'text' : 'password';
+      btn.querySelector('.eye-show').style.display = hidden ? 'none' : '';
+      btn.querySelector('.eye-hide').style.display = hidden ? ''     : 'none';
+      btn.setAttribute('aria-label', hidden ? 'Ocultar contraseña' : 'Mostrar contraseña');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Marco Teórico — Indicadores de pH — CeroLab</title>
+  <link rel="stylesheet" href="/shared/styles.css" />
+  <style>
+    .ph-example { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 3px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; }
+    .ph-dot { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 0.68rem; font-weight: 500; color: #fff; flex-shrink: 0; }
+    .theory-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-top: 2px solid currentColor; border-radius: 2px; padding: 24px 20px; }
+    .indicator-chip { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 3px; padding: 12px 16px; }
+    .indicator-swatch { display: flex; gap: 2px; }
+    .indicator-swatch span { display: block; width: 9px; height: 20px; border-radius: 1px; }
+
+    /* Progress header bar */
+    .exp-progress-bar {
+      background: var(--dark-lab-3); border-bottom: 1px solid rgba(46,139,87,0.15);
+      padding: 12px 28px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+    }
+    .exp-progress-label { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.12em; color: rgba(255,255,255,0.35); text-transform: uppercase; }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" aria-label="Navegación alumno">
+    <a href="/" class="sidebar-logo">
+      <img src="/brand_assets/CeroLab PNG.png" alt="CeroLab" />
+      <span class="sidebar-logo-text">CeroLab</span>
+    </a>
+    <span class="sidebar-section-label">Experimento</span>
+    <a href="/alumno" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+      Dashboard
+    </a>
+    <a href="/alumno/quimica" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M7 3V8L3 13H13L9 8V3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 3H10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Química
+    </a>
+    <span class="sidebar-section-label">Pasos</span>
+    <a href="/experimento/acido-base/concepto" class="sidebar-link active" aria-current="page">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M5 8h6M5 6h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      1. Marco teórico
+    </a>
+    <a href="/experimento/acido-base" class="sidebar-link" style="opacity:0.4;pointer-events:none;">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M7 3V8L3 13H13L9 8V3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 3H10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      2. Laboratorio
+    </a>
+    <a href="/experimento/acido-base/quiz" class="sidebar-link" style="opacity:0.4;pointer-events:none;">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M6 6.5C6 5.4 6.9 4.5 8 4.5s2 .9 2 2c0 1-1 1.5-2 2v1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="8" cy="12" r="0.7" fill="currentColor"/></svg>
+      3. Quiz
+    </a>
+    <a href="/experimento/acido-base/resultados" class="sidebar-link" style="opacity:0.4;pointer-events:none;">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="4" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M5 9l2 2 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      4. Resultados
+    </a>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar">VG</div>
+      <div>
+        <div class="sidebar-user-name">Valentina G.</div>
+        <div class="sidebar-user-role">Alumno · 3° Medio A</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="app-main">
+    <div class="topbar">
+      <nav class="topbar-breadcrumb" aria-label="Ubicación">
+        <a href="/alumno">Inicio</a>
+        <span>/</span>
+        <a href="/alumno/quimica">Química</a>
+        <span>/</span>
+        <span class="current">Marco Teórico</span>
+      </nav>
+      <div class="topbar-right">
+        <span class="chip chip-green">
+          <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg>
+          Paso 1 de 4
+        </span>
+      </div>
+    </div>
+
+    <!-- Experiment step tracker -->
+    <div class="exp-progress-bar">
+      <span class="exp-progress-label">Indicadores de pH: ¿Ácido o Base?</span>
+      <div class="step-track" style="flex:1;max-width:500px;" aria-label="Progreso del experimento">
+        <div class="step-item active">
+          <div class="step-dot">1</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-item">
+          <div class="step-dot">2</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-item">
+          <div class="step-dot">3</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-item">
+          <div class="step-dot">4</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:28px;font-family:var(--mono);font-size:0.6rem;color:rgba(255,255,255,0.25);">
+        <span style="color:rgba(255,255,255,0.7);">Teoría</span><span>Lab</span><span>Quiz</span><span>Result.</span>
+      </div>
+    </div>
+
+    <div class="page-pad">
+
+      <span class="section-tag" style="color:var(--science);">Marco Científico · Paso 1</span>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:start;margin-top:24px;">
+        <div>
+          <h1 style="font-family:var(--display);font-size:1.75rem;font-weight:800;letter-spacing:-0.025em;line-height:1.15;color:#fff;">
+            La teoría que hace<br/>cobrar vida al experimento.
+          </h1>
+          <p style="margin-top:14px;font-size:0.9rem;line-height:1.75;color:rgba(255,255,255,0.55);">
+            Antes de entrar al laboratorio, debes comprender los conceptos clave. Sin memorizar definiciones: entendiendo el porqué.
+          </p>
+        </div>
+        <div>
+          <p style="font-size:0.87rem;line-height:1.75;color:rgba(255,255,255,0.45);">
+            El experimento está alineado a los Objetivos de Aprendizaje de Química de 3° y 4° medio del currículum MINEDUC. Integra conceptos de escala de pH, indicadores y reacciones de neutralización.
+          </p>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;">
+            <span class="chip chip-red">Ácidos y Bases</span>
+            <span class="chip chip-green">Escala de pH</span>
+            <span class="chip" style="background:rgba(232,75,138,0.12);color:#e878b8;border:1px solid rgba(232,75,138,0.25);">Indicadores</span>
+            <span class="chip chip-yellow">Neutralización</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- pH Scale -->
+      <div style="margin:44px 0 28px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-family:var(--mono);font-size:0.65rem;">
+          <span style="color:var(--acid);">◀ ÁCIDO</span>
+          <span style="color:var(--neutral);">NEUTRO</span>
+          <span style="color:var(--base-blue);">BASE ▶</span>
+        </div>
+        <div class="ph-scale-bar"></div>
+        <div style="display:flex;justify-content:space-between;margin-top:8px;font-family:var(--mono);font-size:0.7rem;color:rgba(255,255,255,0.65);">
+          <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span>
+          <span>7</span><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span><span>13</span><span>14</span>
+        </div>
+      </div>
+
+      <!-- pH Examples -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin-bottom:44px;">
+        <div class="ph-example"><div class="ph-dot" style="background:#D64550;">0</div><div><div style="font-weight:600;font-size:0.83rem;">Ácido clorhídrico</div><div style="font-family:var(--mono);font-size:0.65rem;color:rgba(255,255,255,0.4);margin-top:2px;">HCl · pH 0–1</div></div></div>
+        <div class="ph-example"><div class="ph-dot" style="background:#E05020;">2</div><div><div style="font-weight:600;font-size:0.83rem;">Jugo de limón</div><div style="font-family:var(--mono);font-size:0.65rem;color:rgba(255,255,255,0.4);margin-top:2px;">Ácido cítrico · pH 2</div></div></div>
+        <div class="ph-example"><div class="ph-dot" style="background:#E07820;">3</div><div><div style="font-weight:600;font-size:0.83rem;">Vinagre</div><div style="font-family:var(--mono);font-size:0.65rem;color:rgba(255,255,255,0.4);margin-top:2px;">Ácido acético · pH 3</div></div></div>
+        <div class="ph-example"><div class="ph-dot" style="background:#44AA44;">7</div><div><div style="font-weight:600;font-size:0.83rem;">Agua destilada</div><div style="font-family:var(--mono);font-size:0.65rem;color:rgba(255,255,255,0.4);margin-top:2px;">Neutro · pH 7</div></div></div>
+        <div class="ph-example"><div class="ph-dot" style="background:#44AAAA;">9</div><div><div style="font-weight:600;font-size:0.83rem;">Bicarbonato</div><div style="font-family:var(--mono);font-size:0.65rem;color:rgba(255,255,255,0.4);margin-top:2px;">Base débil · pH 8–9</div></div></div>
+        <div class="ph-example"><div class="ph-dot" style="background:#3A6EA5;">13</div><div><div style="font-weight:600;font-size:0.83rem;">Hidróxido de sodio</div><div style="font-family:var(--mono);font-size:0.65rem;color:rgba(255,255,255,0.4);margin-top:2px;">NaOH · pH 13–14</div></div></div>
+      </div>
+
+      <!-- Theory cards -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:40px;">
+        <div class="theory-card" style="color:var(--acid);">
+          <div style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.12em;color:currentColor;opacity:0.7;margin-bottom:8px;">01 · CONCEPTO</div>
+          <svg width="38" height="38" viewBox="0 0 38 38" fill="none" style="margin-bottom:12px;" aria-hidden="true">
+            <path d="M15 5V17L4 34H34L23 17V5" stroke="#D64550" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M13 5H25" stroke="#D64550" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="14" cy="28" r="1.3" fill="#D64550" opacity="0.7"/>
+            <circle cx="19" cy="30" r="1.3" fill="#D64550" opacity="0.7"/>
+            <circle cx="24" cy="27" r="1.3" fill="#D64550" opacity="0.7"/>
+          </svg>
+          <h3 style="font-family:var(--display);font-size:1rem;font-weight:700;margin-bottom:8px;">Ácidos</h3>
+          <p style="font-size:0.82rem;line-height:1.7;color:rgba(255,255,255,0.55);">Las sustancias ácidas tienen pH menor a 7. Ceden protones (H⁺) en solución acuosa. El limón, el vinagre y el HCl son ejemplos con distintos niveles de acidez.</p>
+        </div>
+        <div class="theory-card" style="color:var(--neutral);">
+          <div style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.12em;color:currentColor;opacity:0.7;margin-bottom:8px;">02 · MEDICIÓN</div>
+          <svg width="38" height="38" viewBox="0 0 38 38" fill="none" style="margin-bottom:12px;" aria-hidden="true">
+            <rect x="7" y="3" width="24" height="18" rx="3" stroke="#44AA44" stroke-width="1.5"/>
+            <text x="19" y="16" font-family="IBM Plex Mono" font-size="10" fill="#44AA44" text-anchor="middle" font-weight="500">7.0</text>
+            <path d="M19 21 L19 34" stroke="#44AA44" stroke-width="1.8"/>
+            <circle cx="19" cy="35" r="2.5" stroke="#44AA44" stroke-width="1.5"/>
+          </svg>
+          <h3 style="font-family:var(--display);font-size:1rem;font-weight:700;margin-bottom:8px;">Escala de pH</h3>
+          <p style="font-size:0.82rem;line-height:1.7;color:rgba(255,255,255,0.55);">La escala va de 0 a 14. Valores menores a 7 indican acidez, el 7 es neutro y valores mayores a 7 indican basicidad. Se mide con indicadores o pHímetro digital.</p>
+        </div>
+        <div class="theory-card" style="color:var(--base-blue);">
+          <div style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.12em;color:currentColor;opacity:0.7;margin-bottom:8px;">03 · CONCEPTO</div>
+          <svg width="38" height="38" viewBox="0 0 38 38" fill="none" style="margin-bottom:12px;" aria-hidden="true">
+            <circle cx="19" cy="19" r="6" stroke="#3A6EA5" stroke-width="1.5"/>
+            <circle cx="7" cy="10" r="3.5" stroke="#3A6EA5" stroke-width="1.3"/>
+            <circle cx="31" cy="10" r="3.5" stroke="#3A6EA5" stroke-width="1.3"/>
+            <circle cx="7" cy="28" r="3.5" stroke="#3A6EA5" stroke-width="1.3"/>
+            <circle cx="31" cy="28" r="3.5" stroke="#3A6EA5" stroke-width="1.3"/>
+            <line x1="10" y1="13" x2="14" y2="16" stroke="#3A6EA5" stroke-width="1.1"/>
+            <line x1="28" y1="13" x2="24" y2="16" stroke="#3A6EA5" stroke-width="1.1"/>
+            <line x1="10" y1="25" x2="14" y2="22" stroke="#3A6EA5" stroke-width="1.1"/>
+            <line x1="28" y1="25" x2="24" y2="22" stroke="#3A6EA5" stroke-width="1.1"/>
+            <text x="19" y="22" font-family="IBM Plex Mono" font-size="6.5" fill="#3A6EA5" text-anchor="middle">OH⁻</text>
+          </svg>
+          <h3 style="font-family:var(--display);font-size:1rem;font-weight:700;margin-bottom:8px;">Bases</h3>
+          <p style="font-size:0.82rem;line-height:1.7;color:rgba(255,255,255,0.55);">Las bases tienen pH mayor a 7. Aceptan protones o liberan iones OH⁻ en solución. El bicarbonato, el NaOH y los jabones son ejemplos de sustancias básicas.</p>
+        </div>
+      </div>
+
+      <!-- Indicators -->
+      <div style="margin-bottom:48px;">
+        <span class="section-tag" style="color:rgba(255,255,255,0.35);">Indicadores de pH</span>
+        <p style="margin-top:10px;font-size:0.85rem;color:rgba(255,255,255,0.45);max-width:580px;line-height:1.7;">
+          Los indicadores son sustancias que cambian de color según el pH. En el laboratorio usarás tres indicadores distintos y observarás sus reacciones en tiempo real.
+        </p>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:18px;">
+          <div class="indicator-chip">
+            <div class="indicator-swatch">
+              <span style="background:#D64550;"></span><span style="background:#E07820;"></span>
+              <span style="background:#44AA44;"></span><span style="background:#3A6EA5;"></span>
+            </div>
+            <div>
+              <div style="font-family:var(--mono);font-size:0.75rem;color:rgba(255,255,255,0.8);">Papel tornasol</div>
+              <div style="font-size:0.72rem;color:rgba(255,255,255,0.35);margin-top:2px;">Rojo en ácidos · Azul en bases</div>
+            </div>
+          </div>
+          <div class="indicator-chip">
+            <div class="indicator-swatch">
+              <span style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);"></span>
+              <span style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);"></span>
+              <span style="background:#E84B8A;"></span><span style="background:#E84B8A;"></span>
+            </div>
+            <div>
+              <div style="font-family:var(--mono);font-size:0.75rem;color:rgba(255,255,255,0.8);">Fenolftaleína</div>
+              <div style="font-size:0.72rem;color:rgba(255,255,255,0.35);margin-top:2px;">Incoloro en ácidos · Rosa en bases</div>
+            </div>
+          </div>
+          <div class="indicator-chip">
+            <div class="indicator-swatch">
+              <span style="background:#D64550;"></span><span style="background:#E0A800;"></span>
+              <span style="background:#44AA44;"></span><span style="background:#5A4EA5;"></span>
+            </div>
+            <div>
+              <div style="font-family:var(--mono);font-size:0.75rem;color:rgba(255,255,255,0.8);">Indicador universal</div>
+              <div style="font-size:0.72rem;color:rgba(255,255,255,0.35);margin-top:2px;">Espectro completo 0–14</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA to lab -->
+      <div style="background:rgba(46,139,87,0.06);border:1px solid rgba(46,139,87,0.2);border-radius:4px;padding:28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;">
+        <div>
+          <div style="font-family:var(--mono);font-size:0.65rem;letter-spacing:0.1em;color:var(--science);margin-bottom:8px;">SIGUIENTE PASO</div>
+          <h3 style="font-family:var(--display);font-size:1.1rem;font-weight:700;color:#fff;">¿Listo para entrar al laboratorio?</h3>
+          <p style="font-size:0.85rem;color:rgba(255,255,255,0.45);margin-top:5px;">Aplicarás los indicadores sobre HCl, vinagre, agua destilada, bicarbonato y NaOH.</p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <a href="/alumno/quimica" class="btn btn-ghost btn-sm">← Volver</a>
+          <a href="/experimento/acido-base" class="btn btn-primary">
+            Ir al laboratorio
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7H12M8 3L12 7L8 11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+</body>
+</html>

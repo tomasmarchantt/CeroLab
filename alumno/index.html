@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Dashboard — CeroLab</title>
+  <link rel="stylesheet" href="/shared/styles.css" />
+  <style>
+    .exp-card {
+      background: rgba(255,255,255,0.02); border: 1px solid rgba(46,139,87,0.15);
+      border-radius: 4px; padding: 22px; display: flex; flex-direction: column; gap: 12px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .exp-card:hover { border-color: rgba(46,139,87,0.35); background: rgba(46,139,87,0.04); }
+    .exp-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+    .exp-card-title { font-family: var(--display); font-size: 0.95rem; font-weight: 700; color: #fff; }
+    .exp-card-meta { font-family: var(--mono); font-size: 0.68rem; color: rgba(255,255,255,0.35); display: flex; gap: 12px; flex-wrap: wrap; }
+    .exp-card-meta span::before { content: '·'; margin-right: 6px; opacity: 0.4; }
+    .exp-card-meta span:first-child::before { display: none; }
+    .history-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 12px 16px; border-radius: 3px; background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .history-row-left { display: flex; align-items: center; gap: 12px; }
+    .history-icon { width: 32px; height: 32px; border-radius: 50%; background: rgba(46,139,87,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" aria-label="Navegación alumno">
+    <a href="/" class="sidebar-logo">
+      <img src="/brand_assets/CeroLab PNG.png" alt="CeroLab" />
+      <span class="sidebar-logo-text">CeroLab</span>
+    </a>
+
+    <span class="sidebar-section-label">Alumno</span>
+    <a href="/alumno" class="sidebar-link active" aria-current="page">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+      Mi dashboard
+    </a>
+    <a href="/alumno/quimica" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M7 3V8L3 13H13L9 8V3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 3H10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Química
+      <span class="sidebar-badge">1</span>
+    </a>
+
+    <span class="sidebar-section-label">Historial</span>
+    <a href="#historial" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M8 5v3.5l2.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Actividad reciente
+    </a>
+
+    <div class="sidebar-user">
+      <div class="sidebar-avatar">VG</div>
+      <div>
+        <div class="sidebar-user-name">Valentina G.</div>
+        <div class="sidebar-user-role">Alumno · 3° Medio A</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="app-main">
+    <div class="topbar">
+      <nav class="topbar-breadcrumb" aria-label="Ubicación">
+        <a href="/alumno">Inicio</a>
+      </nav>
+      <div class="topbar-right">
+        <span class="chip chip-green">Curso activo: QUI-3M-24A</span>
+      </div>
+    </div>
+
+    <div class="page-pad">
+
+      <!-- Welcome -->
+      <div style="margin-bottom:32px;">
+        <h1 style="font-family:var(--display);font-size:1.5rem;font-weight:800;letter-spacing:-0.02em;color:#fff;">
+          Bienvenida, Valentina 👋
+        </h1>
+        <p style="margin-top:6px;font-size:0.87rem;color:rgba(255,255,255,0.45);">
+          Tienes 1 experimento asignado pendiente.
+        </p>
+      </div>
+
+      <!-- Stats row -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:32px;">
+
+        <div class="card card-dark" style="display:flex;flex-direction:column;gap:10px;border-left:3px solid var(--science);">
+          <div class="stat-label">Experimentos</div>
+          <div class="stat-value">0</div>
+          <span class="badge-delta bd-risk">
+            <svg aria-hidden="true" viewBox="0 0 10 10"><path d="M8.5 5 L1.5 1.5 L1.5 8.5Z"/></svg>
+            1 pendiente
+          </span>
+          <div class="gauge-wrap"><div class="gauge-bar"><div class="gauge-fill" style="width:0%;"></div></div></div>
+          <div style="font-family:var(--mono);font-size:0.62rem;color:rgba(255,255,255,0.25);">1 asignado</div>
+        </div>
+
+        <div class="card card-dark" style="display:flex;flex-direction:column;gap:10px;border-left:3px solid var(--warning);">
+          <div class="stat-label">Puntaje promedio</div>
+          <div class="stat-value">—</div>
+          <span class="badge-delta bd-flat">
+            <svg aria-hidden="true" viewBox="0 0 10 10"><path d="M8.5 5 L1.5 1.5 L1.5 8.5Z"/></svg>
+            Sin datos aún
+          </span>
+          <div class="gauge-wrap"><div class="gauge-bar"><div class="gauge-fill warn" style="width:0%;"></div></div></div>
+          <div style="font-family:var(--mono);font-size:0.62rem;color:rgba(255,255,255,0.25);">0 / 5 quizzes</div>
+        </div>
+
+        <div class="card card-dark" style="display:flex;flex-direction:column;gap:10px;border-left:3px solid var(--base-blue);">
+          <div class="stat-label">Quizzes completados</div>
+          <div class="stat-value">0</div>
+          <span class="badge-delta bd-flat">
+            <svg aria-hidden="true" viewBox="0 0 10 10"><path d="M8.5 5 L1.5 1.5 L1.5 8.5Z"/></svg>
+            0.6 progreso semanal
+          </span>
+          <div class="gauge-wrap"><div class="gauge-bar"><div class="gauge-fill" style="width:0%;background:var(--base-blue)"></div></div></div>
+          <div style="font-family:var(--mono);font-size:0.62rem;color:rgba(255,255,255,0.25);">De 1 asignado</div>
+        </div>
+
+        <div class="card card-dark" style="display:flex;flex-direction:column;gap:10px;border-left:3px solid var(--phenol);">
+          <div class="stat-label">Mi curso</div>
+          <div class="stat-value" style="font-size:1rem;">3° M-A</div>
+          <span class="badge-delta bd-up">
+            <svg aria-hidden="true" viewBox="0 0 10 10"><path d="M5 1.5 L9 8.5 L1 8.5Z"/></svg>
+            +28 compañeros
+          </span>
+          <div style="font-family:var(--mono);font-size:0.62rem;color:var(--science);">QUI-3M-24A</div>
+          <div style="font-family:var(--mono);font-size:0.62rem;color:rgba(255,255,255,0.25);">Prof. Martínez</div>
+        </div>
+
+      </div>
+
+      <!-- Assigned experiments -->
+      <div style="margin-bottom:32px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <h2 style="font-family:var(--display);font-size:1rem;font-weight:700;color:#fff;">Experimentos asignados</h2>
+          <a href="/alumno/quimica" style="font-family:var(--mono);font-size:0.68rem;color:var(--science);text-decoration:none;letter-spacing:0.06em;">Ver todos →</a>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;">
+          <!-- Assigned experiment card -->
+          <div class="exp-card" style="border-color:rgba(46,139,87,0.3);">
+            <div class="exp-card-header">
+              <div>
+                <div style="font-family:var(--mono);font-size:0.62rem;letter-spacing:0.1em;color:var(--science);margin-bottom:5px;">QUÍMICA · EXPERIMENTO Nº1</div>
+                <div class="exp-card-title">Indicadores de pH: ¿Ácido o Base?</div>
+              </div>
+              <span class="chip chip-yellow">Pendiente</span>
+            </div>
+            <div class="exp-card-meta">
+              <span>3° Medio</span>
+              <span>~30 min</span>
+              <span>Vence: 20 jun 2024</span>
+            </div>
+            <div class="gauge-wrap">
+              <div class="gauge-label">Progreso</div>
+              <div class="gauge-bar"><div class="gauge-fill" style="width:0%;"></div></div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <span class="chip chip-gray">Marco teórico</span>
+              <span class="chip chip-gray">Laboratorio</span>
+              <span class="chip chip-gray">Quiz</span>
+            </div>
+            <a href="/alumno/quimica" class="btn btn-primary btn-sm" style="align-self:flex-start;margin-top:4px;">
+              Comenzar experimento
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2 6H10M7 3L10 6L7 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </div>
+
+          <!-- Locked future experiment -->
+          <div class="exp-card" style="opacity:0.45;cursor:not-allowed;">
+            <div class="exp-card-header">
+              <div>
+                <div style="font-family:var(--mono);font-size:0.62rem;letter-spacing:0.1em;color:rgba(255,255,255,0.3);margin-bottom:5px;">QUÍMICA · EXPERIMENTO Nº2</div>
+                <div class="exp-card-title" style="color:rgba(255,255,255,0.5);">Reacciones de Neutralización</div>
+              </div>
+              <span class="chip chip-gray">Bloqueado</span>
+            </div>
+            <div class="exp-card-meta">
+              <span>3° Medio</span>
+              <span>~45 min</span>
+            </div>
+            <div style="font-size:0.78rem;color:rgba(255,255,255,0.3);">Completa el experimento anterior para desbloquear.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent history -->
+      <div id="historial">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <h2 style="font-family:var(--display);font-size:1rem;font-weight:700;color:#fff;">Historial de actividad</h2>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="padding:20px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:3px;text-align:center;">
+            <div style="font-family:var(--mono);font-size:0.72rem;color:rgba(255,255,255,0.25);letter-spacing:0.08em;">SIN ACTIVIDAD AÚN</div>
+            <p style="margin-top:8px;font-size:0.83rem;color:rgba(255,255,255,0.35);">Cuando completes tu primer experimento, tu historial aparecerá aquí.</p>
+            <a href="/alumno/quimica" class="btn btn-secondary btn-sm" style="margin-top:14px;display:inline-flex;">Ir al laboratorio</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+</body>
+</html>

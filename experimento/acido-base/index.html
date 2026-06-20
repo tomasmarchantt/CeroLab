@@ -1,0 +1,4224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Laboratorio Ácido-Base — CeroLab</title>
+  <link rel="stylesheet" href="/shared/styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body { overflow: hidden; height: 100vh; }
+
+    .lab-shell {
+      display: grid;
+      grid-template-rows: 52px 1fr 62px;
+      height: 100vh;
+      background: #040d08;
+    }
+
+    /* ── TOPBAR ── */
+    .lab-topbar {
+      background: rgba(4,10,6,0.99);
+      border-bottom: 1px solid rgba(46,139,87,0.18);
+      display: flex; align-items: center; padding: 0 18px; gap: 14px; z-index: 20;
+    }
+    .lab-topbar-logo {
+      display: flex; align-items: center; gap: 10px; text-decoration: none;
+    }
+    .lab-topbar-logo img {
+      height: 26px;
+      filter: drop-shadow(0 0 7px rgba(52,211,153,0.28));
+    }
+    .lab-topbar-wordmark {
+      display: flex; flex-direction: column; gap: 2px;
+      position: relative;
+    }
+    .lab-topbar-wordmark::after {
+      content: '';
+      position: absolute;
+      bottom: -3px; left: 0;
+      width: 60%; height: 1px;
+      background: linear-gradient(90deg, rgba(52,211,153,0.45), transparent);
+    }
+    .lab-topbar-brand {
+      font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+      font-size: 1rem; font-weight: 700; letter-spacing: -0.02em;
+      color: #edfff4;
+      text-shadow: 0 0 18px rgba(52,211,153,0.42), 0 0 5px rgba(52,211,153,0.18);
+      line-height: 1;
+    }
+    .lab-topbar-title {
+      font-family: var(--mono); font-size: 0.59rem; letter-spacing: 0.05em;
+      color: rgba(52,211,153,0.62); line-height: 1;
+    }
+    .lab-topbar-sep {
+      width: 1px; height: 22px;
+      background: linear-gradient(180deg, transparent, rgba(52,211,153,0.22) 35%, rgba(52,211,153,0.22) 65%, transparent);
+    }
+    .lab-topbar-steps { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+    .lab-step-pill {
+      font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.08em;
+      padding: 3px 10px; border-radius: 10px; text-decoration: none;
+      background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.28);
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: color 0.15s, background 0.15s, border-color 0.15s;
+    }
+    .lab-step-pill.active { background: rgba(46,139,87,0.2); color: var(--science); border-color: rgba(46,139,87,0.4); }
+    .lab-step-pill.done   { background: rgba(27,94,63,0.15); color: rgba(46,139,87,0.6); border-color: rgba(27,94,63,0.25); }
+
+    /* ── BODY 3-COLUMN GRID ── */
+    .lab-body {
+      display: grid;
+      grid-template-columns: 192px 1fr 252px;
+      overflow: hidden;
+    }
+
+    /* ══════════════════════════════════════════
+       LEFT RACK — Reagent shelf
+    ══════════════════════════════════════════ */
+    .lab-rack {
+      background: #040c07;
+      border-right: 1px solid rgba(27,94,63,0.22);
+      display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden;
+    }
+    .rack-sec-label {
+      font-family: var(--mono); font-size: 0.53rem; letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(46,139,87,0.38); padding: 12px 14px 6px;
+    }
+    .rack-item {
+      display: flex; align-items: center; gap: 9px;
+      padding: 6px 12px 6px 9px; cursor: pointer;
+      border-left: 2px solid transparent;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .rack-item:hover { background: rgba(255,255,255,0.024); }
+    .rack-item.selected { background: rgba(46,139,87,0.07); border-left-color: var(--science); }
+    .rack-item:focus-visible { outline: 2px solid var(--science); outline-offset: -2px; }
+    .rack-item-info { flex: 1; min-width: 0; }
+    .rack-item-name { font-family: var(--mono); font-size: 0.71rem; color: rgba(255,255,255,0.7); }
+    .rack-item.selected .rack-item-name { color: #fff; }
+    .rack-item-sub  { font-family: var(--mono); font-size: 0.58rem; color: rgba(255,255,255,0.28); margin-top: 1px; }
+    .rack-divider   { height: 1px; background: rgba(255,255,255,0.06); margin: 6px 0; }
+
+    .rack-footer {
+      margin-top: auto; padding: 10px 12px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .rack-footer-label { font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(46,139,87,0.35); margin-bottom: 4px; }
+    #active-indicator-display { font-family: var(--mono); font-size: 0.7rem; color: rgba(255,255,255,0.3); }
+
+    /* ══════════════════════════════════════════
+       CENTER BENCH — Main lab scene
+    ══════════════════════════════════════════ */
+    .lab-bench {
+      position: relative; overflow: hidden;
+      display: flex; flex-direction: column;
+      background-image: url('/brand_assets/Laboratorio.png');
+      background-size: cover;
+      background-position: center 30%;
+    }
+
+    /* Wall area — transparent, sits over lab photo */
+    .bench-wall {
+      flex: 0 0 auto;
+      max-height: 165px;
+      position: relative;
+      background: transparent;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 0 20px;
+    }
+    .bench-wall::before { display: none; }
+
+    /* Flask row — bench surface — grows to fill remaining height */
+    .flask-row {
+      flex: 1 1 auto;
+      background: linear-gradient(180deg, #0c2218 0%, #071812 80%, #06150f 100%);
+      border-top: 2px solid rgba(27,94,63,0.45);
+      box-shadow: inset 0 12px 32px rgba(0,0,0,0.6);
+      display: flex; align-items: flex-end; justify-content: center;
+      gap: 10px; padding: 24px 20px 0;
+      min-width: 0; overflow-x: auto;
+      position: relative;
+    }
+
+    /* Individual flask slot */
+    .flask-slot {
+      display: flex; flex-direction: column; align-items: center; gap: 5px;
+      cursor: pointer; position: relative; flex-shrink: 0;
+      transition: transform 0.22s cubic-bezier(.34,1.56,.64,1);
+    }
+    .flask-slot:hover  { transform: translateY(-7px); }
+    .flask-slot:focus-visible { outline: 2px solid var(--science); outline-offset: 4px; border-radius: 2px; }
+    .flask-slot.active { transform: translateY(-7px); }
+    /* flask-halo kept hidden — glow behind flask removed */
+    .flask-halo {
+      position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+      width: 84px; height: 50px;
+      background: radial-gradient(ellipse, var(--halo-col, rgba(46,139,87,0.3)) 0%, transparent 70%);
+      opacity: 0; transition: opacity 0.4s; pointer-events: none; z-index: 0;
+    }
+    .flask-slot > svg { position: relative; z-index: 1; display: block; }
+    .flask-lbl {
+      font-family: var(--mono); font-size: 0.6rem; color: rgba(255,255,255,0.38);
+      letter-spacing: 0.04em; text-align: center; position: relative; z-index: 1;
+      transition: color 0.4s;
+    }
+
+    /* Flask drop shadow */
+    .flask-slot::after {
+      content: '';
+      display: block;
+      width: 75%; height: 10px;
+      background: radial-gradient(ellipse, rgba(0,0,0,0.55) 0%, transparent 70%);
+      border-radius: 50%;
+      position: absolute;
+      bottom: 25px; left: 50%; transform: translateX(-50%);
+      pointer-events: none; z-index: 0;
+    }
+
+    /* Bench surface depth lines */
+    .flask-row::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background:
+        linear-gradient(180deg,
+          rgba(0,0,0,0.28) 0%,
+          rgba(0,0,0,0.12) 55%,
+          rgba(0,0,0,0) 100%
+        );
+      pointer-events: none; z-index: 0;
+    }
+
+    /* Bench floor accent */
+    .bench-floor {
+      flex-shrink: 0; height: 18px;
+      background: linear-gradient(180deg, rgba(46,139,87,0.18) 0%, rgba(46,139,87,0.05) 100%);
+      border-top: 1.5px solid rgba(46,139,87,0.32);
+    }
+
+    /* Instruction box */
+    .lab-instruction {
+      background: rgba(3,12,7,0.95); border: 1px solid rgba(46,139,87,0.2);
+      border-radius: 3px; padding: 10px 16px;
+      display: flex; align-items: flex-start; gap: 12px;
+      width: min(600px,100%); backdrop-filter: blur(8px);
+      position: relative; z-index: 2; flex-shrink: 0;
+    }
+    .lab-instruction-num {
+      font-family: var(--mono); font-size: 0.65rem; color: var(--science);
+      background: rgba(46,139,87,0.12); border: 1px solid rgba(46,139,87,0.26);
+      border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0; margin-top: 2px;
+    }
+    .lab-instruction-text { font-size: 0.82rem; color: rgba(255,255,255,0.72); line-height: 1.5; }
+    .lab-instruction-text strong { color: #fff; }
+
+    /* CSS transitions on SVG liquid fills (critical for color-change reaction) */
+    [id^="liq-"], [id^="wave-"] { transition: fill 0.9s ease; }
+
+    /* Bubbles */
+    @keyframes bubble-rise {
+      0%   { transform: translateY(0);    opacity: 0.6; }
+      80%  { opacity: 0.35; }
+      100% { transform: translateY(-44px); opacity: 0; }
+    }
+    .bubble  { animation: bubble-rise 2.6s ease-in infinite; }
+    .b1 { animation-delay: 0s; }
+    .b2 { animation-delay: 0.9s; }
+    .b3 { animation-delay: 1.6s; }
+    .b4 { animation-delay: 0.4s; }
+
+
+    /* Dropper animation */
+    #dropper-anim {
+      position: absolute; pointer-events: none; z-index: 60;
+      opacity: 0; transition: opacity 0.12s;
+    }
+    @keyframes dropper-dip {
+      0%   { transform: translateY(0) scale(1);   opacity: 1; }
+      35%  { transform: translateY(28px) scale(1); opacity: 1; }
+      65%  { transform: translateY(28px) scale(1); opacity: 0.7; }
+      100% { transform: translateY(62px) scale(0.4); opacity: 0; }
+    }
+    #dropper-anim.animating { animation: dropper-dip 0.82s ease-in-out forwards; }
+
+    /* ══════════════════════════════════════════
+       RIGHT PANEL
+    ══════════════════════════════════════════ */
+    .lab-panel {
+      background: #040b06;
+      border-left: 1px solid rgba(27,94,63,0.2);
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+
+    /* Digital pH meter */
+    .ph-instrument {
+      padding: 14px 14px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      flex-shrink: 0;
+    }
+    .ph-instrument-head {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
+    }
+    .ph-instrument-label { font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(46,139,87,0.45); }
+    .ph-led { display: none; }
+    .ph-screen {
+      background: #010804; border: 1px solid rgba(46,139,87,0.18);
+      border-radius: 4px; padding: 14px 12px 11px; text-align: center;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);
+    }
+    .ph-screen-sub   { font-family: var(--mono); font-size: 0.53rem; letter-spacing: 0.16em; color: rgba(46,139,87,0.4); margin-bottom: 5px; }
+    .ph-screen-value { font-family: var(--mono); font-size: 2.6rem; font-weight: 500; line-height: 1; transition: color 0.6s; color: rgba(255,255,255,0.22); }
+    .ph-screen-state { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.08em; margin-top: 5px; transition: color 0.6s; color: rgba(255,255,255,0.18); }
+    .ph-bar      { height: 5px; background: rgba(255,255,255,0.06); border-radius: 2px; margin-top: 11px; overflow: hidden; }
+    .ph-bar-fill { height: 100%; border-radius: 2px; transition: width 0.6s ease, background 0.6s ease; width: 0%; }
+    .ph-ticks    { display: flex; justify-content: space-between; margin-top: 4px; font-family: var(--mono); font-size: 0.5rem; color: rgba(255,255,255,0.18); }
+    .ph-btns     { display: flex; gap: 5px; margin-top: 10px; }
+    .ph-btn      { flex: 1; height: 7px; background: rgba(27,94,63,0.1); border-radius: 1px; border: 1px solid rgba(27,94,63,0.18); }
+
+    /* Panel tabs */
+    .panel-tabs  { display: flex; border-bottom: 1px solid rgba(255,255,255,0.05); flex-shrink: 0; }
+    .panel-tab   {
+      flex: 1; font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 8px 4px; cursor: pointer; color: rgba(255,255,255,0.28);
+      background: none; border: none; border-bottom: 1.5px solid transparent; margin-bottom: -1px;
+      transition: color 0.15s;
+    }
+    .panel-tab.active { color: var(--science); border-bottom-color: var(--science); }
+
+    .panel-body  { flex: 1; overflow-y: auto; padding: 11px; display: flex; flex-direction: column; gap: 8px; }
+
+    /* Reading widget */
+    .reading-widget {
+      background: rgba(5,16,10,0.7); border: 1px solid rgba(46,139,87,0.14);
+      border-radius: 2px; padding: 8px 10px; display: flex; align-items: center; gap: 9px;
+    }
+    .reading-value { font-family: var(--mono); font-size: 1.25rem; font-weight: 500; transition: color 0.6s; color: rgba(255,255,255,0.22); }
+    .reading-info  { flex: 1; }
+    .reading-state { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.06em; transition: color 0.6s; color: rgba(255,255,255,0.2); }
+
+    /* ── Terminal log rows ─────────────────────────────────────── */
+    #log-container { gap: 0 !important; }
+    .log-entry {
+      display: flex; align-items: baseline; gap: 0;
+      padding: 4px 10px;
+      border-left: 2px solid transparent;
+      border-radius: 0; background: transparent;
+      transition: background 0.12s ease;
+    }
+    .log-entry:hover { background: rgba(255,255,255,0.022); }
+
+    /* Status dot */
+    .log-dot {
+      width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0;
+      margin-right: 8px; margin-top: 5px;
+      background: rgba(52,211,153,0.45);
+    }
+    /* Elapsed timestamp */
+    .log-ts {
+      font-family: var(--mono); font-size: 0.56rem; color: rgba(255,255,255,0.20);
+      margin-right: 9px; flex-shrink: 0; min-width: 30px; letter-spacing: 0.03em;
+    }
+    /* Category label */
+    .log-label {
+      font-family: var(--mono); font-size: 0.52rem; font-weight: 700;
+      letter-spacing: 0.10em; text-transform: uppercase;
+      margin-right: 9px; flex-shrink: 0; min-width: 62px;
+    }
+    /* Message text */
+    .log-text {
+      font-family: var(--mono); font-size: 0.70rem;
+      color: rgba(255,255,255,0.55); line-height: 1.45;
+    }
+
+    /* Type variants */
+    .log-entry--init  { border-left-color: rgba(255,255,255,0.08); }
+    .log-entry--init  .log-dot   { background: rgba(255,255,255,0.22); }
+    .log-entry--init  .log-label { color: rgba(255,255,255,0.28); }
+
+    .log-entry--data  { border-left-color: rgba(46,139,87,0.35); }
+    .log-entry--data  .log-dot   { background: rgba(52,211,153,0.62); }
+    .log-entry--data  .log-label { color: rgba(52,211,153,0.68); }
+
+    .log-entry--scan  { border-left-color: rgba(100,200,255,0.28); }
+    .log-entry--scan  .log-dot   { background: rgba(100,200,255,0.60); }
+    .log-entry--scan  .log-label { color: rgba(100,200,255,0.68); }
+
+    .log-entry--reaction { border-left-color: rgba(52,211,153,0.42); }
+    .log-entry--reaction .log-dot   { background: rgba(52,211,153,0.72); }
+    .log-entry--reaction .log-label { color: rgba(52,211,153,0.78); }
+
+    .log-entry--ok    { border-left-color: rgba(120,255,180,0.45); }
+    .log-entry--ok    .log-dot   { background: rgba(120,255,180,0.78); }
+    .log-entry--ok    .log-label { color: rgba(120,255,180,0.88); }
+
+    .log-color-swatch { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 4px; vertical-align: middle; position: relative; top: -1px; }
+
+    /* Indicator buttons in tab */
+    .indicator-btn {
+      width: 100%; display: flex; align-items: center; gap: 9px; padding: 8px 9px; margin-bottom: 5px;
+      background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 2px;
+      cursor: pointer; color: #fff; text-align: left;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .indicator-btn:hover    { background: rgba(46,139,87,0.07); border-color: rgba(46,139,87,0.25); }
+    .indicator-btn.selected { background: rgba(46,139,87,0.1);  border-color: rgba(46,139,87,0.42); }
+    .indicator-btn:focus-visible { outline: 2px solid var(--science); outline-offset: 2px; }
+    .indicator-swatches { display: flex; gap: 2px; }
+    .indicator-swatches span { display: block; width: 7px; height: 15px; border-radius: 1px; }
+    .indicator-btn-name { font-family: var(--mono); font-size: 0.68rem; flex: 1; }
+
+    /* Panel footer */
+    .panel-footer { padding: 11px; border-top: 1px solid rgba(255,255,255,0.05); flex-shrink: 0; }
+    /* ── Neon Button — "Aplicar indicador" ──────────────────── */
+    @keyframes neon-scan-line {
+      0%   { left: -70%; }
+      100% { left: 140%; }
+    }
+    .btn-neon-apply {
+      position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center; width: 100%;
+      padding: 0 20px; height: 40px;
+      font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.12em;
+      text-transform: uppercase; font-weight: 600;
+      color: rgba(52,211,153,0.78);
+      background: rgba(4,18,10,0.95);
+      border: 1px solid rgba(52,211,153,0.32);
+      border-radius: 3px; cursor: pointer;
+      transition: color 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+    }
+    .btn-neon-apply::before {
+      content: ''; position: absolute; top: 0; left: -70%;
+      width: 50%; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(52,211,153,0.9), rgba(120,255,200,0.5), transparent);
+      opacity: 0; pointer-events: none;
+    }
+    .btn-neon-apply::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(180deg, rgba(52,211,153,0.05) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .btn-neon-apply:hover:not(:disabled) {
+      color: rgba(120,255,195,0.95);
+      border-color: rgba(52,211,153,0.65);
+      box-shadow: 0 0 10px rgba(52,211,153,0.20), 0 0 24px rgba(52,211,153,0.10), inset 0 0 14px rgba(52,211,153,0.06);
+    }
+    .btn-neon-apply:hover:not(:disabled)::before {
+      opacity: 1; animation: neon-scan-line 1.6s linear infinite;
+    }
+    .btn-neon-apply:active:not(:disabled) { transform: scale(0.98); }
+    .btn-neon-apply:focus-visible { outline: 2px solid rgba(52,211,153,0.6); outline-offset: 2px; }
+    .btn-neon-apply:disabled { opacity: 0.25; cursor: not-allowed; color: rgba(52,211,153,0.35); border-color: rgba(52,211,153,0.14); }
+
+    /* ── Flow Button — "Ir al Quiz" ──────────────────────────── */
+    .lab-flow-btn {
+      position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%;
+      padding: 10px 16px;
+      font-family: var(--mono); font-size: 0.70rem; font-weight: 600;
+      letter-spacing: 0.10em; text-transform: uppercase; text-decoration: none;
+      color: rgba(52,211,153,0.85);
+      background: rgba(4,20,12,0.92);
+      border: 1px solid rgba(52,211,153,0.32);
+      border-radius: 3px; cursor: pointer;
+      transition: color 0.22s ease, border-color 0.22s ease;
+    }
+    .lab-flow-btn::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(90deg, rgba(52,211,153,0.13) 0%, rgba(52,211,153,0.04) 55%, transparent 100%);
+      transform: translateX(-105%);
+      transition: transform 0.38s cubic-bezier(0.23, 1, 0.32, 1);
+      pointer-events: none;
+    }
+    .lab-flow-btn:hover::before { transform: translateX(0); }
+    .lab-flow-btn:hover { color: rgba(180,255,220,0.95); border-color: rgba(52,211,153,0.60); }
+    .lab-flow-btn:active { transform: scale(0.98); }
+    .lab-flow-btn:focus-visible { outline: 2px solid rgba(52,211,153,0.55); outline-offset: 2px; }
+    .flow-arrows { position: relative; width: 14px; height: 14px; flex-shrink: 0; }
+    .arrow-out, .arrow-in {
+      position: absolute; top: 0; left: 0;
+      transition: transform 0.26s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.20s ease;
+    }
+    .arrow-in { transform: translateX(-14px); opacity: 0; }
+    .lab-flow-btn:hover .arrow-out { transform: translateX(14px); opacity: 0; }
+    .lab-flow-btn:hover .arrow-in  { transform: translateX(0); opacity: 1; }
+
+    /* ── Lab footer — horizontal progress stepper ── */
+    .lab-footer {
+      display: flex; align-items: center;
+      padding: 0 20px;
+      background: rgba(2,7,4,0.98);
+      border-top: 1px solid rgba(46,139,87,0.18);
+      z-index: 10; overflow: hidden;
+    }
+    #lab-stepper-wrap {
+      display: flex; align-items: center; gap: 16px; width: 100%; min-width: 0;
+    }
+    #lab-stepper-nav {
+      display: flex; align-items: center; flex-shrink: 0;
+    }
+    .lab-step-item {
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      cursor: default; user-select: none; pointer-events: none;
+    }
+    .lab-step-dot {
+      width: 18px; height: 18px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--mono); font-size: 8px; font-weight: 700; line-height: 1;
+      transition: background 0.35s, border-color 0.35s, box-shadow 0.35s, color 0.35s;
+      flex-shrink: 0; border: 1.5px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.2);
+    }
+    .lab-step-item.done .lab-step-dot {
+      background: rgba(52,211,153,0.15); border-color: rgba(52,211,153,0.65);
+      color: rgba(52,211,153,0.9);
+    }
+    .lab-step-item.active .lab-step-dot {
+      background: rgba(52,211,153,0.12); border-color: rgba(52,211,153,0.9);
+      color: #34d399;
+      box-shadow: 0 0 12px rgba(52,211,153,0.32), 0 0 4px rgba(52,211,153,0.16);
+      animation: stepPulse 2s ease-in-out infinite;
+    }
+    @keyframes stepPulse {
+      0%,100% { box-shadow: 0 0 12px rgba(52,211,153,0.32), 0 0 4px rgba(52,211,153,0.16); }
+      50%      { box-shadow: 0 0 18px rgba(52,211,153,0.52), 0 0 8px rgba(52,211,153,0.28); }
+    }
+    .lab-step-label {
+      font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.02em; white-space: nowrap;
+      transition: color 0.35s; color: rgba(255,255,255,0.18);
+    }
+    .lab-step-item.done  .lab-step-label { color: rgba(52,211,153,0.6); }
+    .lab-step-item.active .lab-step-label { color: rgba(52,211,153,0.88); }
+    .lab-step-sep {
+      height: 1px; width: 18px; flex-shrink: 0; margin: 0 2px;
+      margin-bottom: 14px; border-radius: 1px;
+      transition: background 0.35s;
+      background: rgba(255,255,255,0.09);
+    }
+    .lab-step-sep.done { background: rgba(52,211,153,0.5); }
+    .lab-step-check { display: none; }
+    .lab-step-item.done .lab-step-check { display: block; }
+    .lab-step-item.done .lab-step-num { display: none; }
+    #lab-stepper-divider {
+      width: 1px; height: 26px; flex-shrink: 0;
+      background: linear-gradient(180deg, transparent, rgba(46,139,87,0.22) 40%, rgba(46,139,87,0.22) 60%, transparent);
+    }
+    #lab-stepper-instruction {
+      font-size: 0.71rem; color: rgba(255,255,255,0.46);
+      font-family: var(--mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      flex: 1; min-width: 0; line-height: 1;
+      transition: color 0.4s;
+    }
+    #lab-stepper-instruction.ready { color: rgba(52,211,153,0.78); }
+
+    /* ════════════════════════════════════════════════════════
+       GLASSMORPHISM — Frosted scientific instrument panels
+       Port of FrostedGlassCard to vanilla CSS/JS.
+       Applied ONLY to: pH poster, safety board, pH meter, bitácora, rack selection.
+    ════════════════════════════════════════════════════════ */
+
+    /* Base interaction class — sets tilt context and glare layer */
+    .lab-glass-panel {
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+      will-change: transform;
+    }
+
+    /* Mouse-position radial glare (the core "glass" effect) */
+    .lab-glass-panel::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        170px circle at var(--mouse-x, 50%) var(--mouse-y, -25%),
+        rgba(155, 230, 180, 0.07) 0%,
+        transparent 70%
+      );
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.35s ease;
+      border-radius: inherit;
+      z-index: 0;
+    }
+    .lab-glass-panel:hover::before { opacity: 1; }
+
+    /* Top-edge glass highlight (always present, simulates surface catch-light) */
+    .lab-glass-panel::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 8%; right: 8%; height: 1px;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(155, 230, 180, 0.09) 25%,
+        rgba(210, 255, 225, 0.16) 50%,
+        rgba(155, 230, 180, 0.09) 75%,
+        transparent 100%
+      );
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    /* ── Frosted poster panel (pH scale + safety board on wall) ── */
+    .bench-poster-glass {
+      width: min(630px, 96%);
+      flex-shrink: 0;
+      margin-top: 0;
+      margin-bottom: 0;
+      background: rgba(7, 18, 11, 0.74);
+      backdrop-filter: blur(16px) saturate(1.28);
+      -webkit-backdrop-filter: blur(16px) saturate(1.28);
+      border: 1px solid rgba(46, 139, 87, 0.32);
+      border-radius: 2px;
+      box-shadow:
+        inset 0 0 0 1px rgba(0, 0, 0, 0.28),
+        inset 0 1px 0 rgba(180, 255, 210, 0.045),
+        0 14px 48px rgba(0, 0, 0, 0.52),
+        0 0 0 3px rgba(46, 139, 87, 0.03);
+    }
+    /* Screw rivets on poster corners (acrylic safety-sign aesthetic) */
+    .bench-poster-glass .poster-screw {
+      position: absolute;
+      width: 6px; height: 6px; border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, rgba(180,210,185,0.35), rgba(30,50,35,0.8));
+      border: 1px solid rgba(46,139,87,0.22);
+      z-index: 4;
+    }
+    .bench-poster-glass .poster-screw.tl { top: 5px; left: 5px; }
+    .bench-poster-glass .poster-screw.tr { top: 5px; right: 5px; }
+    .bench-poster-glass .poster-screw.bl { bottom: 5px; left: 5px; }
+    .bench-poster-glass .poster-screw.br { bottom: 5px; right: 5px; }
+
+    /* ── pH meter instrument glass ── */
+    .ph-instrument.lab-glass-panel {
+      background: linear-gradient(
+        152deg,
+        rgba(4, 13, 8, 0.97) 0%,
+        rgba(3, 9, 5, 0.99) 55%,
+        rgba(5, 15, 9, 0.97) 100%
+      );
+      box-shadow:
+        inset 0 1px 0 rgba(180, 255, 210, 0.04),
+        inset 0 0 0 1px rgba(46, 139, 87, 0.09),
+        0 10px 32px rgba(0, 0, 0, 0.45);
+    }
+    /* Screen glass reflection on pH display */
+    .ph-screen {
+      position: relative;
+      overflow: hidden;
+    }
+    .ph-screen::before {
+      content: '';
+      position: absolute;
+      top: -40%; left: -15%;
+      width: 50%; height: 180%;
+      background: linear-gradient(
+        108deg,
+        transparent 38%,
+        rgba(180, 255, 220, 0.018) 50%,
+        transparent 62%
+      );
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ── Bitácora reading widget glass ── */
+    .reading-widget.lab-glass-panel {
+      background: rgba(4, 13, 8, 0.82);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(46, 139, 87, 0.2);
+      box-shadow:
+        inset 0 1px 0 rgba(180, 255, 210, 0.04),
+        inset 0 0 0 1px rgba(0, 0, 0, 0.18),
+        0 6px 20px rgba(0, 0, 0, 0.38);
+    }
+
+    /* ── Selected rack item glass highlight ── */
+    .rack-item.selected {
+      background: rgba(7, 22, 13, 0.72) !important;
+      border-left-color: var(--science) !important;
+      box-shadow:
+        inset 0 1px 0 rgba(155, 230, 180, 0.04),
+        inset 0 0 0 1px rgba(46, 139, 87, 0.07),
+        0 2px 12px rgba(0, 0, 0, 0.3);
+    }
+    /* Extra glow on indicator selection (more dramatic) */
+    .rack-indicator.selected {
+      border-left-color: var(--science) !important;
+      box-shadow:
+        inset 0 1px 0 rgba(155, 230, 180, 0.05),
+        inset 0 0 0 1px rgba(46, 139, 87, 0.1),
+        0 0 12px rgba(46, 139, 87, 0.08),
+        0 2px 14px rgba(0, 0, 0, 0.3);
+    }
+
+    @media (max-width: 900px) {
+      .lab-body { grid-template-columns: 1fr; }
+      .lab-rack, .lab-panel { display: none; }
+      body { overflow: auto; }
+      .lab-shell { height: auto; }
+    }
+
+    /* ══════════════════════════════════════════
+       PNG BEAKER SYSTEM — drag & drop lab
+    ══════════════════════════════════════════ */
+    .beaker-row {
+      flex: 1 1 auto;
+      background: transparent;
+      border-top: none;
+      display: flex; align-items: center; justify-content: space-evenly;
+      gap: 0; padding: 0 8px;
+      margin-top: -40px;
+      min-width: 0; overflow-x: hidden; position: relative;
+    }
+    .beaker-row::before { display: none; }
+    .beaker-slot {
+      position: relative; display: flex; flex-direction: column; align-items: center;
+      cursor: default; flex-shrink: 0; z-index: 1;
+      outline: none;
+      height: 208px; overflow: visible;
+    }
+    .beaker-slot:focus-visible { outline: none; }
+    .beaker-wrap {
+      position: relative; width: 156px; height: 208px;
+      /* Tight contour shadow — follows glass silhouette, minimal vertical offset */
+      filter: drop-shadow(0 5px 14px rgba(0,0,0,0.54)) drop-shadow(0 1px 3px rgba(0,0,0,0.42));
+    }
+    /* Layer 2 — ambient spread: originates at the actual glass base (SVG y≈1230 → screen y≈160px) */
+    .beaker-wrap::before {
+      content: ''; position: absolute;
+      top: 160px; left: 50%; transform: translateX(-50%);
+      width: 132px; height: 26px;
+      background: radial-gradient(ellipse 50% 50% at 50% 30%, rgba(0,0,0,0.38) 0%, rgba(0,0,0,0.14) 55%, transparent 100%);
+      border-radius: 50%; pointer-events: none;
+      filter: blur(9px);
+    }
+    /* Layer 1 — contact shadow: thin dark strip touching the glass base ring */
+    .beaker-wrap::after {
+      content: ''; position: absolute;
+      top: 157px; left: 50%; transform: translateX(-50%);
+      width: 98px; height: 11px;
+      background: radial-gradient(ellipse 50% 50% at 50% 40%, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.42) 40%, transparent 76%);
+      border-radius: 50%; pointer-events: none;
+      filter: blur(2.5px);
+    }
+    /* Drop target highlight — glowing outline */
+    .beaker-slot.drag-over {
+      transform: scale(1.05);
+      transition: transform 0.15s ease;
+    }
+    .beaker-slot.drag-over .beaker-wrap {
+      filter:
+        drop-shadow(0 5px 14px rgba(0,0,0,0.54))
+        drop-shadow(0 0 22px rgba(52,211,153,0.75))
+        drop-shadow(0 0 42px rgba(52,211,153,0.45));
+    }
+    /* pH meter inside beaker indicator */
+    .beaker-slot.has-meter .beaker-wrap {
+      filter:
+        drop-shadow(0 5px 14px rgba(0,0,0,0.54))
+        drop-shadow(0 0 14px rgba(120,220,255,0.45))
+        drop-shadow(0 0 28px rgba(80,180,255,0.25));
+    }
+    .beaker-liquid {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none; z-index: 1; overflow: visible;
+    }
+    .beaker-glass {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none; z-index: 3;
+      object-fit: contain;
+    }
+    .beaker-png {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none; z-index: 2;
+      user-select: none; overflow: visible;
+    }
+    .beaker-lbl {
+      font-family: var(--display); font-size: 0.75rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.88); letter-spacing: 0.01em;
+      text-align: center; z-index: 3;
+      position: absolute; top: 216px; left: 50%; transform: translateX(-50%);
+      width: 148px; white-space: normal; word-break: break-word;
+      line-height: 1.25;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.9), 0 2px 12px rgba(0,0,0,0.7);
+      transition: color 0.4s;
+    }
+    /* Beakers always full opacity — no selection dimming */
+    .beaker-row.has-selection .beaker-slot:not(.active) { opacity: 1; }
+
+    /* ── Analyze pH button ── */
+    .btn-analyze {
+      position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center; width: 100%;
+      height: 36px; margin-top: 9px;
+      font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.11em;
+      text-transform: uppercase; font-weight: 600; cursor: pointer;
+      color: rgba(100,200,255,0.65);
+      background: rgba(3,12,18,0.92);
+      border: 1px solid rgba(100,180,255,0.22);
+      border-radius: 3px;
+      transition: color 0.2s, border-color 0.2s, box-shadow 0.2s;
+    }
+    .btn-analyze:hover:not(:disabled) {
+      color: rgba(160,225,255,0.92);
+      border-color: rgba(100,180,255,0.5);
+      box-shadow: 0 0 12px rgba(80,160,255,0.18), inset 0 0 10px rgba(80,160,255,0.05);
+    }
+    .btn-analyze:disabled { opacity: 0.22; cursor: not-allowed; }
+    .btn-analyze:focus-visible { outline: 2px solid rgba(100,180,255,0.5); outline-offset: 2px; }
+
+    /* Indicator inventory in right-panel tab — draggable cards */
+    .ind-drag-card {
+      width: 100%; display: flex; align-items: center; gap: 9px;
+      padding: 8px 9px; margin-bottom: 5px;
+      background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 2px; cursor: grab; color: #fff; text-align: left;
+      transition: background 0.15s, border-color 0.15s, transform 0.15s;
+    }
+    .ind-drag-card:hover { background: rgba(46,139,87,0.08); border-color: rgba(46,139,87,0.3); transform: translateY(-1px); }
+    .ind-drag-card:active { cursor: grabbing; }
+    .ind-drag-card.selected { background: rgba(46,139,87,0.1); border-color: rgba(46,139,87,0.42); }
+    .ind-drag-card:focus-visible { outline: 2px solid var(--science); outline-offset: 2px; }
+
+    /* Indicator strip/dropper visual */
+    .ind-strip { width: 10px; height: 28px; border-radius: 2px; flex-shrink: 0; }
+    .ind-dropper { width: 10px; height: 28px; flex-shrink: 0; position: relative; }
+    .ind-card-name { font-family: var(--mono); font-size: 0.67rem; flex: 1; }
+    .ind-card-desc { font-family: var(--mono); font-size: 0.56rem; color: rgba(255,255,255,0.28); margin-top: 2px; }
+
+    /* Dim non-selected flasks when one is active */
+    .flask-row.has-selection .flask-slot {
+      transition: opacity 0.45s ease, transform 0.22s cubic-bezier(.34,1.56,.64,1);
+    }
+    .flask-row.has-selection .flask-slot:not(.active) { opacity: 0.44; }
+    .flask-row.has-selection .flask-slot:not(.active):hover { opacity: 0.82; }
+
+    /* Rack indicator: breathing inner glow when selected */
+    .rack-indicator.selected { position: relative; }
+    .rack-indicator.selected::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        ellipse 85% 60% at 50% 50%,
+        rgba(46, 139, 87, 0.16) 0%,
+        transparent 100%
+      );
+      pointer-events: none;
+      z-index: 0;
+      animation: lab-indicator-breathe 2.8s ease-in-out infinite;
+    }
+    @keyframes lab-indicator-breathe {
+      0%, 100% { opacity: 0.5; }
+      50%       { opacity: 1; }
+    }
+
+    /* ── Glowing 3D Card Effect ─────────────────────────────────────── */
+    /* Adapted from 21st.dev glowing-card: moving scan dot that travels  */
+    /* the panel border, diagonal light ray, L-bracket corner accents.   */
+
+    /* Provided animation (verbatim from task, pixel-adjusted for lab panels) */
+    @keyframes moveDot {
+      0%,  100% { top: 10px;               right: 10px; }
+      25%        { top: 10px;               right: calc(100% - 18px); }
+      50%        { top: calc(100% - 18px);  right: calc(100% - 18px); }
+      75%        { top: calc(100% - 18px);  right: 10px; }
+    }
+    @keyframes scanRay {
+      0%, 100% { opacity: 0.75; transform: translateX(0px); }
+      50%       { opacity: 0.30; transform: translateX(28px); }
+    }
+
+    /* .glow-scan-dot removed — floating ball orbs look sci-fi, not lab */
+    .glow-scan-dot { display: none; }
+
+    /* Diagonal sweep ray — like a scanner beam across the instrument face */
+    .glow-card-ray {
+      position: absolute; inset: 0;
+      background: linear-gradient(
+        118deg,
+        transparent 28%,
+        rgba(46, 139, 87, 0.055) 45%,
+        rgba(60, 200, 120, 0.034) 53%,
+        transparent 68%
+      );
+      animation: scanRay var(--ray-dur, 10s) ease-in-out infinite;
+      animation-delay: var(--ray-delay, 0s);
+      pointer-events: none; z-index: 1;
+    }
+
+    /* Corner accent lines — technical L-bracket marks at all 4 corners */
+    .glow-card-line {
+      position: absolute;
+      background: rgba(55, 210, 130, 0.50);
+      pointer-events: none; z-index: 3; border-radius: 1px;
+    }
+    .gcl-tl-h { top: 0;    left: 0;  width: 16px; height: 1px; }
+    .gcl-tl-v { top: 0;    left: 0;  width: 1px;  height: 16px; }
+    .gcl-tr-h { top: 0;    right: 0; width: 16px; height: 1px; }
+    .gcl-tr-v { top: 0;    right: 0; width: 1px;  height: 16px; }
+    .gcl-bl-h { bottom: 0; left: 0;  width: 16px; height: 1px; }
+    .gcl-bl-v { bottom: 0; left: 0;  width: 1px;  height: 16px; }
+    .gcl-br-h { bottom: 0; right: 0; width: 16px; height: 1px; }
+    .gcl-br-v { bottom: 0; right: 0; width: 1px;  height: 16px; }
+
+
+    /* ── Animated Card Options — ENHANCED ───────────────────────────── */
+
+    /* Staggered entrance keyframe (page-load one-shot) */
+    @keyframes rackCardEntrance {
+      0%   { opacity: 0; transform: scale(0.82) translateY(8px); }
+      65%  { opacity: 1; transform: scale(1.022) translateY(-1px); }
+      100% { opacity: 1; transform: scale(1)     translateY(0); }
+    }
+
+    /* Continuous border-glow pulse on selected card */
+    @keyframes selectedCardPulse {
+      0%, 100% {
+        box-shadow:
+          0 0 0 1.5px rgba(46, 200, 100, 0.80),
+          0 0 8px    rgba(46, 139, 87, 0.65),
+          0 0 22px   rgba(46, 139, 87, 0.38),
+          0 0 42px   rgba(46, 139, 87, 0.16),
+          inset 0 0 16px rgba(46, 139, 87, 0.10);
+      }
+      50% {
+        box-shadow:
+          0 0 0 2.5px rgba(80, 240, 130, 1.0),
+          0 0 14px   rgba(46, 200, 100, 0.90),
+          0 0 34px   rgba(46, 139, 87, 0.55),
+          0 0 60px   rgba(46, 139, 87, 0.28),
+          inset 0 0 24px rgba(46, 200, 100, 0.16);
+      }
+    }
+
+    /* Position context for ::before badge + extend transitions */
+    .rack-item {
+      position: relative;
+      transition:
+        background   0.15s ease,
+        border-color 0.15s ease,
+        border       0.15s ease,
+        box-shadow   0.15s ease,
+        transform    0.20s cubic-bezier(0.34, 1.56, 0.64, 1),
+        opacity      0.22s ease;
+    }
+    .indicator-btn {
+      position: relative;
+      transition:
+        background   0.15s ease,
+        border-color 0.15s ease,
+        box-shadow   0.15s ease,
+        transform    0.20s cubic-bezier(0.34, 1.56, 0.64, 1),
+        opacity      0.22s ease;
+    }
+
+    /* One-time entrance class, removed after animation ends */
+    .rack-item.card-enter,
+    .indicator-btn.card-enter {
+      animation: rackCardEntrance 0.42s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+      animation-delay: var(--card-delay, 0ms);
+    }
+
+    /* ── No ACTIVO badge — glow border only ── */
+    .rack-item.selected::before { display: none; }
+
+    /* ── STRONG selected state: border glow, no badge, no translateX ── */
+    .rack-item.selected {
+      background: rgba(8, 38, 20, 0.90) !important;
+      border: 1.5px solid rgba(52, 211, 153, 0.72) !important;
+      border-left-width: 2.5px !important;
+      box-shadow:
+        0 0 0 1.5px rgba(52, 211, 153, 0.22),
+        0 0 14px rgba(52, 211, 153, 0.16),
+        inset 0 0 10px rgba(52, 211, 153, 0.06) !important;
+      transform: translateX(2px) !important;
+      animation: none !important;
+      padding-right: 8px;
+    }
+    .rack-item.selected .rack-item-name {
+      color: #b8ffdb !important;
+      text-shadow: 0 0 10px rgba(52, 211, 153, 0.55);
+    }
+    .rack-item.selected .rack-item-sub {
+      color: rgba(150, 255, 190, 0.55) !important;
+    }
+
+    /* ── Dimming: non-selected fade to 32% — sharp contrast ── */
+    .lab-rack:has(.rack-substance.selected) .rack-substance:not(.selected) {
+      opacity: 0.32 !important;
+    }
+    .lab-rack:has(.rack-substance.selected) .rack-substance:not(.selected):hover {
+      opacity: 0.82 !important;
+    }
+    .lab-rack:has(.rack-indicator.selected) .rack-indicator:not(.selected) {
+      opacity: 0.32 !important;
+    }
+    .lab-rack:has(.rack-indicator.selected) .rack-indicator:not(.selected):hover {
+      opacity: 0.82 !important;
+    }
+
+    /* ── Obvious hover: bigger push + full green border + glow ── */
+    .rack-item:hover:not(.selected) {
+      transform: translateX(6px) scale(1.018) !important;
+      background: rgba(46, 139, 87, 0.14) !important;
+      border: 1px solid rgba(46, 139, 87, 0.55) !important;
+      box-shadow:
+        0 0 0 1px rgba(46, 139, 87, 0.38),
+        0 0 14px rgba(46, 139, 87, 0.28) !important;
+    }
+
+    /* ── indicator-btn in panel tab: same strong treatment ── */
+    .indicator-btn:hover:not(.selected) {
+      transform: translateY(-3px) scale(1.015) !important;
+      background: rgba(46, 139, 87, 0.14) !important;
+      border-color: rgba(46, 139, 87, 0.55) !important;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.35), 0 0 0 1.5px rgba(46,139,87,0.40), 0 0 14px rgba(46,139,87,0.28) !important;
+    }
+    .indicator-btn.selected {
+      background: rgba(8, 38, 20, 0.97) !important;
+      border: 1.5px solid rgba(46, 200, 100, 0.78) !important;
+      transform: translateY(-2px) !important;
+      animation: selectedCardPulse 2.6s ease-in-out infinite !important;
+    }
+
+    /* ── Scanner Beam & Analysis Overlay ────────────────────────────────── */
+    /* Extracted from scanner-card-stream.tsx (21st.dev).                    */
+    /* Vertical scan beam sweeps the active flask on indicator apply.        */
+    /* ASCII noise flickers in the pH panel. Canvas particles from flask.    */
+    /* Three.js and card carousel omitted — pure CSS/canvas adaptation.      */
+
+    @keyframes scanGlitch {
+      0%, 16%, 50%, 100% { opacity: 1.0; }
+      15%, 99%            { opacity: 0.82; }
+      49%                 { opacity: 0.65; }
+    }
+
+    /* ASCII data noise — injected into .ph-screen, stays inside the black display */
+    #scan-ascii-panel {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0;
+      transition: opacity 0.22s ease;
+      overflow: hidden;
+      border-radius: inherit;
+    }
+    #scan-ascii-panel.active { opacity: 1; }
+    /* Keep pH number and classification text above the ASCII layer */
+    .ph-screen-sub,
+    .ph-screen-value,
+    .ph-screen-state { position: relative; z-index: 1; }
+
+    #scan-ascii-content {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      font-family: var(--mono);
+      font-size: 0.40rem;
+      line-height: 1.22;
+      color: rgba(52, 211, 153, 0.22);
+      overflow: hidden;
+      white-space: pre;
+      letter-spacing: 0.03em;
+      animation: scanGlitch 0.14s linear infinite alternate-reverse;
+      -webkit-mask-image: linear-gradient(to bottom,
+        rgba(0,0,0,0.7) 0%,
+        rgba(0,0,0,0.5) 55%,
+        rgba(0,0,0,0.10) 100%);
+      mask-image: linear-gradient(to bottom,
+        rgba(0,0,0,0.7) 0%,
+        rgba(0,0,0,0.5) 55%,
+        rgba(0,0,0,0.10) 100%);
+    }
+
+    /* ── pH meter inside beaker ── */
+    .beaker-meter-img {
+      position: absolute;
+      width: 110px;
+      top: -65px;    /* probe tip ends at ~94px inside beaker; display hangs above rim */
+      left: 18px;    /* probe positioned left of center */
+      transform: rotate(-20deg);
+      transform-origin: bottom center;
+      z-index: 2;    /* behind the front beaker glass (z:3), above liquid (z:1) */
+      pointer-events: auto;
+      filter: drop-shadow(-3px 6px 16px rgba(0,0,0,0.75)) drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    }
+    /* pH meter label on beaker */
+    .meter-reading-label {
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%; transform: translateX(-50%);
+      font-family: var(--mono);
+      font-size: 0.56rem; font-weight: 700;
+      color: rgba(140,230,255,0.95);
+      background: rgba(3,8,12,0.88);
+      border: 1px solid rgba(100,200,255,0.4);
+      border-radius: 10px; padding: 2px 8px;
+      white-space: nowrap; pointer-events: none; z-index: 20;
+      text-shadow: 0 0 8px rgba(100,200,255,0.6);
+    }
+    /* pH meter inventory item disabled state */
+    .rack-item.ph-meter-in-use {
+      opacity: 0.38;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    .rack-item.ph-meter-in-use .rack-bottle-thumb img {
+      filter: saturate(0) brightness(0.7);
+    }
+    .ph-meter-status {
+      font-family: var(--mono); font-size: 0.52rem;
+      color: rgba(100,200,255,0.6); letter-spacing: 0.08em;
+      margin-top: 1px;
+    }
+
+    /* Reaction particle canvas — absolute-fills the bench */
+    #scan-react-canvas {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 15;
+      opacity: 0;
+      transition: opacity 0.28s ease;
+    }
+    #scan-react-canvas.active { opacity: 1; }
+
+    /* ══════════════════════════════════════════
+       BOTTLE THUMBNAILS — left rack redesign
+    ══════════════════════════════════════════ */
+    .rack-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 5px 10px 5px 8px;
+    }
+    .rack-bottle-thumb {
+      flex-shrink: 0;
+      width: 34px; height: 50px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .rack-bottle-thumb img {
+      max-width: 100%; max-height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+      filter: drop-shadow(0 2px 5px rgba(0,0,0,0.6));
+    }
+    .rack-ind-thumb {
+      flex-shrink: 0;
+      width: 40px; height: 34px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .rack-ind-thumb img {
+      max-width: 100%; max-height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    }
+    /* Rack items are NOT draggable via HTML5 now — grab cursor only for feel */
+    .rack-item { cursor: grab; }
+    .rack-item.dragging-active { cursor: grabbing; opacity: 0.45; }
+
+    /* ══════════════════════════════════════════
+       PHYSICS DRAG PREVIEW
+    ══════════════════════════════════════════ */
+    .drag-preview {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      width: 72px; height: 108px;
+      transform-origin: 50% 85%;
+      filter: drop-shadow(0 16px 28px rgba(0,0,0,0.7));
+      transition: none;
+      will-change: transform, left, top;
+    }
+    .drag-preview img {
+      width: 100%; height: 100%;
+      object-fit: contain;
+    }
+    .drag-preview.strip-preview {
+      width: 28px; height: 90px;
+    }
+    /* Universal strip drag preview — vertical, yellow, visible */
+    .drag-preview.strip-universal-preview {
+      width: 20px !important; height: 130px !important;
+      overflow: visible;
+      background: linear-gradient(180deg, #FFE34A 0%, #FFD21F 44%, #E8AF00 78%, #C58B00 100%);
+      border-radius: 5px;
+      border: 1px solid rgba(180,140,0,0.40);
+      box-shadow: 1px 2px 8px rgba(0,0,0,0.38), inset 0 0 0 1px rgba(255,255,200,0.25);
+    }
+    .drag-preview.strip-universal-preview img { display: none; }
+    /* Tornasol strip drag preview — vertical, same size as Universal */
+    .drag-preview.strip-tornasol-preview {
+      width: 20px !important; height: 130px !important;
+      overflow: visible;
+      border-radius: 5px;
+      box-shadow: 1px 2px 8px rgba(0,0,0,0.38), inset 0 0 0 1px rgba(255,255,255,0.18);
+    }
+    .drag-preview.strip-tornasol-preview img { display: none; }
+    .drag-preview.strip-tornasol-preview.tornasol-red {
+      background: linear-gradient(180deg, #FF8A8A 0%, #F04A4A 44%, #C62828 78%, #8E1515 100%);
+      border: 1px solid rgba(142,21,21,0.45);
+    }
+    .drag-preview.strip-tornasol-preview.tornasol-blue {
+      background: linear-gradient(180deg, #5EC8FF 0%, #2F9BFF 44%, #1F6FE5 78%, #1746A2 100%);
+      border: 1px solid rgba(23,70,162,0.45);
+    }
+    .drag-preview.strip-tornasol-preview.tornasol-purple {
+      background: linear-gradient(180deg, #C490E8 0%, #9B4EC5 44%, #6E2B8F 78%, #4A1D60 100%);
+      border: 1px solid rgba(74,29,96,0.45);
+    }
+    .drag-preview.pipette-preview {
+      width: 60px; height: 120px;
+    }
+
+    /* ══════════════════════════════════════════
+       POUR STREAM ANIMATION
+    ══════════════════════════════════════════ */
+    @keyframes pourStreamAnim {
+      0%   { height: 0; opacity: 0; transform: scaleX(1); }
+      15%  { opacity: 0.85; }
+      70%  { opacity: 0.7; transform: scaleX(0.85); }
+      100% { opacity: 0; transform: scaleX(0.4); }
+    }
+    .pour-stream {
+      position: fixed;
+      width: 8px;
+      border-radius: 4px;
+      z-index: 9997;
+      pointer-events: none;
+      transform-origin: top center;
+      animation: pourStreamAnim 0.75s ease-in forwards;
+    }
+
+    /* ══════════════════════════════════════════
+       PAPER STRIP (Tornasol / Universal)
+    ══════════════════════════════════════════ */
+    .paper-strip-drag {
+      display: flex; flex-direction: column;
+      gap: 2px; padding: 2px;
+    }
+    .paper-strip-drag .strip-band {
+      width: 24px; height: 20px;
+      border-radius: 2px;
+    }
+    @keyframes stripDip {
+      0%   { transform: translateY(0); }
+      40%  { transform: translateY(55px); }
+      65%  { transform: translateY(52px); }
+      85%  { transform: translateY(0); }
+      100% { transform: translateY(0); }
+    }
+    .paper-strip-dipping { animation: stripDip 1.6s cubic-bezier(0.25,0.1,0.25,1) forwards; }
+
+    /* Result badge shown beside the beaker after strip test */
+    .strip-result-badge {
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--mono);
+      font-size: 0.58rem;
+      padding: 3px 8px;
+      border-radius: 10px;
+      border: 1px solid currentColor;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 50;
+      backdrop-filter: blur(4px);
+      animation: badgeIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    @keyframes badgeIn {
+      from { opacity: 0; transform: translateX(-50%) translateY(6px) scale(0.9); }
+      to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+    }
+    @keyframes badgeFade { to { opacity: 0; transform: translateX(-50%) translateY(-4px); } }
+
+    /* ══════════════════════════════════════════
+       DROPLET ANIMATION (Fenolftaleína)
+    ══════════════════════════════════════════ */
+    @keyframes dropletFall {
+      0%   { transform: translateY(0) scale(1); opacity: 0.9; }
+      80%  { transform: translateY(var(--drop-h, 60px)) scale(0.7); opacity: 0.6; }
+      100% { transform: translateY(var(--drop-h, 60px)) scale(0.3); opacity: 0; }
+    }
+    .droplet {
+      position: fixed;
+      width: 9px; height: 13px;
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      background: rgba(220,240,255,0.22) !important;
+      border: 1px solid rgba(255,255,255,0.35);
+      box-shadow: inset 0 -2px 4px rgba(200,230,255,0.3), 0 1px 3px rgba(255,255,255,0.2);
+      z-index: 9996;
+      pointer-events: none;
+      animation: dropletFall 0.55s ease-in forwards;
+    }
+
+  </style>
+</head>
+<body>
+<div class="lab-shell">
+
+  <!-- TOP BAR -->
+  <header class="lab-topbar">
+    <a href="/" class="lab-topbar-logo">
+      <img src="/brand_assets/CeroLab PNG.png" alt="CeroLab" />
+      <div class="lab-topbar-wordmark">
+        <span class="lab-topbar-brand">CeroLab</span>
+        <span class="lab-topbar-title">Indicadores de pH: ¿Ácido o Base?</span>
+      </div>
+    </a>
+    <div class="lab-topbar-steps">
+      <a href="/experimento/acido-base/concepto" class="lab-step-pill done">1 Teoría</a>
+      <span class="lab-step-pill active">2 Laboratorio</span>
+      <span class="lab-step-pill" id="pill-quiz">3 Quiz</span>
+      <span class="lab-step-pill">4 Resultados</span>
+    </div>
+    <div class="lab-topbar-sep"></div>
+    <a href="/alumno/quimica" class="btn btn-ghost btn-sm" style="font-size:0.75rem;padding:5px 12px;">Salir</a>
+  </header>
+
+  <!-- MAIN 3-COLUMN LAB BODY -->
+  <div class="lab-body">
+
+    <!-- ═══════════════════════════════
+         LEFT RACK — Substances + Indicators
+    ═══════════════════════════════ -->
+    <aside class="lab-rack" aria-label="Reactivos e indicadores">
+
+      <span class="rack-sec-label">Sustancias</span>
+
+      <div class="rack-item rack-substance" tabindex="0" role="button"
+           aria-label="HCl Ácido clorhídrico pH 1" data-ph="1.0" data-name="HCl"
+           data-key="hcl" data-state="Ácido fuerte" onmousedown="initDragFromEl(event,this,'substance','hcl')" onclick="rackItemClick(this,'substance','hcl')">
+        <div class="rack-bottle-thumb"><img src="/brand_assets/hcl_amber_reagent_bottle.svg" alt="HCl"/></div>
+        <div class="rack-item-info">
+          <div class="rack-item-name">HCl</div>
+          <div class="rack-item-sub">pH 1.0 · Ácido fuerte</div>
+        </div>
+      </div>
+
+      <div class="rack-item rack-substance" tabindex="0" role="button"
+           aria-label="Jugo de limón pH 2.4" data-ph="2.4" data-name="Limón"
+           data-key="limon" data-state="Ácido débil" onmousedown="initDragFromEl(event,this,'substance','limon')" onclick="rackItemClick(this,'substance','limon')">
+        <div class="rack-bottle-thumb"><img src="/brand_assets/limon_amber_reagent_bottle.svg" alt="Limón"/></div>
+        <div class="rack-item-info">
+          <div class="rack-item-name">Limón</div>
+          <div class="rack-item-sub">pH 2.4 · Ácido débil</div>
+        </div>
+      </div>
+
+      <div class="rack-item rack-substance" tabindex="0" role="button"
+           aria-label="Vinagre pH 2.9" data-ph="2.9" data-name="Vinagre"
+           data-key="vinagre" data-state="Ácido débil" onmousedown="initDragFromEl(event,this,'substance','vinagre')" onclick="rackItemClick(this,'substance','vinagre')">
+        <div class="rack-bottle-thumb"><img src="/brand_assets/vinagre_amber_reagent_bottle.svg" alt="Vinagre"/></div>
+        <div class="rack-item-info">
+          <div class="rack-item-name">Vinagre</div>
+          <div class="rack-item-sub">pH 2.9 · Ácido débil</div>
+        </div>
+      </div>
+
+      <div class="rack-item rack-substance" tabindex="0" role="button"
+           aria-label="Agua destilada pH 7" data-ph="7.0" data-name="H₂O destilada"
+           data-key="agua" data-state="Neutro" onmousedown="initDragFromEl(event,this,'substance','agua')" onclick="rackItemClick(this,'substance','agua')">
+        <div class="rack-bottle-thumb"><img src="/brand_assets/h2o_destilada_amber_reagent_bottle.svg" alt="H₂O destilada"/></div>
+        <div class="rack-item-info">
+          <div class="rack-item-name">H₂O dest.</div>
+          <div class="rack-item-sub">pH 7.0 · Neutro</div>
+        </div>
+      </div>
+
+      <div class="rack-item rack-substance" tabindex="0" role="button"
+           aria-label="Bicarbonato pH 8.3" data-ph="8.3" data-name="Bicarbonato"
+           data-key="bicarbonato" data-state="Base débil" onmousedown="initDragFromEl(event,this,'substance','bicarbonato')" onclick="rackItemClick(this,'substance','bicarbonato')">
+        <div class="rack-bottle-thumb"><img src="/brand_assets/bicarbonato_amber_reagent_bottle.svg" alt="Bicarbonato"/></div>
+        <div class="rack-item-info">
+          <div class="rack-item-name">Bicarbonato</div>
+          <div class="rack-item-sub">pH 8.3 · Base débil</div>
+        </div>
+      </div>
+
+      <div class="rack-item rack-substance" tabindex="0" role="button"
+           aria-label="NaOH pH 13" data-ph="13.0" data-name="NaOH"
+           data-key="naoh" data-state="Base fuerte" onmousedown="initDragFromEl(event,this,'substance','naoh')" onclick="rackItemClick(this,'substance','naoh')">
+        <div class="rack-bottle-thumb"><img src="/brand_assets/naoh_amber_reagent_bottle.svg" alt="NaOH"/></div>
+        <div class="rack-item-info">
+          <div class="rack-item-name">NaOH</div>
+          <div class="rack-item-sub">pH 13.0 · Base fuerte</div>
+        </div>
+      </div>
+
+      <div class="rack-divider"></div>
+      <span class="rack-sec-label">Indicadores</span>
+
+      <div class="rack-item rack-indicator" tabindex="0" role="button"
+           aria-label="Papel tornasol" data-indicator="tornasol"
+           onmousedown="initDragFromEl(event,this,'indicator','tornasol')" onclick="rackItemClick(this,'indicator','tornasol')">
+        <div class="rack-ind-thumb"><img src="/brand_assets/Tornasol.svg" alt="Tornasol"/></div>
+        <div class="rack-item-info">
+          <div class="rack-item-name">Tornasol</div>
+          <div class="rack-item-sub">Rojo / Azul</div>
+        </div>
+      </div>
+
+      <div class="rack-item rack-indicator" tabindex="0" role="button"
+           aria-label="Fenolftaleína" data-indicator="fenolftaleina"
+           onmousedown="initDragFromEl(event,this,'indicator','fenolftaleina')" onclick="rackItemClick(this,'indicator','fenolftaleina')">
+        <div class="rack-ind-thumb" style="width:32px;height:44px;"><img src="/brand_assets/fenolftaleina_bottle_pipette.svg" alt="Fenolftaleína"/></div>
+        <div class="rack-item-info">
+          <div class="rack-item-name">Fenolftaleína</div>
+          <div class="rack-item-sub">Incoloro / Rosa</div>
+        </div>
+      </div>
+
+      <div class="rack-item rack-indicator" tabindex="0" role="button"
+           aria-label="Indicador universal" data-indicator="universal"
+           onmousedown="initDragFromEl(event,this,'indicator','universal')" onclick="rackItemClick(this,'indicator','universal')">
+        <div class="rack-ind-thumb"><img src="/brand_assets/Universal.svg" alt="Universal"/></div>
+        <div class="rack-item-info">
+          <div class="rack-item-name">Universal</div>
+          <div class="rack-item-sub">pH 0–14 espectro</div>
+        </div>
+      </div>
+
+      <div class="rack-divider"></div>
+      <span class="rack-sec-label">PH METRO</span>
+
+      <div class="rack-item" id="ph-meter-rack-item" tabindex="0" role="button"
+           aria-label="pH Metro Digital"
+           onmousedown="initDragFromEl(event,this,'phMeter','phMeter')" onclick="rackItemClick(this,'phMeter','phMeter')">
+        <div class="rack-bottle-thumb" style="width:30px;height:52px;">
+          <img id="ph-meter-rack-img" src="/brand_assets/ph_meter_pen_realistic.svg" alt="pH Metro"/>
+        </div>
+        <div class="rack-item-info">
+          <div class="rack-item-name">pH Metro</div>
+          <div class="rack-item-sub ph-meter-status" id="ph-meter-status">Digital · 0–14</div>
+        </div>
+      </div>
+
+      <div class="rack-footer">
+        <div class="rack-footer-label">Seleccionado</div>
+        <div id="active-indicator-display">Ninguno</div>
+      </div>
+
+    </aside>
+
+    <!-- ═══════════════════════════════
+         CENTER BENCH — Lab scene
+    ═══════════════════════════════ -->
+    <section class="lab-bench" aria-label="Mesa de laboratorio">
+
+      <!-- Wall background area -->
+      <div class="bench-wall">
+
+        <!-- Wall poster: frosted glass panel containing pH scale + safety board -->
+        <div class="lab-glass-panel bench-poster-glass" data-max-tilt="3">
+          <div class="poster-screw tl"></div>
+          <div class="poster-screw tr"></div>
+          <div class="poster-screw bl"></div>
+          <div class="poster-screw br"></div>
+        <svg width="100%" viewBox="0 0 660 160" fill="none" preserveAspectRatio="xMidYMid meet"
+             style="display:block;pointer-events:none;" aria-hidden="true">
+          <!-- Poster board frame -->
+          <rect x="0" y="8" width="420" height="148" rx="2" fill="rgba(8,20,12,0.75)" stroke="rgba(27,94,63,0.2)" stroke-width="1"/>
+          <!-- pH poster content -->
+          <text x="210" y="26" font-family="IBM Plex Mono" font-size="8" fill="rgba(46,139,87,0.45)" text-anchor="middle" letter-spacing="3">ESCALA DE pH — ÁCIDOS Y BASES</text>
+          <defs>
+            <linearGradient id="ph-grad-wall" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%"   stop-color="#D64550"/>
+              <stop offset="14%"  stop-color="#E07820"/>
+              <stop offset="28%"  stop-color="#c8c800"/>
+              <stop offset="50%"  stop-color="#44AA44"/>
+              <stop offset="72%"  stop-color="#44AAAA"/>
+              <stop offset="86%"  stop-color="#3A6EA5"/>
+              <stop offset="100%" stop-color="#5A4EA5"/>
+            </linearGradient>
+          </defs>
+          <rect x="14" y="33" width="392" height="14" rx="2" fill="url(#ph-grad-wall)"/>
+          <!-- pH labels 0–14 -->
+          <text x="14"  y="58" font-family="IBM Plex Mono" font-size="7" fill="rgba(255,255,255,0.28)">0</text>
+          <text x="41"  y="58" font-family="IBM Plex Mono" font-size="7" fill="rgba(255,255,255,0.22)">1</text>
+          <text x="69"  y="58" font-family="IBM Plex Mono" font-size="7" fill="rgba(255,255,255,0.22)">2</text>
+          <text x="97"  y="58" font-family="IBM Plex Mono" font-size="7" fill="rgba(255,255,255,0.22)">3</text>
+          <text x="125" y="58" font-family="IBM Plex Mono" font-size="7" fill="rgba(255,255,255,0.22)">4</text>
+          <text x="153" y="58" font-family="IBM Plex Mono" font-size="7" fill="rgba(255,255,255,0.22)">5</text>
+          <text x="181" y="58" font-family="IBM Plex Mono" font-size="7" fill="rgba(255,255,255,0.22)">6</text>
+          <text x="204" y="58" font-family="IBM Plex Mono" font-size="7" fill="rgba(68,170,68,0.7)" font-weight="bold">7</text>
+          <text x="231" y="58" font-family="IBM Plex Mono" font-size="7" fill="rgba(255,255,255,0.22)">8</text>
+          <text x="259" y="58" font-family="IBM Plex Mono" font-size="7" fill="rgba(255,255,255,0.22)">9</text>
+          <text x="284" y="58" font-family="IBM Plex Mono" font-size="7" fill="rgba(255,255,255,0.22)">10</text>
+          <text x="311" y="58" font-family="IBM Plex Mono" font-size="7" fill="rgba(255,255,255,0.22)">11</text>
+          <text x="338" y="58" font-family="IBM Plex Mono" font-size="7" fill="rgba(255,255,255,0.22)">12</text>
+          <text x="365" y="58" font-family="IBM Plex Mono" font-size="7" fill="rgba(255,255,255,0.22)">13</text>
+          <text x="392" y="58" font-family="IBM Plex Mono" font-size="7" fill="rgba(90,78,165,0.6)">14</text>
+          <!-- axis labels -->
+          <text x="14"  y="74" font-family="IBM Plex Mono" font-size="7.5" fill="rgba(214,69,80,0.55)">← ÁCIDO</text>
+          <text x="210" y="74" font-family="IBM Plex Mono" font-size="7.5" fill="rgba(68,170,68,0.55)" text-anchor="middle">NEUTRO</text>
+          <text x="406" y="74" font-family="IBM Plex Mono" font-size="7.5" fill="rgba(90,78,165,0.55)" text-anchor="end">BASE →</text>
+          <!-- Indicator rows -->
+          <text x="14" y="92" font-family="IBM Plex Mono" font-size="7" fill="rgba(255,255,255,0.22)">Tornasol:</text>
+          <rect x="80" y="84" width="140" height="9" rx="1" fill="#D64550" opacity="0.7"/>
+          <rect x="220" y="84" width="14"  height="9" rx="1" fill="#888" opacity="0.5"/>
+          <rect x="234" y="84" width="172" height="9" rx="1" fill="#3A6EA5" opacity="0.7"/>
+          <text x="14"  y="112" font-family="IBM Plex Mono" font-size="7" fill="rgba(255,255,255,0.22)">Fenolft.:</text>
+          <rect x="80"  y="104" width="168" height="9" rx="1" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.12)" stroke-width="0.5"/>
+          <text x="164" y="111" font-family="IBM Plex Mono" font-size="6" fill="rgba(255,255,255,0.3)" text-anchor="middle">incoloro</text>
+          <rect x="248" y="104" width="158" height="9" rx="1" fill="#E84B8A" opacity="0.75"/>
+          <text x="14"  y="132" font-family="IBM Plex Mono" font-size="7" fill="rgba(255,255,255,0.22)">Universal:</text>
+          <defs><linearGradient id="uni-wall" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#D64550"/><stop offset="25%" stop-color="#E0A800"/><stop offset="50%" stop-color="#44AA44"/><stop offset="75%" stop-color="#3A6EA5"/><stop offset="100%" stop-color="#5A4EA5"/></linearGradient></defs>
+          <rect x="80"  y="124" width="326" height="9" rx="1" fill="url(#uni-wall)" opacity="0.7"/>
+
+          <!-- Safety notices block -->
+          <rect x="432" y="8" width="228" height="148" rx="2" fill="rgba(8,20,12,0.75)" stroke="rgba(224,168,0,0.18)" stroke-width="1"/>
+          <text x="546" y="26" font-family="IBM Plex Mono" font-size="8" fill="rgba(224,168,0,0.45)" text-anchor="middle" letter-spacing="2">SEGURIDAD LAB.</text>
+          <text x="444" y="45"  font-family="IBM Plex Mono" font-size="7.5" fill="rgba(255,255,255,0.22)">• Usar guantes de nitrilo</text>
+          <text x="444" y="60"  font-family="IBM Plex Mono" font-size="7.5" fill="rgba(255,255,255,0.22)">• No tocar los ojos</text>
+          <text x="444" y="75"  font-family="IBM Plex Mono" font-size="7.5" fill="rgba(255,255,255,0.22)">• Reportar derrames</text>
+          <text x="444" y="90"  font-family="IBM Plex Mono" font-size="7.5" fill="rgba(255,255,255,0.22)">• pH &lt; 3 o pH &gt; 11 ⚠</text>
+          <text x="444" y="105" font-family="IBM Plex Mono" font-size="7.5" fill="rgba(255,255,255,0.22)">• Sustancias: 6</text>
+          <text x="444" y="120" font-family="IBM Plex Mono" font-size="7.5" fill="rgba(255,255,255,0.22)">• Indicadores: 3</text>
+          <text x="444" y="140" font-family="IBM Plex Mono" font-size="7" fill="rgba(46,139,87,0.35)">OA7 · Química 3° Medio</text>
+        </svg>
+        </div><!-- /bench-poster-glass -->
+      </div><!-- /bench-wall -->
+
+      <!-- Beaker row — bench surface — realistic SVG beakers -->
+      <div class="beaker-row" id="beaker-row" role="group" aria-label="Matraces de laboratorio">
+
+        <!-- Beaker 0 -->
+        <div class="beaker-slot" id="beaker-0" data-idx="0" tabindex="0" role="button" aria-label="Matraz 1">
+          <div class="beaker-wrap">
+            <svg class="beaker-liquid" id="bsvg-0" viewBox="0 0 1200 1600" preserveAspectRatio="xMidYMid meet">
+              <defs><clipPath id="bclip-0"><path d="M266 336C272 453 277 706 283 1024C286 1178 336 1230 600 1230C864 1230 914 1178 917 1024C923 706 928 453 934 336C895 357 317 357 266 336Z"/></clipPath></defs>
+              <rect id="liq-fill-0" x="255" y="1230" width="690" height="0" clip-path="url(#bclip-0)" fill="transparent" style="transition:fill 0.85s ease;"/>
+              <path id="liq-wave-0" d="" clip-path="url(#bclip-0)" fill="transparent" opacity="0.5"/>
+            </svg>
+            <img class="beaker-glass" src="/brand_assets/beaker_reference_realistic.svg" alt="" draggable="false"/>
+          </div>
+          <div class="beaker-lbl" id="blbl-0">Vacío</div>
+        </div>
+
+        <!-- Beaker 1 -->
+        <div class="beaker-slot" id="beaker-1" data-idx="1" tabindex="0" role="button" aria-label="Matraz 2">
+          <div class="beaker-wrap">
+            <svg class="beaker-liquid" id="bsvg-1" viewBox="0 0 1200 1600" preserveAspectRatio="xMidYMid meet">
+              <defs><clipPath id="bclip-1"><path d="M266 336C272 453 277 706 283 1024C286 1178 336 1230 600 1230C864 1230 914 1178 917 1024C923 706 928 453 934 336C895 357 317 357 266 336Z"/></clipPath></defs>
+              <rect id="liq-fill-1" x="255" y="1230" width="690" height="0" clip-path="url(#bclip-1)" fill="transparent" style="transition:fill 0.85s ease;"/>
+              <path id="liq-wave-1" d="" clip-path="url(#bclip-1)" fill="transparent" opacity="0.5"/>
+            </svg>
+            <img class="beaker-glass" src="/brand_assets/beaker_reference_realistic.svg" alt="" draggable="false"/>
+          </div>
+          <div class="beaker-lbl" id="blbl-1">Vacío</div>
+        </div>
+
+        <!-- Beaker 2 -->
+        <div class="beaker-slot" id="beaker-2" data-idx="2" tabindex="0" role="button" aria-label="Matraz 3">
+          <div class="beaker-wrap">
+            <svg class="beaker-liquid" id="bsvg-2" viewBox="0 0 1200 1600" preserveAspectRatio="xMidYMid meet">
+              <defs><clipPath id="bclip-2"><path d="M266 336C272 453 277 706 283 1024C286 1178 336 1230 600 1230C864 1230 914 1178 917 1024C923 706 928 453 934 336C895 357 317 357 266 336Z"/></clipPath></defs>
+              <rect id="liq-fill-2" x="255" y="1230" width="690" height="0" clip-path="url(#bclip-2)" fill="transparent" style="transition:fill 0.85s ease;"/>
+              <path id="liq-wave-2" d="" clip-path="url(#bclip-2)" fill="transparent" opacity="0.5"/>
+            </svg>
+            <img class="beaker-glass" src="/brand_assets/beaker_reference_realistic.svg" alt="" draggable="false"/>
+          </div>
+          <div class="beaker-lbl" id="blbl-2">Vacío</div>
+        </div>
+
+        <!-- Beaker 3 -->
+        <div class="beaker-slot" id="beaker-3" data-idx="3" tabindex="0" role="button" aria-label="Matraz 4">
+          <div class="beaker-wrap">
+            <svg class="beaker-liquid" id="bsvg-3" viewBox="0 0 1200 1600" preserveAspectRatio="xMidYMid meet">
+              <defs><clipPath id="bclip-3"><path d="M266 336C272 453 277 706 283 1024C286 1178 336 1230 600 1230C864 1230 914 1178 917 1024C923 706 928 453 934 336C895 357 317 357 266 336Z"/></clipPath></defs>
+              <rect id="liq-fill-3" x="255" y="1230" width="690" height="0" clip-path="url(#bclip-3)" fill="transparent" style="transition:fill 0.85s ease;"/>
+              <path id="liq-wave-3" d="" clip-path="url(#bclip-3)" fill="transparent" opacity="0.5"/>
+            </svg>
+            <img class="beaker-glass" src="/brand_assets/beaker_reference_realistic.svg" alt="" draggable="false"/>
+          </div>
+          <div class="beaker-lbl" id="blbl-3">Vacío</div>
+        </div>
+
+        <!-- Beaker 4 -->
+        <div class="beaker-slot" id="beaker-4" data-idx="4" tabindex="0" role="button" aria-label="Matraz 5">
+          <div class="beaker-wrap">
+            <svg class="beaker-liquid" id="bsvg-4" viewBox="0 0 1200 1600" preserveAspectRatio="xMidYMid meet">
+              <defs><clipPath id="bclip-4"><path d="M266 336C272 453 277 706 283 1024C286 1178 336 1230 600 1230C864 1230 914 1178 917 1024C923 706 928 453 934 336C895 357 317 357 266 336Z"/></clipPath></defs>
+              <rect id="liq-fill-4" x="255" y="1230" width="690" height="0" clip-path="url(#bclip-4)" fill="transparent" style="transition:fill 0.85s ease;"/>
+              <path id="liq-wave-4" d="" clip-path="url(#bclip-4)" fill="transparent" opacity="0.5"/>
+            </svg>
+            <img class="beaker-glass" src="/brand_assets/beaker_reference_realistic.svg" alt="" draggable="false"/>
+          </div>
+          <div class="beaker-lbl" id="blbl-4">Vacío</div>
+        </div>
+
+        <!-- Beaker 5 -->
+        <div class="beaker-slot" id="beaker-5" data-idx="5" tabindex="0" role="button" aria-label="Matraz 6">
+          <div class="beaker-wrap">
+            <svg class="beaker-liquid" id="bsvg-5" viewBox="0 0 1200 1600" preserveAspectRatio="xMidYMid meet">
+              <defs><clipPath id="bclip-5"><path d="M266 336C272 453 277 706 283 1024C286 1178 336 1230 600 1230C864 1230 914 1178 917 1024C923 706 928 453 934 336C895 357 317 357 266 336Z"/></clipPath></defs>
+              <rect id="liq-fill-5" x="255" y="1230" width="690" height="0" clip-path="url(#bclip-5)" fill="transparent" style="transition:fill 0.85s ease;"/>
+              <path id="liq-wave-5" d="" clip-path="url(#bclip-5)" fill="transparent" opacity="0.5"/>
+            </svg>
+            <img class="beaker-glass" src="/brand_assets/beaker_reference_realistic.svg" alt="" draggable="false"/>
+          </div>
+          <div class="beaker-lbl" id="blbl-5">Vacío</div>
+        </div>
+
+      </div><!-- end beaker-row -->
+
+      <!-- Bench floor -->
+      <div class="bench-floor"></div>
+
+      <!-- Dropper animation element (absolutely positioned in bench) -->
+      <div id="dropper-anim" aria-hidden="true">
+        <svg width="30" height="72" viewBox="0 0 30 72" fill="none">
+          <ellipse cx="15" cy="13" rx="12" ry="12" fill="rgba(100,180,140,0.15)" stroke="rgba(100,180,140,0.5)" stroke-width="1.4"/>
+          <rect x="13" y="24" width="4" height="36" rx="2" fill="rgba(180,235,210,0.14)" stroke="rgba(180,235,210,0.42)" stroke-width="1.2"/>
+          <rect x="13.5" y="25" width="3" height="18" rx="1.5" fill="rgba(100,200,180,0.45)"/>
+          <path d="M13,60 Q15,72 17,60" fill="rgba(180,235,210,0.35)" stroke="rgba(180,235,210,0.42)" stroke-width="0.8"/>
+        </svg>
+      </div>
+
+    </section>
+
+    <!-- ═══════════════════════════════
+         RIGHT PANEL
+    ═══════════════════════════════ -->
+    <aside class="lab-panel" aria-label="pHímetro y bitácora">
+
+      <!-- Digital pH meter -->
+      <div class="ph-instrument lab-glass-panel" data-max-tilt="5">
+        <div class="ph-instrument-head">
+          <span class="ph-instrument-label">pH-Metro Digital</span>
+          <div class="ph-led" id="ph-led"></div>
+        </div>
+        <div class="ph-screen">
+          <div class="ph-screen-sub">pH</div>
+          <div class="ph-screen-value" id="ph-display">—</div>
+          <div class="ph-screen-state" id="ph-state">Sin muestra</div>
+        </div>
+        <div class="ph-bar"><div class="ph-bar-fill" id="panel-ph-fill"></div></div>
+        <div class="ph-ticks"><span>0</span><span>3.5</span><span>7</span><span>10.5</span><span>14</span></div>
+        <div class="ph-btns"><div class="ph-btn"></div><div class="ph-btn"></div><div class="ph-btn"></div></div>
+
+        <button class="btn-analyze" id="btn-analyze" onclick="analyzePH()" disabled>
+          Analizar pH
+        </button>
+
+      </div>
+
+      <!-- Tabs -->
+      <div class="panel-tabs">
+        <button class="panel-tab active" onclick="switchPanelTab('bitacora',this)">Bitácora</button>
+        <button class="panel-tab"        onclick="switchPanelTab('registro',this)">Registro</button>
+      </div>
+
+      <!-- Bitácora tab -->
+      <div id="tab-bitacora" class="panel-body">
+        <!-- Hidden elements kept so JS references don't break -->
+        <span id="panel-ph-value"  style="display:none;"></span>
+        <span id="panel-ph-state"  style="display:none;"></span>
+
+        <div style="font-family:var(--mono);font-size:0.56rem;letter-spacing:0.12em;color:rgba(46,139,87,0.45);text-transform:uppercase;display:flex;align-items:center;gap:6px;">
+          <span style="width:5px;height:5px;border-radius:50%;background:var(--science);box-shadow:0 0 5px var(--science);display:inline-block;"></span>
+          Bitácora de observaciones
+        </div>
+
+        <div id="log-container" style="display:flex;flex-direction:column;gap:6px;border-top:1px solid rgba(255,255,255,0.04);padding-top:6px;">
+          <div class="log-entry log-entry--init">
+            <span class="log-dot"></span>
+            <span class="log-ts" id="start-time">00:00</span>
+            <span class="log-label">INICIO</span>
+            <span class="log-text" style="color:rgba(255,255,255,0.32);">Laboratorio iniciado. Arrastra sustancias e indicadores a los matraces.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Registro tab (hidden by default) -->
+      <div id="tab-registro" class="panel-body" style="display:none;">
+        <div style="font-family:var(--mono);font-size:0.58rem;letter-spacing:0.1em;color:rgba(255,255,255,0.28);margin-bottom:4px;">Selecciona un registro para ver aplicaciones.</div>
+        <button class="indicator-btn" id="ind-tornasol"     onclick="selectIndicatorPanel('tornasol',this)"     aria-label="Papel tornasol">
+          <div class="indicator-swatches"><span style="background:#D64550;"></span><span style="background:#a04878;"></span><span style="background:#7070a0;"></span><span style="background:#3A6EA5;"></span></div>
+          <span class="indicator-btn-name">Papel tornasol</span><span style="font-size:0.68rem;color:rgba(255,255,255,0.3);">→</span>
+        </button>
+        <button class="indicator-btn" id="ind-fenolftaleina" onclick="selectIndicatorPanel('fenolftaleina',this)" aria-label="Fenolftaleína">
+          <div class="indicator-swatches"><span style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);"></span><span style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);"></span><span style="background:#E84B8A;"></span><span style="background:#E84B8A;"></span></div>
+          <span class="indicator-btn-name">Fenolftaleína</span><span style="font-size:0.68rem;color:rgba(255,255,255,0.3);">→</span>
+        </button>
+        <button class="indicator-btn" id="ind-universal"    onclick="selectIndicatorPanel('universal',this)"    aria-label="Ind. universal">
+          <div class="indicator-swatches"><span style="background:#D64550;"></span><span style="background:#E0A800;"></span><span style="background:#44AA44;"></span><span style="background:#5A4EA5;"></span></div>
+          <span class="indicator-btn-name">Ind. universal</span><span style="font-size:0.68rem;color:rgba(255,255,255,0.3);">→</span>
+        </button>
+        <button class="indicator-btn" id="ind-phmetro" onclick="selectIndicatorPanel('phmetro',this)" aria-label="pH Metro">
+          <div class="indicator-swatches">
+            <span style="background:rgba(46,139,87,0.55);border:1px solid rgba(46,139,87,0.4);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:0.42rem;color:rgba(255,255,255,0.7);letter-spacing:0;width:18px;">pH</span>
+            <span style="background:rgba(46,139,87,0.25);border:1px solid rgba(46,139,87,0.25);"></span>
+            <span style="background:rgba(46,139,87,0.25);border:1px solid rgba(46,139,87,0.25);"></span>
+            <span style="background:rgba(46,139,87,0.55);border:1px solid rgba(46,139,87,0.4);"></span>
+          </div>
+          <span class="indicator-btn-name">pH Metro</span><span style="font-size:0.68rem;color:rgba(255,255,255,0.3);">→</span>
+        </button>
+
+        <div style="padding-top:10px;border-top:1px solid rgba(255,255,255,0.05);margin-top:4px;">
+          <div style="font-family:var(--mono);font-size:0.56rem;letter-spacing:0.12em;color:rgba(255,255,255,0.25);text-transform:uppercase;margin-bottom:8px;">Aplicados</div>
+          <div id="ind-history-container" style="display:flex;flex-direction:column;gap:10px;"></div>
+        </div>
+      </div>
+
+      <!-- Footer: no apply button — indicators applied by drag -->
+      <div class="panel-footer">
+        <div id="finish-section" style="display:none;flex-direction:column;gap:8px;margin-top:10px;">
+          <div style="background:rgba(68,170,68,0.07);border:1px solid rgba(68,170,68,0.22);border-radius:3px;padding:10px;text-align:center;">
+            <div style="font-family:var(--mono);font-size:0.62rem;letter-spacing:0.1em;color:var(--neutral);">EXPERIMENTO COMPLETADO</div>
+            <p style="font-size:0.78rem;color:rgba(255,255,255,0.5);margin-top:5px;line-height:1.5;">Has analizado las sustancias con indicadores.</p>
+          </div>
+          <a href="/experimento/acido-base/quiz" class="lab-flow-btn">
+            <span>Ir al Quiz</span>
+            <span class="flow-arrows" aria-hidden="true">
+              <svg class="arrow-out" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7H12M9 4L12 7L9 10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <svg class="arrow-in"  width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7H12M9 4L12 7L9 10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </a>
+        </div>
+      </div>
+
+    </aside>
+  </div><!-- end lab-body -->
+
+  <!-- Footer: horizontal progress stepper -->
+  <footer class="lab-footer" aria-live="polite">
+    <div id="lab-stepper-wrap">
+      <nav id="lab-stepper-nav" aria-label="Progreso del experimento">
+        <div class="lab-step-item active" id="lab-step-1">
+          <div class="lab-step-dot"><span class="lab-step-check">✓</span><span class="lab-step-num">1</span></div>
+          <span class="lab-step-label">Sust.</span>
+        </div>
+        <div class="lab-step-sep pending" id="lab-step-sep-1"></div>
+        <div class="lab-step-item pending" id="lab-step-2">
+          <div class="lab-step-dot"><span class="lab-step-check">✓</span><span class="lab-step-num">2</span></div>
+          <span class="lab-step-label">pH</span>
+        </div>
+        <div class="lab-step-sep pending" id="lab-step-sep-2"></div>
+        <div class="lab-step-item pending" id="lab-step-3">
+          <div class="lab-step-dot"><span class="lab-step-check">✓</span><span class="lab-step-num">3</span></div>
+          <span class="lab-step-label">Torn.</span>
+        </div>
+        <div class="lab-step-sep pending" id="lab-step-sep-3"></div>
+        <div class="lab-step-item pending" id="lab-step-4">
+          <div class="lab-step-dot"><span class="lab-step-check">✓</span><span class="lab-step-num">4</span></div>
+          <span class="lab-step-label">Univ.</span>
+        </div>
+        <div class="lab-step-sep pending" id="lab-step-sep-4"></div>
+        <div class="lab-step-item pending" id="lab-step-5">
+          <div class="lab-step-dot"><span class="lab-step-check">✓</span><span class="lab-step-num">5</span></div>
+          <span class="lab-step-label">Fenol.</span>
+        </div>
+        <div class="lab-step-sep pending" id="lab-step-sep-5"></div>
+        <div class="lab-step-item pending" id="lab-step-6">
+          <div class="lab-step-dot"><span class="lab-step-check">✓</span><span class="lab-step-num">6</span></div>
+          <span class="lab-step-label">Mezcla</span>
+        </div>
+        <div class="lab-step-sep pending" id="lab-step-sep-6"></div>
+        <div class="lab-step-item pending" id="lab-step-7">
+          <div class="lab-step-dot"><span class="lab-step-check">✓</span><span class="lab-step-num">7</span></div>
+          <span class="lab-step-label">Comp.</span>
+        </div>
+        <div class="lab-step-sep pending" id="lab-step-sep-7"></div>
+        <div class="lab-step-item pending" id="lab-step-8">
+          <div class="lab-step-dot"><span class="lab-step-check">✓</span><span class="lab-step-num">8</span></div>
+          <span class="lab-step-label">Libre</span>
+        </div>
+      </nav>
+      <div id="lab-stepper-divider"></div>
+      <p id="lab-stepper-instruction">Paso actual: Arrastra una sustancia a un vaso vacío.</p>
+    </div>
+  </footer>
+
+</div><!-- end lab-shell -->
+
+<script>
+  // ── Substance + Indicator definitions ──
+  const SUBSTANCES = {
+    hcl:         { name:'HCl',           formula:'HCl',       ph:1.0,  state:'Ácido fuerte', baseColor:'rgba(220,240,236,0.32)' },
+    limon:       { name:'Limón',          formula:'C₆H₈O₇',   ph:2.4,  state:'Ácido débil',  baseColor:'rgba(255,248,110,0.58)' },
+    vinagre:     { name:'Vinagre',        formula:'CH₃COOH',  ph:2.9,  state:'Ácido débil',  baseColor:'rgba(248,244,195,0.42)' },
+    agua:        { name:'H₂O destilada',  formula:'H₂O',      ph:7.0,  state:'Neutro',        baseColor:'rgba(195,222,255,0.32)' },
+    bicarbonato: { name:'Bicarbonato',    formula:'NaHCO₃',   ph:8.3,  state:'Base débil',   baseColor:'rgba(218,240,230,0.32)' },
+    naoh:        { name:'NaOH',           formula:'NaOH',      ph:13.0, state:'Base fuerte',  baseColor:'rgba(212,234,222,0.32)' },
+  };
+  const INDICATORS = {
+    tornasol:     { name:'Tornasol',           fn: function(ph){ return ph < 7 ? 'rgba(210,50,50,0.72)' : ph > 7 ? 'rgba(50,80,200,0.72)' : 'rgba(130,60,160,0.72)'; } },
+    fenolftaleina:{ name:'Fenolftaleína',       fn: function(ph){ if (ph < 8.2) return 'rgba(225,240,235,0.08)'; if (ph < 10) return 'rgba(230,100,165,0.58)'; return 'rgba(225,35,128,0.85)'; } },
+    universal:    { name:'Indicador Universal', fn: ph => {
+      if (ph <= 2)  return 'rgba(215,40,40,0.80)';
+      if (ph <= 4)  return 'rgba(235,95,35,0.80)';
+      if (ph <= 6)  return 'rgba(225,200,35,0.80)';
+      if (ph < 7.5) return 'rgba(55,160,70,0.80)';
+      if (ph <= 9)  return 'rgba(35,155,165,0.80)';
+      if (ph <= 11) return 'rgba(35,95,195,0.80)';
+      return 'rgba(115,45,185,0.80)';
+    }},
+  };
+
+  // ── State ──
+  const beakers = Array.from({length:6}, () => ({
+    substances: [],     // ordered array of substance keys (max 2)
+    substance: null,    // first substance key kept for backwards-compat
+    indicator: null, paperIndicatorApplied: false, ph: null,
+    phAnalyzed: false, liquidColor: null, volume: 0,
+    hasPhenolphthalein: false, // persistent — never cleared by other indicators
+    completedTests: [], // stepper tracking: which tests ran on this beaker
+  }));
+  let activeBeakerIdx = null;
+  let activeIndicator = null;
+  let dragData = null;
+
+  // ── Lab progress stepper state ──
+  var labSteps = [
+    { id: 1, label: 'Sust.',  desc: 'Arrastra una sustancia a un vaso vacío.', done: false },
+    { id: 2, label: 'pH',     desc: 'Coloca el pH metro en una muestra y presiona Analizar pH.', done: false },
+    { id: 3, label: 'Torn.',  desc: 'Usa papel tornasol para detectar si la muestra es ácida o básica.', done: false },
+    { id: 4, label: 'Univ.',  desc: 'Usa el indicador universal y compara el color con la escala.', done: false },
+    { id: 5, label: 'Fenol.', desc: 'Aplica Fenolftaleína y observa si la solución cambia a rosa.', done: false },
+    { id: 6, label: 'Mezcla', desc: 'Mezcla dos sustancias y observa cómo cambia la muestra.', done: false },
+    { id: 7, label: 'Comp.',  desc: 'Compara una misma muestra usando al menos dos métodos distintos.', done: false },
+    { id: 8, label: 'Libre',  desc: 'Experimenta con mezclas, indicadores y mediciones de pH antes de ir al Quiz.', done: false },
+  ];
+
+  function _renderLabStepper() {
+    var current = null;
+    for (var i = 0; i < labSteps.length; i++) {
+      if (!labSteps[i].done) { current = labSteps[i]; break; }
+    }
+    labSteps.forEach(function(step) {
+      var itemEl = document.getElementById('lab-step-' + step.id);
+      var sepEl  = document.getElementById('lab-step-sep-' + step.id);
+      if (itemEl) {
+        itemEl.className = 'lab-step-item ' + (step.done ? 'done' : (step === current ? 'active' : 'pending'));
+      }
+      if (sepEl) {
+        sepEl.className = 'lab-step-sep ' + (step.done ? 'done' : 'pending');
+      }
+    });
+    var instrEl = document.getElementById('lab-stepper-instruction');
+    if (!instrEl) return;
+    var coreDone = labSteps.slice(0, 5).every(function(s) { return s.done; });
+    if (coreDone) {
+      instrEl.textContent = 'Experimento listo: ya probaste sustancias, indicadores y pH. Puedes ir al Quiz cuando quieras.';
+      instrEl.classList.add('ready');
+    } else if (current) {
+      instrEl.textContent = 'Paso actual: ' + current.desc;
+      instrEl.classList.remove('ready');
+    }
+  }
+
+  function completeLabStep(stepId) {
+    var s = labSteps[stepId - 1];
+    if (!s || s.done) return;
+    s.done = true;
+    _renderLabStepper();
+    if (stepId <= 5) _checkLibreStep();
+  }
+
+  function _checkLibreStep() {
+    if (labSteps.slice(0, 5).every(function(s) { return s.done; })) {
+      completeLabStep(8);
+    }
+  }
+
+  function _checkComparStep(beakerIdx) {
+    var b = beakers[beakerIdx];
+    if (b && b.completedTests && b.completedTests.length >= 2) {
+      completeLabStep(7);
+    }
+  }
+  let completedCount = 0;
+
+  // ── pH Meter global state (only one can exist at a time) ──
+  var phMeterState = {
+    activeBeaker: null,   // which beaker index the meter is currently in
+    meterImgEl:   null,   // wrapper div rendered inside the beaker
+    meterObjEl:   null,   // <object> inside wrapper — SVG DOM access for live display
+    readingEl:    null,   // the reading label element
+    inBeaker:     false,  // whether the meter is placed
+    locked:       false   // becomes true ONLY when ANALIZAR PH is pressed
+  };
+  const startTime = new Date();
+  let wavePhase = 0;
+
+  // kept for backward compat (indicator rack click path uses this array shape)
+  const substances = [
+    { name:'HCl', ph:1.0, color:'rgba(214,69,80,0.5)', state:'Ácido fuerte', stateColor:'#D64550' },
+    { name:'Limón', ph:2.4, color:'rgba(255,252,150,0.28)', state:'Ácido débil', stateColor:'#c89614' },
+    { name:'Vinagre', ph:2.9, color:'rgba(248,244,210,0.18)', state:'Ácido débil', stateColor:'#E07820' },
+    { name:'H₂O', ph:7.0, color:'rgba(200,225,255,0.13)', state:'Neutro', stateColor:'#44AA44' },
+    { name:'Bicarb.', ph:8.3, color:'rgba(220,240,232,0.12)', state:'Base débil', stateColor:'#44AAAA' },
+    { name:'NaOH', ph:13.0, color:'rgba(215,235,225,0.12)', state:'Base fuerte', stateColor:'#3A6EA5' },
+  ];
+
+  // legacy indicatorColors alias (rack click path still references this)
+  const indicatorColors = {
+    tornasol:     { fn: ph => INDICATORS.tornasol.fn(ph),     name: 'Tornasol' },
+    fenolftaleina:{ fn: ph => INDICATORS.fenolftaleina.fn(ph),name: 'Fenolftaleína' },
+    universal:    { fn: ph => INDICATORS.universal.fn(ph),    name: 'Ind. universal' },
+  };
+  let currentSubstanceForFill = null;
+
+  function ts() {
+    const s = Math.floor((Date.now() - startTime) / 1000);
+    return String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0');
+  }
+
+  function phToColor(ph) {
+    if (ph <= 1)  return '#D64550';
+    if (ph <= 3)  return '#E07820';
+    if (ph <= 5)  return '#c8c800';
+    if (ph < 7.5) return '#44AA44';
+    if (ph <= 9)  return '#44AAAA';
+    if (ph <= 11) return '#3A6EA5';
+    return '#5A4EA5';
+  }
+  function phToState(ph) {
+    if (ph < 3)   return 'Ácido fuerte';
+    if (ph < 7)   return 'Ácido débil';
+    if (ph < 7.5) return 'Neutro';
+    if (ph < 11)  return 'Base débil';
+    return 'Base fuerte';
+  }
+
+  // ── Liquid SVG rendering (1200×1600 coordinate space) ──
+  function renderLiquid(idx) {
+    var b = beakers[idx];
+    var fill = document.getElementById('liq-fill-' + idx);
+    if (!fill) return;
+    var botY = 1230, maxH = 880;
+    if (!b.substance || b.volume <= 0) {
+      fill.setAttribute('height', '0');
+      fill.setAttribute('y', String(botY));
+      fill.setAttribute('fill', 'transparent');
+      var w = document.getElementById('liq-wave-' + idx);
+      if (w) { w.setAttribute('d',''); w.setAttribute('fill','transparent'); }
+      return;
+    }
+    var level = Math.min(b.volume / 250, 1);
+    var fillH = maxH * level;
+    var fillY = botY - fillH;
+    fill.setAttribute('y', fillY.toFixed(0));
+    fill.setAttribute('height', (fillH + 20).toFixed(0));
+    fill.setAttribute('fill', b.liquidColor || 'transparent');
+  }
+
+  // ── Wave animation loop (1200×1600 coordinate space) ──
+  function animateWaves() {
+    wavePhase += 0.032;
+    for (var i = 0; i < 6; i++) {
+      var b = beakers[i];
+      if (!b.substance || b.volume <= 0) continue;
+      var wave = document.getElementById('liq-wave-' + i);
+      if (!wave) continue;
+      var botY = 1230, maxH = 880;
+      var level = Math.min(b.volume / 250, 1);
+      var fillH = maxH * level;
+      var surfY = botY - fillH;
+      var A = 14;
+      var ph = wavePhase + i * 0.9;
+      var y0 = (surfY + A * Math.sin(ph)).toFixed(0);
+      var y1 = (surfY + A * Math.sin(ph + 1.8)).toFixed(0);
+      var y2 = (surfY + A * Math.sin(ph + 3.5)).toFixed(0);
+      var s  = surfY.toFixed(0);
+      var sP = (surfY + 36).toFixed(0);
+      var d = 'M278,' + s + ' C390,' + y0 + ' 495,' + y1 + ' 600,' + y2 + ' S810,' + y0 + ' 922,' + s + ' L922,' + sP + ' L278,' + sP + ' Z';
+      wave.setAttribute('d', d);
+      wave.setAttribute('fill', b.liquidColor || 'transparent');
+    }
+    requestAnimationFrame(animateWaves);
+  }
+
+  // ── Beaker label update ──
+  function updateBeakerLabel(idx) {
+    var b = beakers[idx];
+    var lbl = document.getElementById('blbl-' + idx);
+    if (!lbl) return;
+    if (!b.substance) {
+      lbl.textContent = 'Vacío';
+      lbl.style.color = 'rgba(255,255,255,0.35)';
+    } else if (b.substances && b.substances.length === 2) {
+      var n1 = SUBSTANCES[b.substances[0]] ? SUBSTANCES[b.substances[0]].name : b.substances[0];
+      var n2 = SUBSTANCES[b.substances[1]] ? SUBSTANCES[b.substances[1]].name : b.substances[1];
+      lbl.textContent = n1 + ' + ' + n2;
+      lbl.style.color = 'rgba(255,255,255,0.88)';
+    } else {
+      var s = SUBSTANCES[b.substance];
+      lbl.textContent = s ? s.name : b.substance;
+      lbl.style.color = 'rgba(255,255,255,0.88)';
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  //  PHYSICS DRAG SYSTEM
+  // ══════════════════════════════════════════════════════════════
+  // ── Animation lock: prevents new inventory drags while any beaker action runs ──
+  // Uses a reference counter so nested locks (e.g. pour + meter re-place) don't
+  // release early when the shorter one finishes.
+  var isLabAnimationRunning = false;
+  var _labLockCount = 0;
+  function _lockLab() {
+    _labLockCount++;
+    isLabAnimationRunning = true;
+    var rack = document.querySelector('.lab-rack');
+    if (rack) { rack.style.opacity = '0.55'; rack.style.pointerEvents = 'none'; rack.style.cursor = 'not-allowed'; }
+  }
+  function _unlockLab() {
+    _labLockCount = Math.max(0, _labLockCount - 1);
+    if (_labLockCount > 0) return; // another lock still active
+    isLabAnimationRunning = false;
+    var rack = document.querySelector('.lab-rack');
+    if (rack) { rack.style.opacity = ''; rack.style.pointerEvents = ''; rack.style.cursor = ''; }
+  }
+
+  var _drag = {
+    active: false, key: null, type: null, originEl: null,
+    el: null, x: 0, y: 0, vx: 0, vy: 0,
+    ox: 0, oy: 0, angle: 0, angleV: 0,
+    hoveredBeaker: -1, raf: null,
+    tornasolStartColor: null, currentTornasolColor: null
+  };
+
+  // Asset map for drag previews
+  var DRAG_ASSETS = {
+    substance: {
+      hcl:         '/brand_assets/hcl_amber_reagent_bottle.svg',
+      limon:       '/brand_assets/limon_amber_reagent_bottle.svg',
+      vinagre:     '/brand_assets/vinagre_amber_reagent_bottle.svg',
+      agua:        '/brand_assets/h2o_destilada_amber_reagent_bottle.svg',
+      bicarbonato: '/brand_assets/bicarbonato_amber_reagent_bottle.svg',
+      naoh:        '/brand_assets/naoh_amber_reagent_bottle.svg'
+    },
+    indicator: {
+      tornasol:     '/brand_assets/Tornasol.svg',
+      universal:    '/brand_assets/universal_yellow_strip.svg',
+      fenolftaleina:'/brand_assets/fenolftaleina_pipette_only.svg'
+    },
+    phMeter: {
+      phMeter: '/brand_assets/ph_meter_pen_realistic.svg'
+    }
+  };
+
+  function initDragFromEl(e, el, type, key) {
+    if (e.button !== 0) return;
+    if (isLabAnimationRunning) return;
+    // Lock entire inventory while pH meter is inside any beaker
+    if (phMeterState.inBeaker) return;
+
+    // Auto-select the dragged item (drag always selects, no toggle)
+    if (selectedRackKey !== key || selectedRackType !== type) {
+      _clearRackSelection();
+      selectedRackKey  = key;
+      selectedRackType = type;
+      el.classList.add('selected');
+      var _lbl = type === 'phMeter' ? 'pH Metro'
+        : type === 'substance' ? (SUBSTANCES[key] ? SUBSTANCES[key].name : key)
+        : (INDICATORS[key]    ? INDICATORS[key].name : key);
+      var _disp = document.getElementById('active-indicator-display');
+      if (_disp) { _disp.textContent = _lbl; _disp.style.color = 'var(--science)'; }
+      // Signal rackItemClick (onclick, same interaction) to skip the deselect toggle —
+      // only when we actually changed the selection (not when item was already selected)
+      _dragAutoSelected = true;
+    }
+
+    e.preventDefault();
+    _drag.active = true;
+    _drag.key = key; _drag.type = type; _drag.originEl = el;
+    _drag.ox = e.clientX; _drag.oy = e.clientY;
+    _drag.x = e.clientX; _drag.y = e.clientY;
+    _drag.vx = 0; _drag.vy = 0; _drag.angle = 0; _drag.angleV = 0;
+    _drag.hoveredBeaker = -1;
+
+    // Create floating preview
+    var prev = document.createElement('div');
+    prev.className = 'drag-preview';
+    var isTornasol = (type === 'indicator' && key === 'tornasol');
+    var isUniversal = (type === 'indicator' && key === 'universal');
+    var isPipette = (type === 'indicator' && key === 'fenolftaleina');
+    var isMeter   = (type === 'phMeter');
+    if (isUniversal) {
+      prev.classList.add('strip-universal-preview');
+    } else if (isTornasol) {
+      prev.classList.add('strip-tornasol-preview');
+      var tStartColor = Math.random() < 0.5 ? 'red' : 'blue';
+      prev.classList.add('tornasol-' + tStartColor);
+      _drag.tornasolStartColor   = tStartColor;
+      _drag.currentTornasolColor = tStartColor;
+    } else if (isPipette) {
+      prev.classList.add('pipette-preview');
+    } else if (isMeter) {
+      prev.style.width = '52px'; prev.style.height = '150px';
+    }
+    var img = document.createElement('img');
+    img.src = (DRAG_ASSETS[type] || {})[key] || '';
+    img.draggable = false;
+    prev.appendChild(img);
+    document.body.appendChild(prev);
+    _drag.el = prev;
+
+    el.classList.add('dragging-active');
+    _positionPreview(e.clientX, e.clientY, 0);
+
+    document.addEventListener('mousemove', _onDragMove);
+    document.addEventListener('mouseup', _onDragEnd);
+  }
+
+  function _positionPreview(cx, cy, angle) {
+    if (!_drag.el) return;
+    var pw = _drag.el.offsetWidth || 72;
+    var ph = _drag.el.offsetHeight || 108;
+    _drag.el.style.left = (cx - pw/2) + 'px';
+    _drag.el.style.top  = (cy - ph * 0.85) + 'px';
+    _drag.el.style.transform = 'rotate(' + angle.toFixed(1) + 'deg)';
+  }
+
+  function _onDragMove(e) {
+    if (!_drag.active) return;
+    var tx = e.clientX, ty = e.clientY;
+    _drag.vx = _drag.vx * 0.68 + (tx - _drag.x) * 0.32;
+    _drag.vy = _drag.vy * 0.68 + (ty - _drag.y) * 0.32;
+    _drag.x = tx; _drag.y = ty;
+    _drag.angleV = _drag.angleV * 0.75 + _drag.vx * 0.4;
+    _drag.angle  = Math.max(-22, Math.min(22, _drag.angle + _drag.angleV * 0.15));
+    _positionPreview(tx, ty, _drag.angle);
+
+    // Beaker hover detection
+    var hit = _getBeakerAtPoint(tx, ty);
+    if (hit !== _drag.hoveredBeaker) {
+      if (_drag.hoveredBeaker >= 0) document.getElementById('beaker-' + _drag.hoveredBeaker).classList.remove('drag-over');
+      _drag.hoveredBeaker = hit;
+      if (hit >= 0) document.getElementById('beaker-' + hit).classList.add('drag-over');
+    }
+
+    // Tornasol: preview shows the OPPOSITE of the expected result while hovering over a filled beaker.
+    // This gives the animation something to visibly transition from (BLUE→RED in acid, RED→BLUE in base).
+    // Empty beakers and no-hover restore to the original random starting color.
+    if (_drag.type === 'indicator' && _drag.key === 'tornasol' && _drag.el) {
+      var hovB = hit >= 0 ? beakers[hit] : null;
+      var previewColor;
+      if (hovB && hovB.substance) {
+        var hovPH = hovB.ph !== null ? hovB.ph : 7;
+        if (hovPH < 6.8) previewColor = 'blue';      // acid → final RED, so preview BLUE
+        else if (hovPH > 7.2) previewColor = 'red';  // base → final BLUE, so preview RED
+        else previewColor = _drag.tornasolStartColor; // neutral → keep original
+      } else {
+        previewColor = _drag.tornasolStartColor;      // empty/no beaker → keep original
+      }
+      if (previewColor !== _drag.currentTornasolColor) {
+        _drag.el.classList.remove('tornasol-red', 'tornasol-blue', 'tornasol-purple');
+        _drag.el.classList.add('tornasol-' + previewColor);
+        _drag.currentTornasolColor = previewColor;
+      }
+    }
+  }
+
+  function _onDragEnd(e) {
+    document.removeEventListener('mousemove', _onDragMove);
+    document.removeEventListener('mouseup', _onDragEnd);
+    if (!_drag.active) return;
+
+    var hit = _getBeakerAtPoint(e.clientX, e.clientY);
+    if (_drag.hoveredBeaker >= 0) document.getElementById('beaker-' + _drag.hoveredBeaker).classList.remove('drag-over');
+    if (_drag.originEl) _drag.originEl.classList.remove('dragging-active');
+
+    if (hit >= 0) {
+      // Validate substance drops BEFORE any animation starts
+      if (_drag.type === 'substance') {
+        var b = beakers[hit];
+        if (b.hasPhenolphthalein) {
+          addLog('No se puede agregar otra sustancia: este vaso ya tiene Fenolftaleína aplicada.', 'scan');
+          _showBeakerToast(hit, 'Fenolftaleína ya aplicada.', 'rgba(255,160,60,0.9)');
+          _springReturn();
+          _drag.active = false;
+          return;
+        }
+        if (b.substances.length >= 2) {
+          addLog('No se puede agregar otra sustancia: este vaso ya contiene una mezcla de dos sustancias.', 'scan');
+          _showBeakerToast(hit, 'Máx. 2 sustancias.', 'rgba(255,100,80,0.9)');
+          _springReturn();
+          _drag.active = false;
+          return;
+        }
+      }
+      // Validate Fenolftaleína: only blocked by itself — all other indicators are independent
+      if (_drag.type === 'indicator' && _drag.key === 'fenolftaleina') {
+        if (beakers[hit].hasPhenolphthalein) {
+          addLog('No se puede aplicar Fenolftaleína nuevamente: este vaso ya la tiene aplicada.', 'scan');
+          _showBeakerToast(hit, 'Fenolftaleína ya aplicada.', 'rgba(255,160,60,0.9)');
+          _springReturn(); _drag.active = false; return;
+        }
+      }
+      // Validate Tornasol: only requires a filled beaker — repeatable
+      if (_drag.type === 'indicator' && _drag.key === 'tornasol') {
+        if (!beakers[hit].substance) {
+          addLog('No se puede aplicar Tornasol: el vaso está vacío.', 'scan');
+          _showBeakerToast(hit, 'El vaso está vacío.', 'rgba(255,160,60,0.9)');
+          _springReturn(); _drag.active = false; return;
+        }
+      }
+      // Validate Universal: only requires a filled beaker — repeatable
+      if (_drag.type === 'indicator' && _drag.key === 'universal') {
+        if (!beakers[hit].substance) {
+          addLog('No se puede aplicar Indicador Universal: el vaso está vacío.', 'scan');
+          _showBeakerToast(hit, 'El vaso está vacío.', 'rgba(255,160,60,0.9)');
+          _springReturn(); _drag.active = false; return;
+        }
+      }
+
+      // Trigger the appropriate animation and then apply
+      var tornasolDropColor = _drag.currentTornasolColor; // capture before clearing
+      var prevEl = _drag.el;
+      _drag.el = null; _drag.active = false;
+      if (_drag.type === 'substance') {
+        _animatePour(_drag.key, hit, prevEl);
+      } else if (_drag.type === 'phMeter') {
+        _placePHMeter(hit, prevEl);
+      } else if (_drag.type === 'indicator') {
+        if (_drag.key === 'tornasol') {
+          _animateTornasolStrip(hit, prevEl, tornasolDropColor);
+        } else if (_drag.key === 'universal') {
+          _animatePaperStrip('universal', hit, prevEl);
+        } else if (_drag.key === 'fenolftaleina') {
+          _animatePipette(_drag.key, hit, prevEl);
+        }
+      }
+    } else {
+      // Spring return
+      _springReturn();
+    }
+    _drag.active = false;
+  }
+
+  function _springReturn() {
+    if (!_drag.el) return;
+    _drag.el.style.transition = 'left 0.4s cubic-bezier(0.34,1.56,0.64,1), top 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease, transform 0.4s ease';
+    if (_drag.originEl) {
+      var r = _drag.originEl.getBoundingClientRect();
+      _drag.el.style.left = r.left + 'px';
+      _drag.el.style.top  = r.top + 'px';
+    }
+    _drag.el.style.opacity = '0';
+    _drag.el.style.transform = 'rotate(0deg) scale(0.7)';
+    var el = _drag.el;
+    setTimeout(function(){ if (el && el.parentNode) el.parentNode.removeChild(el); }, 450);
+    _drag.el = null;
+  }
+
+  function _getBeakerAtPoint(cx, cy) {
+    for (var i = 0; i < 6; i++) {
+      var slot = document.getElementById('beaker-' + i);
+      if (!slot) continue;
+      var r = slot.getBoundingClientRect();
+      if (cx >= r.left && cx <= r.right && cy >= r.top && cy <= r.bottom) return i;
+    }
+    return -1;
+  }
+
+  // ── Pour animation: bottle moves above, tilts, stream, liquid fills ──
+  function _animatePour(substKey, beakerIdx, prevEl) {
+    _lockLab();
+    var slot = document.getElementById('beaker-' + beakerIdx);
+    var wr   = slot ? slot.getBoundingClientRect() : {left:200, top:200, width:120, height:160};
+    var beakerCX  = wr.left + wr.width  * 0.5;
+    var beakerTop = wr.top;
+
+    var pw = prevEl.offsetWidth  || 72;
+    var ph = prevEl.offsetHeight || 108;
+
+    // .drag-preview transform-origin is 50% 85% → pivot is 85% down from top
+    var pivotFrac  = 0.85;
+    var pivotFromTop = ph * pivotFrac; // px from top of element to pivot
+
+    // After rotate(tiltDeg) with transform-origin at pivot:
+    // Cap is at (0, -pivotFromTop) relative to pivot (top center of bottle).
+    // Rotated cap offset from pivot:
+    //   capDX = pivotFromTop * sin(tilt)  (rightward)
+    //   capDY = -pivotFromTop * cos(tilt) (upward)
+    var tiltDeg = 62;
+    var tiltRad  = tiltDeg * Math.PI / 180;
+    var capDX = pivotFromTop * Math.sin(tiltRad);
+    var capDY = -(pivotFromTop * Math.cos(tiltRad));
+
+    // We want the cap to arrive above the beaker opening with a visible pour arc
+    var targetCapX = beakerCX - 6;
+    var targetCapY = beakerTop - 62;
+
+    // Back-calculate pivot screen position, then element top-left
+    var pivotX   = targetCapX - capDX;
+    var pivotY   = targetCapY - capDY;
+    var hoverLeft = pivotX - pw * 0.5;
+    var hoverTop  = pivotY - pivotFromTop;
+
+    // ── Phase 1: slide bottle above beaker, upright ──
+    prevEl.style.transformOrigin = '50% ' + (pivotFrac * 100).toFixed(0) + '%';
+    prevEl.style.transition = [
+      'left 0.26s cubic-bezier(0.25,0.46,0.45,0.94)',
+      'top  0.26s cubic-bezier(0.25,0.46,0.45,0.94)',
+      'transform 0.26s ease',
+    ].join(',');
+    prevEl.style.left      = hoverLeft + 'px';
+    prevEl.style.top       = hoverTop  + 'px';
+    prevEl.style.transform = 'rotate(0deg)';
+
+    // ── Phase 2: tilt bottle ──
+    setTimeout(function() {
+      prevEl.style.transition = 'transform 0.36s cubic-bezier(0.34,1.0,0.64,1)';
+      prevEl.style.transform  = 'rotate(' + tiltDeg + 'deg)';
+
+      // ── Phase 3: pour stream + fill ──
+      setTimeout(function() {
+        var b = beakers[beakerIdx];
+        var startVol   = b ? (b.volume || 0) : 0;
+        var startColor = b ? (b.liquidColor || 'transparent') : 'transparent';
+
+        // Apply substance (updates state, calls renderLiquid once to final values)
+        addSubstanceToBeaker(beakerIdx, substKey);
+
+        var endVol   = beakers[beakerIdx].volume;
+        var endColor = beakers[beakerIdx].liquidColor || 'transparent';
+
+        // Rewind liquid visual to start so we can animate forward
+        beakers[beakerIdx].volume     = startVol;
+        beakers[beakerIdx].liquidColor = (startVol > 0) ? startColor : endColor;
+        renderLiquid(beakerIdx);
+
+        // ── Stream SVG ──
+        var sc  = _pourStreamColor(substKey);
+        var sx  = targetCapX, sy = targetCapY;
+        var ex  = beakerCX + 4; // fixed horizontal endpoint (beaker center)
+
+        // Map SVG liquid surface Y → screen Y.
+        // .beaker-wrap is 156×208px; SVG viewBox is 1200×1600 → scale = 208/1600 = 0.13.
+        // SVG liquid surface: botY - maxH * min(vol/250,1) = 1230 - 880*(vol/250)
+        var wrapEl   = slot ? slot.querySelector('.beaker-wrap') : null;
+        var wrapRect = wrapEl ? wrapEl.getBoundingClientRect()
+                              : { top: beakerTop, height: 208 };
+        var SVG_SCALE_Y = 208 / 1600; // screen px per SVG unit
+
+        function _surfaceY(vol) {
+          var svgSurf = 1230 - 880 * Math.min(vol / 250, 1);
+          return wrapRect.top + svgSurf * SVG_SCALE_Y;
+        }
+
+        function _buildStreamPath(ey) {
+          var qx = sx + (ex - sx) * 0.55;
+          var qy = sy + (ey - sy) * 0.25;
+          return 'M' + sx.toFixed(1) + ',' + sy.toFixed(1) +
+                 ' Q' + qx.toFixed(1) + ',' + qy.toFixed(1) +
+                 ' ' + ex.toFixed(1) + ',' + ey.toFixed(1);
+        }
+
+        var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.style.cssText = 'position:fixed;left:0;top:0;width:100vw;height:100vh;pointer-events:none;z-index:9800;overflow:visible;';
+
+        var streamPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        streamPath.setAttribute('d', _buildStreamPath(_surfaceY(startVol)));
+        streamPath.setAttribute('stroke', sc);
+        streamPath.setAttribute('stroke-width', '6');
+        streamPath.setAttribute('stroke-linecap', 'round');
+        streamPath.setAttribute('fill', 'none');
+        streamPath.style.opacity   = '0';
+        streamPath.style.transition = 'opacity 0.1s ease';
+
+        var splashEl = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+        splashEl.setAttribute('cx', String(ex));
+        splashEl.setAttribute('cy', _surfaceY(startVol).toFixed(1));
+        splashEl.setAttribute('rx', '11');
+        splashEl.setAttribute('ry', '5');
+        splashEl.setAttribute('fill', sc);
+        splashEl.style.opacity   = '0';
+        splashEl.style.transition = 'opacity 0.1s ease';
+
+        svg.appendChild(streamPath);
+        svg.appendChild(splashEl);
+        document.body.appendChild(svg);
+
+        requestAnimationFrame(function() { requestAnimationFrame(function() {
+          streamPath.style.opacity = '1';
+          splashEl.style.opacity   = '0.62';
+        }); });
+
+        var POUR_MS = 1060;
+
+        // Per-frame: move stream endpoint to the current liquid surface
+        function onPourFrame(vol) {
+          var ey = _surfaceY(vol);
+          streamPath.setAttribute('d', _buildStreamPath(ey));
+          splashEl.setAttribute('cy', ey.toFixed(1));
+        }
+
+        // Animate beaker fill + stream endpoint in one loop
+        _animateFillLerp(beakerIdx, startVol, endVol, endColor, POUR_MS, onPourFrame);
+        // Animate bottle becoming lighter (emptying)
+        _animateBottleEmpty(prevEl, POUR_MS);
+
+        // ── Phase 4: end pour ──
+        setTimeout(function() {
+          streamPath.style.transition = 'opacity 0.18s ease';
+          streamPath.style.opacity    = '0';
+          splashEl.style.opacity      = '0';
+
+          setTimeout(function() {
+            if (svg.parentNode) svg.parentNode.removeChild(svg);
+
+            // Fire gradual color-mixing reaction if a second substance was added
+            var pColor = beakers[beakerIdx]._pendingColor;
+            var hasMix = !!pColor;
+            if (pColor) {
+              var pFizz = beakers[beakerIdx]._pendingFizz;
+              beakers[beakerIdx]._pendingColor = null;
+              beakers[beakerIdx]._pendingFizz  = null;
+              _animateLiquidColor(beakerIdx, beakers[beakerIdx].liquidColor, pColor,
+                                  {duration: 5000, fizz: !!pFizz});
+            }
+
+            prevEl.style.transition = 'opacity 0.28s ease, transform 0.28s ease';
+            prevEl.style.opacity    = '0';
+            prevEl.style.transform  = 'rotate(' + (tiltDeg + 10) + 'deg) scale(0.82)';
+            setTimeout(function() {
+              if (prevEl.parentNode) prevEl.parentNode.removeChild(prevEl);
+              // Keep inventory locked through the 5-second mixing animation if one fired
+              if (hasMix) { setTimeout(_unlockLab, 5100); } else { _unlockLab(); }
+            }, 310);
+          }, 210);
+        }, POUR_MS);
+
+      }, 380); // after tilt
+    }, 270);   // after move
+  }
+
+  // ── Pour stream color (more opaque than base liquid) ──
+  function _pourStreamColor(substKey) {
+    var map = {
+      limon:       'rgba(225,210,48,0.72)',
+      vinagre:     'rgba(205,185,92,0.68)',
+      hcl:         'rgba(195,228,222,0.55)',
+      agua:        'rgba(175,210,252,0.55)',
+      bicarbonato: 'rgba(195,232,216,0.50)',
+      naoh:        'rgba(195,226,214,0.50)',
+    };
+    return map[substKey] || 'rgba(180,218,208,0.55)';
+  }
+
+  // ── Animate beaker fill from startVol to endVol over duration ms ──
+  // onFrame(vol) is called every rAF with the current interpolated volume.
+  function _animateFillLerp(idx, startVol, endVol, color, duration, onFrame) {
+    var fill = document.getElementById('liq-fill-' + idx);
+    if (!fill) return;
+    var botY = 1230, maxH = 880;
+    var t0 = performance.now();
+    function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+    function step(now) {
+      var p   = Math.min((now - t0) / duration, 1);
+      var vol = startVol + (endVol - startVol) * easeOut(p);
+      var h   = maxH * Math.min(vol / 250, 1);
+      fill.setAttribute('y',      (botY - h).toFixed(0));
+      fill.setAttribute('height', (h + 20).toFixed(0));
+      fill.setAttribute('fill', color);
+      // Keep beakers[] in sync so animateWaves follows
+      beakers[idx].volume     = vol;
+      beakers[idx].liquidColor = color;
+      if (onFrame) onFrame(vol);
+      if (p < 1) requestAnimationFrame(step);
+      else beakers[idx].volume = endVol;
+    }
+    requestAnimationFrame(step);
+  }
+
+  // ── Fade bottle preview to suggest liquid leaving ──
+  function _animateBottleEmpty(el, duration) {
+    var t0 = performance.now();
+    function step(now) {
+      var p = Math.min((now - t0) / duration, 1);
+      el.style.opacity = (1 - p * 0.5).toFixed(3);
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  // ── Color interpolation helpers ──────────────────────────────────────────────
+  function _parseRGBA(s) {
+    if (!s || s === 'transparent') return [0, 0, 0, 0];
+    var m = /rgba?\(\s*([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\s*\)/.exec(s);
+    if (!m) return [0, 0, 0, 0];
+    return [+m[1], +m[2], +m[3], m[4] !== undefined ? +m[4] : 1];
+  }
+  function _lerpRGBA(a, b, t) {
+    t = Math.max(0, Math.min(1, t));
+    return [a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t, a[2]+(b[2]-a[2])*t, a[3]+(b[3]-a[3])*t];
+  }
+  function _toRGBAStr(c) {
+    return 'rgba('+c[0].toFixed(0)+','+c[1].toFixed(0)+','+c[2].toFixed(0)+','+c[3].toFixed(3)+')';
+  }
+  // Blend the two substance base colors 50/50 for a visual mix result
+  function _computeMixedColor(b) {
+    if (!b.substances || b.substances.length < 2) return b.liquidColor || 'transparent';
+    var s1 = SUBSTANCES[b.substances[0]], s2 = SUBSTANCES[b.substances[1]];
+    if (!s1 || !s2) return b.liquidColor || 'transparent';
+    return _toRGBAStr(_lerpRGBA(
+      _parseRGBA(s1.baseColor || 'rgba(200,210,200,0.5)'),
+      _parseRGBA(s2.baseColor || 'rgba(200,210,200,0.5)'),
+      0.5
+    ));
+  }
+
+  // ── Gradual liquid color transition: diffusion gradient + bubbles ────────────
+  // fromColor/toColor are rgba() strings. opts: {duration, fizz}
+  function _animateLiquidColor(idx, fromColor, toColor, opts) {
+    var duration = (opts && opts.duration) || 5000;
+    var isFizz   = !!(opts && opts.fizz);
+
+    var svgEl  = document.getElementById('bsvg-' + idx);
+    var fillEl = document.getElementById('liq-fill-' + idx);
+    if (!svgEl || !fillEl) return;
+
+    // Cancel any previous transition cleanly
+    var prev = beakers[idx]._colorAnim;
+    if (prev) prev.cancel();
+
+    var fromC = _parseRGBA(fromColor || 'transparent');
+    var toC   = _parseRGBA(toColor   || 'transparent');
+
+    // Create (or reuse) a vertical linear gradient in the beaker SVG defs.
+    // The gradient goes top→bottom (surface→floor) in objectBoundingBox space.
+    var gradId = 'lgc-' + idx;
+    var defs   = svgEl.querySelector('defs');
+    var grad   = svgEl.querySelector('#' + gradId);
+    if (!grad) {
+      grad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+      grad.setAttribute('id', gradId);
+      grad.setAttribute('x1', '0'); grad.setAttribute('y1', '0');
+      grad.setAttribute('x2', '0'); grad.setAttribute('y2', '1');
+      [0, 1].forEach(function(i) {
+        var s = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+        s.setAttribute('offset', i === 0 ? '0%' : '100%');
+        grad.appendChild(s);
+      });
+      defs.appendChild(grad);
+    }
+    var stops = grad.querySelectorAll('stop');
+
+    fillEl.setAttribute('fill', 'url(#' + gradId + ')');
+
+    var t0             = performance.now();
+    var activeBubbles  = [];
+    var lastBubbleMs   = -999;
+    var bubbleInterval = isFizz ? 110 : 280;
+    var cancelled      = false;
+
+    function easeInOut(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
+
+    function _setStop(s, c) {
+      s.setAttribute('stop-color',
+        'rgb('+c[0].toFixed(0)+','+c[1].toFixed(0)+','+c[2].toFixed(0)+')');
+      s.setAttribute('stop-opacity', c[3].toFixed(3));
+    }
+
+    function _spawnBubble() {
+      var b    = beakers[idx];
+      var fillH = 880 * Math.min((b.volume || 0) / 250, 1);
+      if (fillH < 15) return;
+      var surfY = 1230 - fillH;
+      var bub   = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      var bx    = 310 + Math.random() * 580;
+      var by    = surfY + fillH * (0.18 + Math.random() * 0.75);
+      var r     = 3 + Math.random() * (isFizz ? 9 : 5);
+      bub.setAttribute('cx', bx.toFixed(1));
+      bub.setAttribute('cy', by.toFixed(1));
+      bub.setAttribute('r',  r.toFixed(1));
+      bub.setAttribute('clip-path', 'url(#bclip-' + idx + ')');
+      bub.setAttribute('fill', 'rgba(255,255,255,0.09)');
+      svgEl.appendChild(bub);
+      activeBubbles.push({ el: bub, y: by, speed: 50 + Math.random() * 85 });
+    }
+
+    function _cleanup() {
+      activeBubbles.forEach(function(b) {
+        if (b.el.parentNode) b.el.parentNode.removeChild(b.el);
+      });
+      activeBubbles.length = 0;
+      // Restore flat final color so renderLiquid / animateWaves work normally
+      fillEl.setAttribute('fill', toColor);
+      beakers[idx].liquidColor = toColor;
+      beakers[idx]._colorAnim  = null;
+    }
+
+    function step(now) {
+      if (cancelled) { _cleanup(); return; }
+
+      var dt = now - t0;
+      var p  = Math.min(dt / duration, 1);
+      var pe = easeInOut(p);
+
+      // Gradient: surface (top stop) reacts first, bottom lags by 0.4 progress units
+      var topP = Math.min(1, pe * 1.4);
+      var botP = Math.max(0, pe * 1.4 - 0.4);
+      _setStop(stops[0], _lerpRGBA(fromC, toC, topP));
+      _setStop(stops[1], _lerpRGBA(fromC, toC, botP));
+
+      // Keep liquidColor in sync (wave surface reads this)
+      beakers[idx].liquidColor = _toRGBAStr(_lerpRGBA(fromC, toC, topP));
+
+      // Spawn bubbles
+      if (now - lastBubbleMs > bubbleInterval) {
+        _spawnBubble();
+        lastBubbleMs = now;
+      }
+
+      // Rise + fade bubbles
+      var b     = beakers[idx];
+      var fillH = 880 * Math.min((b.volume || 0) / 250, 1);
+      var surfY = 1230 - fillH;
+      for (var i = activeBubbles.length - 1; i >= 0; i--) {
+        var bub = activeBubbles[i];
+        bub.y -= bub.speed * 0.016;
+        var rel = Math.max(0, (bub.y - surfY) / Math.max(fillH, 1));
+        var op  = rel < 0.12 ? (rel / 0.12) * 0.10 : 0.10;
+        bub.el.setAttribute('cy', bub.y.toFixed(1));
+        bub.el.setAttribute('fill', 'rgba(255,255,255,' + op.toFixed(3) + ')');
+        if (bub.y < surfY - 4) {
+          if (bub.el.parentNode) bub.el.parentNode.removeChild(bub.el);
+          activeBubbles.splice(i, 1);
+        }
+      }
+
+      if (p < 1) {
+        requestAnimationFrame(step);
+      } else {
+        _cleanup();
+      }
+    }
+
+    beakers[idx]._colorAnim = { cancel: function() { cancelled = true; } };
+    requestAnimationFrame(step);
+  }
+
+  // ── Paper strip animation: strip dips into beaker, changes color, result shown ──
+  function _animatePaperStrip(indicatorKey, beakerIdx, prevEl) {
+    var b = beakers[beakerIdx];
+    if (!b.substance) {
+      if (prevEl && prevEl.parentNode) prevEl.parentNode.removeChild(prevEl);
+      return;
+    }
+    // Universal gets its own dedicated animation
+    if (indicatorKey === 'universal') {
+      _animateUniversalStrip(beakerIdx, prevEl);
+      return;
+    }
+    var slot = document.getElementById('beaker-' + beakerIdx);
+    var wr   = slot ? slot.getBoundingClientRect() : {left:0, top:200, width:120, height:160};
+    var targetX = wr.left + wr.width / 2;
+    var targetY = wr.top  + 20;
+
+    prevEl.style.transition = 'left 0.3s cubic-bezier(0.25,0.46,0.45,0.94), top 0.3s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.3s ease';
+    var pw = prevEl.offsetWidth || 28;
+    prevEl.style.left = (targetX - pw/2) + 'px';
+    prevEl.style.top  = targetY + 'px';
+    prevEl.style.transform = 'rotate(0deg)';
+
+    // Determine strip result color
+    var ph = b.ph || 7;
+    var stripColor;
+    if (indicatorKey === 'tornasol') {
+      if (ph < 6.8) stripColor = '#e01525'; // red
+      else if (ph > 7.2) stripColor = '#1567c6'; // blue
+      else stripColor = '#7a6f9a'; // violet neutral
+    } else {
+      // universal
+      if      (ph <= 2)  stripColor = '#ff2535';
+      else if (ph <= 4)  stripColor = '#ff8c00';
+      else if (ph <= 6)  stripColor = '#ffe000';
+      else if (ph <= 7)  stripColor = '#9ad32a';
+      else if (ph <= 9)  stripColor = '#45b94d';
+      else if (ph <= 11) stripColor = '#3498c9';
+      else               stripColor = '#5c23a8';
+    }
+
+    // Dip strip — animate top to lower y-value (into liquid)
+    setTimeout(function() {
+      prevEl.style.transition = 'top 0.6s ease-in, left 0.6s ease-in';
+      prevEl.style.top = (targetY + 60) + 'px';
+
+      setTimeout(function() {
+        // Change strip image tint with a colored overlay
+        var img = prevEl.querySelector('img');
+        if (img) {
+          img.style.filter = 'hue-rotate(0deg) saturate(3) brightness(0.8)';
+          img.style.mixBlendMode = 'multiply';
+          img.style.background = stripColor;
+          img.style.borderRadius = '4px';
+        }
+
+        // Pull out
+        setTimeout(function() {
+          prevEl.style.transition = 'top 0.4s ease-out, opacity 0.4s ease, transform 0.4s ease';
+          prevEl.style.top = (targetY - 20) + 'px';
+
+          setTimeout(function() {
+            // Show result badge
+            var label = indicatorKey === 'tornasol' ? 'Tornasol' : 'Universal';
+            var phLabel = b.ph !== null ? 'pH ≈ ' + b.ph.toFixed(1) : '';
+            var badge = document.createElement('div');
+            badge.className = 'strip-result-badge';
+            badge.style.color = stripColor;
+            badge.style.borderColor = stripColor;
+            badge.style.background = 'rgba(4,10,6,0.88)';
+            badge.textContent = label + ' · ' + phLabel;
+            slot.style.position = 'relative';
+            slot.appendChild(badge);
+
+            // Log indicator result (liquid color unchanged)
+            var iname = indicatorKey === 'tornasol' ? 'Tornasol' : 'Universal';
+            var c = b.ph !== null ? phToColor(b.ph) : '#aaa';
+            addLog('<strong>' + iname + '</strong>: tira cambió a <span style="color:' + stripColor + '">■</span> — pH estimado ' + phLabel, 'reaction');
+
+            // Fade out everything
+            setTimeout(function() {
+              prevEl.style.opacity = '0';
+              prevEl.style.transform = 'scale(0.7)';
+              setTimeout(function(){ if (prevEl.parentNode) prevEl.parentNode.removeChild(prevEl); }, 350);
+              badge.style.animation = 'badgeFade 0.5s ease forwards';
+              setTimeout(function(){ if (badge.parentNode) badge.parentNode.removeChild(badge); }, 550);
+            }, 3500);
+          }, 500);
+        }, 700);
+      }, 650);
+    }, 350);
+  }
+
+  // ── Universal Indicator strip animation ──
+  // Separate from tornasol: instant preview removal, realistic dip, partial wet color, 5s reaction
+  function _animateUniversalStrip(beakerIdx, prevEl) {
+    _lockLab();
+    // Remove drag preview instantly — animation uses its own dedicated strip element
+    if (prevEl && prevEl.parentNode) prevEl.parentNode.removeChild(prevEl);
+
+    var b    = beakers[beakerIdx];
+    var slot = document.getElementById('beaker-' + beakerIdx);
+    var wr   = slot.getBoundingClientRect();
+
+    var STRIP_W  = 22;    // strip width (vertical)
+    var STRIP_H  = 128;   // strip height (vertical)
+    var beakerCX = wr.left + wr.width / 2;
+    var slotTop  = wr.top;
+
+    // Liquid surface in screen coordinates (same scale as beaker SVG)
+    var SVG_SCALE   = 208 / 1600;
+    var svgSurf     = 1230 - 880 * Math.min((b.volume || 150) / 250, 1);
+    var liquidSurfY = slotTop + svgSurf * SVG_SCALE;
+    var glassBaseY  = slotTop + 158;   // physical bottom of glass ring
+
+    // Bottom of strip descends 50px into liquid, capped above glass base
+    var stripBottomTarget = Math.min(liquidSurfY + 50, glassBaseY - 4);
+    var stripTopFinal     = stripBottomTarget - STRIP_H;
+    var submergedH        = Math.max(0, Math.round(stripBottomTarget - liquidSurfY));
+
+    // Result color for this pH
+    var ph = b.ph !== null ? b.ph : 7;
+    var resultColor;
+    if      (ph <= 2)  resultColor = '#e01525';
+    else if (ph <= 4)  resultColor = '#ff7c00';
+    else if (ph <= 6)  resultColor = '#f0cb00';
+    else if (ph <= 7)  resultColor = '#7dbd27';
+    else if (ph <= 9)  resultColor = '#2aaa5c';
+    else if (ph <= 11) resultColor = '#2d88cc';
+    else               resultColor = '#6822b0';
+
+    // Build the animation strip element (separate from drag preview)
+    var stripEl = document.createElement('div');
+    stripEl.style.cssText =
+      'position:fixed;z-index:9998;pointer-events:none;' +
+      'width:' + STRIP_W + 'px;height:' + STRIP_H + 'px;' +
+      'left:' + (beakerCX - STRIP_W / 2) + 'px;' +
+      'top:'  + (slotTop - STRIP_H - 10)  + 'px;' +
+      'border-radius:5px;overflow:hidden;' +
+      'box-shadow:1px 3px 10px rgba(0,0,0,0.42),0 0 0 1px rgba(180,140,0,0.30);';
+
+    // Dry layer — yellow paper strip (CSS gradient matching universal_yellow_strip.svg palette)
+    var dryEl = document.createElement('div');
+    dryEl.style.cssText =
+      'position:absolute;top:0;left:0;width:100%;height:100%;border-radius:5px;' +
+      'background:linear-gradient(180deg,#FFE34A 0%,#FFD21F 44%,#E8AF00 78%,#C58B00 100%);' +
+      'box-shadow:inset 0 0 0 1px rgba(255,255,200,0.22);';
+
+    // Wet overlay — grows from bottom over 5 s as reaction develops
+    var wetEl = document.createElement('div');
+    wetEl.style.cssText =
+      'position:absolute;bottom:0;left:0;width:100%;height:0;' +
+      'background:' + resultColor + ';opacity:0;border-radius:0 0 5px 5px;' +
+      'transition:height 5s cubic-bezier(0.25,0,0.75,1),opacity 1s ease-in;';
+
+    stripEl.appendChild(dryEl);
+    stripEl.appendChild(wetEl);
+    document.body.appendChild(stripEl);
+
+    // Phase 1 — Descend into beaker (1.4 s), starts immediately
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        stripEl.style.transition = 'top 1.4s cubic-bezier(0.45,0,0.55,1)';
+        stripEl.style.top = stripTopFinal + 'px';
+      });
+    });
+
+    // Phase 2 — After descent: record result + start 5 s color reaction
+    setTimeout(function() {
+      applyIndicatorToBeaker(beakerIdx, 'universal');
+      wetEl.style.height  = submergedH + 'px';
+      wetEl.style.opacity = '0.88';
+    }, 1450);
+
+    // Phase 3 — After 5 s reaction: lift strip out, show badge, clean up
+    setTimeout(function() {
+      stripEl.style.transition = 'top 0.9s cubic-bezier(0.25,0.46,0.45,0.94)';
+      stripEl.style.top = (slotTop - STRIP_H - 15) + 'px';
+
+      var phLabel = b.ph !== null ? 'pH ≈ ' + b.ph.toFixed(1) : '';
+      var badge = document.createElement('div');
+      badge.className = 'strip-result-badge';
+      badge.style.color       = resultColor;
+      badge.style.borderColor = resultColor;
+      badge.style.background  = 'rgba(4,10,6,0.88)';
+      // Centered between glass base (~160px) and label (top:216px): 30px gap above, 8px below
+      badge.style.bottom      = 'auto';
+      badge.style.top         = '190px';
+      badge.textContent = 'Universal · ' + phLabel;
+      slot.appendChild(badge);
+
+      setTimeout(function() {
+        stripEl.style.transition = 'opacity 0.5s ease';
+        stripEl.style.opacity = '0';
+        setTimeout(function() { if (stripEl.parentNode) stripEl.parentNode.removeChild(stripEl); }, 530);
+        badge.style.animation = 'badgeFade 0.5s ease forwards';
+        setTimeout(function() { if (badge.parentNode) badge.parentNode.removeChild(badge); _unlockLab(); }, 550);
+      }, 3000);
+
+    }, 1450 + 5000);
+  }
+
+  // ── Tornasol strip animation — mirrors Universal but with litmus red/blue/purple logic ──
+  function _animateTornasolStrip(beakerIdx, prevEl, startColor) {
+    _lockLab();
+    if (prevEl && prevEl.parentNode) prevEl.parentNode.removeChild(prevEl);
+
+    var b    = beakers[beakerIdx];
+    var slot = document.getElementById('beaker-' + beakerIdx);
+    var wr   = slot.getBoundingClientRect();
+
+    var STRIP_W  = 22;
+    var STRIP_H  = 128;
+    var beakerCX = wr.left + wr.width / 2;
+    var slotTop  = wr.top;
+
+    var SVG_SCALE   = 208 / 1600;
+    var svgSurf     = 1230 - 880 * Math.min((b.volume || 150) / 250, 1);
+    var liquidSurfY = slotTop + svgSurf * SVG_SCALE;
+    var glassBaseY  = slotTop + 158;
+
+    var stripBottomTarget = Math.min(liquidSurfY + 50, glassBaseY - 4);
+    var stripTopFinal     = stripBottomTarget - STRIP_H;
+    var submergedH        = Math.max(0, Math.round(stripBottomTarget - liquidSurfY));
+
+    var ph = b.ph !== null ? b.ph : 7;
+
+    // Litmus result: acid → red, base → blue, neutral → no change
+    var resultColorName = ph < 6.8 ? 'red' : ph > 7.2 ? 'blue' : null;
+    var resultColor     = resultColorName === 'red' ? '#e01525' : resultColorName === 'blue' ? '#1567c6' : '#888';
+    // Paper only reacts (changes color) when result differs from starting paper color
+    var paperChanges    = resultColorName !== null && resultColorName !== startColor;
+    // Badge shows the final paper color after reaction
+    var badgeColor      = paperChanges ? resultColor : (startColor === 'red' ? '#e01525' : '#1567c6');
+
+    // Dry layer gradient matches the starting paper color the user randomly received
+    var dryGradient = startColor === 'red'
+      ? 'linear-gradient(180deg, #FF8A8A 0%, #F04A4A 44%, #C62828 78%, #8E1515 100%)'
+      : 'linear-gradient(180deg, #5EC8FF 0%, #2F9BFF 44%, #1F6FE5 78%, #1746A2 100%)';
+
+    var stripEl = document.createElement('div');
+    stripEl.style.cssText =
+      'position:fixed;z-index:9998;pointer-events:none;' +
+      'width:' + STRIP_W + 'px;height:' + STRIP_H + 'px;' +
+      'left:' + (beakerCX - STRIP_W / 2) + 'px;' +
+      'top:'  + (slotTop - STRIP_H - 10)  + 'px;' +
+      'border-radius:5px;overflow:hidden;' +
+      'box-shadow:1px 3px 10px rgba(0,0,0,0.42),0 0 0 1px rgba(0,0,0,0.18);';
+
+    // Dry layer — full-height starting color
+    var dryEl = document.createElement('div');
+    dryEl.style.cssText =
+      'position:absolute;top:0;left:0;width:100%;height:100%;border-radius:5px;' +
+      'background:' + dryGradient + ';' +
+      'box-shadow:inset 0 0 0 1px rgba(255,255,255,0.18);';
+
+    // Wet overlay — result color grows from bottom over 5 s as strip reacts
+    var wetEl = document.createElement('div');
+    wetEl.style.cssText =
+      'position:absolute;bottom:0;left:0;width:100%;height:0;' +
+      'background:' + resultColor + ';opacity:0;border-radius:0 0 5px 5px;' +
+      'transition:height 5s cubic-bezier(0.25,0,0.75,1),opacity 1.5s ease-in;';
+
+    stripEl.appendChild(dryEl);
+    stripEl.appendChild(wetEl);
+    document.body.appendChild(stripEl);
+
+    // Phase 1 — Descend (1.4 s)
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        stripEl.style.transition = 'top 1.4s cubic-bezier(0.45,0,0.55,1)';
+        stripEl.style.top = stripTopFinal + 'px';
+      });
+    });
+
+    // Phase 2 — Record result + start 5 s color reaction (only when paper changes color)
+    setTimeout(function() {
+      applyIndicatorToBeaker(beakerIdx, 'tornasol');
+      if (paperChanges) {
+        wetEl.style.height  = submergedH + 'px';
+        wetEl.style.opacity = '0.88';
+      }
+    }, 1450);
+
+    // Phase 3 — Lift strip, show badge, clean up
+    setTimeout(function() {
+      stripEl.style.transition = 'top 0.9s cubic-bezier(0.25,0.46,0.45,0.94)';
+      stripEl.style.top = (slotTop - STRIP_H - 15) + 'px';
+
+      var phLabel = b.ph !== null ? 'pH ≈ ' + b.ph.toFixed(1) : '';
+      var badge = document.createElement('div');
+      badge.className = 'strip-result-badge';
+      badge.style.color       = badgeColor;
+      badge.style.borderColor = badgeColor;
+      badge.style.background  = 'rgba(4,10,6,0.88)';
+      badge.style.bottom      = 'auto';
+      badge.style.top         = '190px';
+      badge.textContent = 'Tornasol · ' + phLabel;
+      slot.appendChild(badge);
+
+      setTimeout(function() {
+        stripEl.style.transition = 'opacity 0.5s ease';
+        stripEl.style.opacity = '0';
+        setTimeout(function() { if (stripEl.parentNode) stripEl.parentNode.removeChild(stripEl); }, 530);
+        badge.style.animation = 'badgeFade 0.5s ease forwards';
+        setTimeout(function() { if (badge.parentNode) badge.parentNode.removeChild(badge); _unlockLab(); }, 550);
+      }, 3000);
+
+    }, 1450 + 5000);
+  }
+
+  // ── Pipette animation: droplets fall, THEN liquid changes color ──
+  function _animatePipette(indicatorKey, beakerIdx, prevEl) {
+    _lockLab();
+    var b = beakers[beakerIdx];
+    if (!b.substance) {
+      if (prevEl && prevEl.parentNode) prevEl.parentNode.removeChild(prevEl);
+      _unlockLab();
+      return;
+    }
+    var slot = document.getElementById('beaker-' + beakerIdx);
+    var wr   = slot ? slot.getBoundingClientRect() : {left:0, top:200, width:120};
+    var targetX = wr.left + wr.width / 2;
+    var targetY = wr.top  - 20;
+
+    // ── Shared anchor: single point that both the pipette tip and droplets use ──
+    // anchorX/Y is the screen position of the pipette tip (and first droplet origin).
+    // Tip offset within the 60×120 element after SVG rotate(-20) + CSS rotate(-15deg):
+    //   xMidYMid meet → y-scale wins (0.1395) → ~4.9px margins → tip at img (50.5, 109)
+    //   after rotate(-15°) around center (30,60): visual tip at ~(62.5, 102) from element TL.
+    var TIP_EX = 62, TIP_EY = 102;
+    var anchorX = targetX - 3;          // droplet spawn X (slightly left of beaker center)
+    var anchorY = wr.top + 3;           // shared Y anchor at beaker rim
+    var pipTipX = anchorX + 7;          // pipette tip 7px right of droplet spawn
+
+    // Snap pipette to its tip position immediately — no left/top transition.
+    prevEl.style.transition = 'transform 0.22s ease';
+    prevEl.style.left      = (pipTipX - TIP_EX) + 'px';
+    prevEl.style.top       = (anchorY - TIP_EY) + 'px';
+    prevEl.style.transform = 'rotate(-15deg)';
+
+    var numDrops = 4;
+    /* Phenolphthalein solution is colorless — droplets are transparent/glossy */
+    var dropColor = 'rgba(220,240,255,0.22)';
+
+    // Droplets spawn from anchor + 6px gap below tip — both derived from same anchorX/Y.
+    var dropSpawnX = anchorX;
+    var dropSpawnY = anchorY + 6;
+
+    setTimeout(function() {
+      var dropDestY = wr.top + 110;   // midway into the liquid column
+
+      for (var d = 0; d < numDrops; d++) {
+        (function(delay) {
+          setTimeout(function() {
+            var drop = document.createElement('div');
+            drop.className = 'droplet';
+            drop.style.background = dropColor;
+            drop.style.left = (dropSpawnX + (Math.random()-0.5) * 6) + 'px';
+            drop.style.top  = dropSpawnY + 'px';
+            drop.style.setProperty('--drop-h', (dropDestY - dropSpawnY) + 'px');
+            document.body.appendChild(drop);
+            setTimeout(function(){ if (drop.parentNode) drop.parentNode.removeChild(drop); }, 600);
+          }, delay);
+        })(d * 180);
+      }
+
+      // After last droplet, apply indicator then keep lock through the 5-second
+      // Fenolftaleína liquid color transition before releasing inventory.
+      setTimeout(function() {
+        applyIndicatorToBeaker(beakerIdx, indicatorKey);
+
+        prevEl.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+        prevEl.style.opacity = '0';
+        prevEl.style.transform = 'rotate(0deg) scale(0.7)';
+        setTimeout(function(){ if (prevEl.parentNode) prevEl.parentNode.removeChild(prevEl); }, 420);
+
+        // Show result badge after the 5-second color transition finishes
+        setTimeout(function() {
+          var phForBadge = b.ph !== null ? b.ph : (SUBSTANCES[b.substance] ? SUBSTANCES[b.substance].ph : 7);
+          var fLabel, fColor;
+          if (phForBadge < 8.2)  { fLabel = 'Fenolftaleína · Incoloro';            fColor = 'rgba(170,195,185,0.9)'; }
+          else if (phForBadge < 10) { fLabel = 'Fenolftaleína · Rosa / Base débil'; fColor = '#e664a5'; }
+          else                   { fLabel = 'Fenolftaleína · Rosa intenso';         fColor = '#e12380'; }
+          var badge = document.createElement('div');
+          badge.className = 'strip-result-badge';
+          badge.style.color = fColor; badge.style.borderColor = fColor;
+          badge.style.background = 'rgba(4,10,6,0.88)';
+          badge.style.bottom = 'auto'; badge.style.top = '190px';
+          badge.textContent = fLabel;
+          slot.style.position = 'relative';
+          slot.appendChild(badge);
+          setTimeout(function() {
+            badge.style.animation = 'badgeFade 0.5s ease forwards';
+            setTimeout(function() { if (badge.parentNode) badge.parentNode.removeChild(badge); }, 550);
+          }, 3500);
+        }, 5000);
+
+        // Fenolftaleína triggers a 5-second _animateLiquidColor call inside
+        // applyIndicatorToBeaker; hold the lock until that transition completes.
+        setTimeout(_unlockLab, 5500);
+      }, numDrops * 180 + 350);
+    }, 310);
+  }
+
+  // ── Global single selection state ──
+  var selectedRackKey  = null;
+  var selectedRackType = null;
+  // Set to true when initDragFromEl auto-selects on mousedown so rackItemClick
+  // (onclick on the same interaction) can suppress the deselect toggle.
+  var _dragAutoSelected = false;
+
+  function rackItemClick(el, type, key) {
+    // If drag-start already selected this item in the same mousedown, suppress toggle
+    if (_dragAutoSelected && selectedRackKey === key && selectedRackType === type) {
+      _dragAutoSelected = false;
+      return;
+    }
+    _dragAutoSelected = false;
+    // If clicking the same item → deselect
+    if (selectedRackKey === key && selectedRackType === type) {
+      _clearRackSelection();
+      return;
+    }
+    _clearRackSelection();
+    selectedRackKey  = key;
+    selectedRackType = type;
+    el.classList.add('selected');
+    // Update display
+    var label = type === 'substance'
+      ? (SUBSTANCES[key] ? SUBSTANCES[key].name : key)
+      : (INDICATORS[key] ? INDICATORS[key].name : key);
+    var disp = document.getElementById('active-indicator-display');
+    if (disp) {
+      disp.textContent = label;
+      disp.style.color = 'var(--science)';
+    }
+  }
+
+  function _clearRackSelection() {
+    document.querySelectorAll('.rack-item.selected').forEach(function(e){ e.classList.remove('selected'); });
+    selectedRackKey  = null;
+    selectedRackType = null;
+    var disp = document.getElementById('active-indicator-display');
+    if (disp) { disp.textContent = 'Ninguno'; disp.style.color = ''; }
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  //  pH METER PLACEMENT SYSTEM
+  // ══════════════════════════════════════════════════════════════
+
+  function _placePHMeter(beakerIdx, prevEl) {
+    _lockLab();
+    var b = beakers[beakerIdx];
+    // If beaker is empty — reject, clean up preview, unlock immediately
+    if (!b || !b.substance) {
+      var slot = document.getElementById('beaker-' + beakerIdx);
+      if (slot) {
+        slot.style.transition = 'filter 0.15s';
+        slot.style.filter = 'drop-shadow(0 0 16px rgba(255,60,60,0.8))';
+        setTimeout(function(){ slot.style.filter = ''; slot.style.transition = ''; }, 500);
+      }
+      _showBeakerToast(beakerIdx, 'El vaso está vacío.', 'rgba(255,100,80,0.9)');
+      // Remove preview directly — _drag.el is already null at this point
+      if (prevEl && prevEl.parentNode) {
+        prevEl.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+        prevEl.style.opacity = '0';
+        prevEl.style.transform = 'scale(0.6)';
+        setTimeout(function(){ if(prevEl.parentNode) prevEl.parentNode.removeChild(prevEl); _unlockLab(); }, 280);
+      } else {
+        _unlockLab();
+      }
+      return;
+    }
+
+    // Place meter: fade/slide the drag preview into the beaker
+    var slot = document.getElementById('beaker-' + beakerIdx);
+    var wr = slot ? slot.getBoundingClientRect() : {left:0, top:0, width:168};
+    var targetX = wr.left + wr.width / 2;
+    var targetY = wr.top  + wr.height * 0.15;
+    var pw = prevEl.offsetWidth || 52;
+
+    prevEl.style.transition = 'left 0.35s cubic-bezier(0.25,0.46,0.45,0.94), top 0.35s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.35s ease, opacity 0.35s ease';
+    prevEl.style.left = (targetX - pw/2) + 'px';
+    prevEl.style.top  = targetY + 'px';
+    prevEl.style.transform = 'rotate(-5deg) scale(0.6)';
+    prevEl.style.opacity = '0';
+
+    setTimeout(function() {
+      if (prevEl.parentNode) prevEl.parentNode.removeChild(prevEl);
+
+      // Create the meter image inside the beaker-wrap
+      var wrap = slot.querySelector('.beaker-wrap');
+      if (!wrap) return;
+
+      // Clear any stale pH reading the moment a new meter starts entering a beaker
+      resetPHMeterDisplay();
+
+      // Wrapper div — carries the CSS class for position/shadow; meterImgEl points here
+      var meterImg = document.createElement('div');
+      meterImg.className = 'beaker-meter-img';
+      meterImg.style.opacity = '0';
+      meterImg.style.cursor = 'grab';
+      meterImg.style.transform = 'rotate(-20deg) translateY(30px)';
+
+      // <object> renders the SVG and gives us contentDocument for live text updates
+      var meterObj = document.createElement('object');
+      meterObj.type = 'image/svg+xml';
+      meterObj.data = '/brand_assets/ph_meter_pen_realistic.svg';
+      meterObj.draggable = false;
+      meterObj.style.cssText = 'width:100%; height:auto; display:block; pointer-events:none;';
+      meterObj.addEventListener('load', function() {
+        try {
+          var svgDoc = meterObj.contentDocument;
+          var phTxt = svgDoc && svgDoc.getElementById('ph-value');
+          if (phTxt) phTxt.textContent = '--';
+        } catch(e) {}
+      });
+      meterImg.appendChild(meterObj);
+
+      // Transparent overlay — sole target for pointer events / re-drag
+      var meterOverlay = document.createElement('div');
+      meterOverlay.style.cssText = 'position:absolute; top:0; left:0; width:100%; height:100%; cursor:inherit;';
+      meterOverlay.addEventListener('mousedown', _initMeterReDrag);
+      meterImg.appendChild(meterOverlay);
+
+      wrap.appendChild(meterImg);
+      phMeterState.meterObjEl = meterObj;
+
+      // Animate in — inventory stays locked (no _unlockLab here) until meter is removed
+      requestAnimationFrame(function() {
+        meterImg.style.transition = 'opacity 0.45s ease, transform 0.45s cubic-bezier(0.34,1.3,0.64,1)';
+        meterImg.style.opacity = '1';
+        meterImg.style.transform = 'rotate(-20deg) translateY(0)';
+      });
+
+      // Update state — meter is placed but moveable until ANALIZAR PH is pressed
+      phMeterState.activeBeaker = beakerIdx;
+      phMeterState.meterImgEl   = meterImg;
+      phMeterState.inBeaker     = true;
+      phMeterState.locked       = false;
+      activeBeakerIdx = beakerIdx;
+
+      // Add blue glow to the slot
+      slot.classList.add('has-meter');
+
+      // Disable inventory item
+      _setPHMeterInventoryState(true);
+
+      // Enable ANALIZAR PH button
+      updateAnalyzeBtn();
+      updatePanel();
+
+      addLog('pH Metro insertado en matraz ' + (beakerIdx+1) + '. Presiona <strong>Analizar pH</strong>.', 'scan');
+      setInstruction(4, 'pH Metro listo. Presiona <strong>Analizar pH</strong> para medir.');
+    }, 380);
+  }
+
+  function _updateMeterScreen(ph, color) {
+    var slot = document.getElementById('beaker-' + phMeterState.activeBeaker);
+    if (!slot) return;
+    // Remove any existing badge/label from a previous reading
+    var old = slot.querySelector('.meter-reading-label');  if (old) old.remove();
+    var oldB = slot.querySelector('.strip-result-badge');  if (oldB) oldB.remove();
+
+    var badge = document.createElement('div');
+    badge.className = 'meter-reading-label strip-result-badge';
+    badge.style.color       = color;
+    badge.style.borderColor = color;
+    badge.style.background  = 'rgba(4,10,6,0.88)';
+    badge.style.bottom      = 'auto';
+    badge.style.top         = '190px';
+    badge.textContent       = 'pH Metro · pH ' + ph.toFixed(1);
+    slot.style.position     = 'relative';
+    slot.appendChild(badge);
+    // Fade after 3.5 s (meter remains visible for 5 s total before reset)
+    setTimeout(function() {
+      badge.style.animation = 'badgeFade 0.5s ease forwards';
+      setTimeout(function() { if (badge.parentNode) badge.parentNode.removeChild(badge); }, 550);
+    }, 3500);
+  }
+
+  function _removePHMeterFromBeaker() {
+    var beakerIdx = phMeterState.activeBeaker;
+    if (beakerIdx === null) return;
+
+    var slot = document.getElementById('beaker-' + beakerIdx);
+    if (slot) slot.classList.remove('has-meter');
+
+    // Remove any result badge/label still visible (may already be faded)
+    if (slot) {
+      var lbl = slot.querySelector('.meter-reading-label'); if (lbl) lbl.remove();
+      var bdg = slot.querySelector('.strip-result-badge');  if (bdg) bdg.remove();
+    }
+
+    // Fade out the meter image
+    if (phMeterState.meterImgEl) {
+      var img = phMeterState.meterImgEl;
+      img.style.transition = 'opacity 0.55s ease, transform 0.55s ease';
+      img.style.opacity = '0';
+      img.style.transform = 'rotate(-26deg) translateY(-30px)';
+      setTimeout(function(){ if (img.parentNode) img.parentNode.removeChild(img); _unlockLab(); }, 580);
+    } else {
+      _unlockLab();
+    }
+
+    // Reset state
+    phMeterState.activeBeaker = null;
+    phMeterState.meterImgEl   = null;
+    phMeterState.meterObjEl   = null;
+    phMeterState.readingEl    = null;
+    phMeterState.inBeaker     = false;
+    phMeterState.locked       = false;
+
+    // Re-enable inventory
+    _setPHMeterInventoryState(false);
+    updateAnalyzeBtn();
+    resetPHMeterDisplay();
+
+    addLog('pH Metro retirado del matraz ' + (beakerIdx+1) + '.', 'scan');
+  }
+
+  function _setPHMeterInventoryState(inUse) {
+    var item   = document.getElementById('ph-meter-rack-item');
+    var status = document.getElementById('ph-meter-status');
+    if (!item) return;
+    if (inUse) {
+      item.classList.add('ph-meter-in-use');
+      if (status) { status.textContent = 'pH metro en uso'; status.style.color = 'rgba(255,160,60,0.75)'; }
+    } else {
+      item.classList.remove('ph-meter-in-use');
+      if (status) { status.textContent = 'Digital · 0–14'; status.style.color = ''; }
+    }
+  }
+
+  function _showBeakerToast(beakerIdx, msg, color) {
+    var slot = document.getElementById('beaker-' + beakerIdx);
+    if (!slot) return;
+    var toast = document.createElement('div');
+    toast.style.cssText = 'position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);' +
+      'font-family:var(--mono);font-size:0.55rem;font-weight:700;white-space:nowrap;' +
+      'padding:3px 10px;border-radius:10px;background:rgba(4,8,6,0.92);' +
+      'color:' + color + ';border:1px solid ' + color + ';z-index:50;pointer-events:none;' +
+      'animation:badgeIn 0.25s ease both;';
+    toast.textContent = msg;
+    slot.style.position = 'relative';
+    slot.appendChild(toast);
+    setTimeout(function(){ toast.style.animation = 'badgeFade 0.4s ease forwards'; setTimeout(function(){ if(toast.parentNode) toast.parentNode.removeChild(toast); }, 450); }, 2000);
+  }
+
+  // ── Re-drag meter from inside beaker (State A: meter placed, not yet analyzing) ──
+
+  function _initMeterReDrag(e) {
+    if (e.button !== 0) return;
+    if (phMeterState.locked || !phMeterState.inBeaker) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    var fromBeaker = phMeterState.activeBeaker;
+    var meterImg = phMeterState.meterImgEl;
+
+    // Dim the in-beaker image — meter is "lifted"
+    meterImg.style.opacity = '0.25';
+    meterImg.style.cursor = 'grabbing';
+
+    // Create floating drag preview
+    var prev = document.createElement('div');
+    prev.style.cssText = 'position:fixed;z-index:9999;pointer-events:none;width:52px;height:150px;opacity:0.95;';
+    var img = document.createElement('img');
+    img.src = '/brand_assets/ph_meter_pen_realistic.svg';
+    img.style.width = '100%'; img.style.height = '100%'; img.style.objectFit = 'contain';
+    img.draggable = false;
+    prev.appendChild(img);
+    document.body.appendChild(prev);
+
+    // Plug into the shared _drag system so beaker hover-highlights work
+    _drag.active = true;
+    _drag.type = 'phMeter'; _drag.key = 'phMeter';
+    _drag.el = prev; _drag.originEl = null;
+    _drag.x = e.clientX; _drag.y = e.clientY;
+    _drag.vx = 0; _drag.vy = 0; _drag.angle = 0; _drag.angleV = 0;
+    _drag.hoveredBeaker = -1;
+    _drag._fromBeaker = fromBeaker;
+
+    _positionPreview(e.clientX, e.clientY, 0);
+    document.addEventListener('mousemove', _onDragMove);
+    document.addEventListener('mouseup', _onReDragEnd);
+  }
+
+  function _onReDragEnd(e) {
+    document.removeEventListener('mousemove', _onDragMove);
+    document.removeEventListener('mouseup', _onReDragEnd);
+    if (!_drag.active) return;
+
+    var fromBeaker = _drag._fromBeaker;
+    var prev = _drag.el;
+    var hit = _getBeakerAtPoint(e.clientX, e.clientY);
+    var overInv = _isOverPHMeterInventory(e.clientX, e.clientY);
+
+    if (_drag.hoveredBeaker >= 0) {
+      document.getElementById('beaker-' + _drag.hoveredBeaker).classList.remove('drag-over');
+    }
+    _drag.active = false;
+    _drag.el = null;
+
+    // Drop on inventory → return to inventory, fully reset
+    if (overInv) {
+      _removePHMeterFromBeaker();
+      if (prev && prev.parentNode) {
+        prev.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        prev.style.opacity = '0'; prev.style.transform = 'scale(0.6)';
+        setTimeout(function(){ if(prev.parentNode) prev.parentNode.removeChild(prev); }, 320);
+      }
+      return;
+    }
+
+    // Drop on a DIFFERENT filled beaker → move meter there
+    if (hit >= 0 && hit !== fromBeaker && beakers[hit] && beakers[hit].substance) {
+      var oldSlot = document.getElementById('beaker-' + fromBeaker);
+      if (oldSlot) oldSlot.classList.remove('has-meter');
+      var oldImg = phMeterState.meterImgEl;
+      if (oldImg && oldImg.parentNode) oldImg.parentNode.removeChild(oldImg);
+      phMeterState.activeBeaker = null;
+      phMeterState.meterImgEl = null;
+      phMeterState.meterObjEl = null;
+      phMeterState.inBeaker = false;
+      // Release the previous placement lock before _placePHMeter acquires a new one
+      _unlockLab();
+      _placePHMeter(hit, prev);
+      return;
+    }
+
+    // Everything else (same beaker, empty beaker, miss) → snap back
+    var meterImg = phMeterState.meterImgEl;
+    if (meterImg) { meterImg.style.opacity = '1'; meterImg.style.cursor = 'grab'; }
+    if (prev && prev.parentNode) {
+      prev.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+      prev.style.opacity = '0'; prev.style.transform = 'scale(0.7)';
+      setTimeout(function(){ if(prev.parentNode) prev.parentNode.removeChild(prev); }, 320);
+    }
+    if (hit >= 0 && hit !== fromBeaker && beakers[hit] && !beakers[hit].substance) {
+      _showBeakerToast(hit, 'El vaso está vacío.', 'rgba(255,100,80,0.9)');
+    }
+  }
+
+  function _isOverPHMeterInventory(cx, cy) {
+    var item = document.getElementById('ph-meter-rack-item');
+    if (!item) return false;
+    var r = item.getBoundingClientRect();
+    return cx >= r.left - 24 && cx <= r.right + 24 && cy >= r.top - 24 && cy <= r.bottom + 24;
+  }
+
+  // ── Add / mix substance into beaker ──
+  function addSubstanceToBeaker(idx, substKey) {
+    var subst = SUBSTANCES[substKey];
+    if (!subst) return;
+    var b = beakers[idx];
+    // Cancel any ongoing color animation before modifying the beaker state
+    if (b._colorAnim) b._colorAnim.cancel();
+
+    // Gate 1: Fenolftaleína applied → reject (paper indicators do not block)
+    if (b.hasPhenolphthalein) {
+      addLog('No se puede agregar otra sustancia: este vaso ya tiene Fenolftaleína aplicada.', 'scan');
+      _showBeakerToast(idx, 'Fenolftaleína ya aplicada.', 'rgba(255,160,60,0.9)');
+      return;
+    }
+    // Gate 2: already 2 substances → reject
+    if (b.substances.length >= 2) {
+      addLog('No se puede agregar otra sustancia: este vaso ya contiene una mezcla de dos sustancias.', 'scan');
+      _showBeakerToast(idx, 'Máx. 2 sustancias.', 'rgba(255,100,80,0.9)');
+      return;
+    }
+
+    if (b.substances.length === 0) {
+      // First substance — fill normally
+      b.substances = [substKey];
+      b.substance  = substKey;
+      b.ph = subst.ph;
+      b.liquidColor = subst.baseColor;
+      b.volume = 150;
+      b.indicator = null;
+      b.paperIndicatorApplied = false;
+      b.phAnalyzed = false;
+      addLog('Matraz ' + (idx+1) + ' llenado con <strong>' + subst.name + '</strong>', 'data');
+      setInstruction(2, 'Matraz ' + (idx+1) + ' con <strong>' + subst.name + '</strong>. Arrastra un indicador sobre él, o presiona <strong>Analizar pH</strong> para medir.');
+      completeLabStep(1);
+    } else {
+      // Second substance — mix
+      mixIntoBeaker(idx, substKey);
+      completeLabStep(6);
+    }
+
+    renderLiquid(idx);
+    updateBeakerLabel(idx);
+    selectBeaker(idx);
+    updatePanel();
+    updateApplyBtn();
+    updateAnalyzeBtn();
+  }
+
+  function mixIntoBeaker(idx, substKey) {
+    var b = beakers[idx];
+    var s1key = b.substances[0];
+    var s1 = SUBSTANCES[s1key];
+    var s2 = SUBSTANCES[substKey];
+    if (!s1 || !s2) return;
+
+    b.substances = [s1key, substKey];
+    // b.substance stays as s1key for backwards compat (renderLiquid etc.)
+
+    var resultPH = calculateMixturePH(s1key, substKey, s1.ph, s2.ph);
+    b.ph = resultPH;
+    b.phAnalyzed = false;
+    b.indicator = null;
+    b.paperIndicatorApplied = false;
+    b.volume = Math.min(250, (b.volume || 150) + 100);
+
+    var isFizz = _isFizzReaction(s1key, substKey);
+    var isNeut = (s1.ph <= 2 && s2.ph >= 12) || (s2.ph <= 2 && s1.ph >= 12);
+
+    if (isNeut) {
+      addLog('<strong>Neutralización:</strong> ' + s1.name + ' + ' + s2.name + ' → pH ≈ ' + resultPH.toFixed(1), 'reaction');
+      if (window.__triggerScannerBeam) window.__triggerScannerBeam(idx);
+    } else if (isFizz) {
+      addLog('<strong>Efervescencia (CO₂ ↑):</strong> ' + s1.name + ' + ' + s2.name + ' → pH ≈ ' + resultPH.toFixed(1), 'reaction');
+      if (window.__triggerScannerBeam) window.__triggerScannerBeam(idx);
+    } else {
+      addLog('Se mezcló <strong>' + s1.name + '</strong> con <strong>' + s2.name + '</strong> en el vaso ' + (idx+1) + '. Nuevo pH estimado: ' + resultPH.toFixed(1) + ' (pendiente de análisis).', 'data');
+    }
+    setInstruction(2, 'Mezcla: <strong>' + s1.name + ' + ' + s2.name + '</strong>. Aplica un indicador o presiona <strong>Analizar pH</strong>.');
+
+    // Queue gradual color transition — triggered after pour animation ends
+    b._pendingColor = _computeMixedColor(b);
+    b._pendingFizz  = isFizz;
+  }
+
+  // ── pH calculation for two-substance mixtures ──
+  function calculateMixturePH(key1, key2, ph1, ph2) {
+    var isAcid1 = ph1 < 7, isBase1 = ph1 > 7;
+    var isAcid2 = ph2 < 7, isBase2 = ph2 > 7;
+
+    // Strong acid + strong base → neutralization ~7.0
+    if ((ph1 <= 1.5 && ph2 >= 13) || (ph2 <= 1.5 && ph1 >= 13)) return 7.0;
+
+    // Any acid + bicarbonato (weak base, pH 8.3) → moves toward weak-acid range
+    if ((key1 === 'bicarbonato' && isAcid2) || (key2 === 'bicarbonato' && isAcid1)) {
+      var aph = key1 === 'bicarbonato' ? ph2 : ph1;
+      if (aph <= 1.5) return 5.5;   // HCl + bicarbonato
+      if (aph <= 3)   return 6.0;   // weak-strong acid + bicarbonato
+      return Math.min(6.8, (aph + 7.5) / 2);
+    }
+
+    // Substance + water → dilution: moves toward 7 by 35%
+    if (key1 === 'agua' || key2 === 'agua') {
+      var other = key1 === 'agua' ? ph2 : ph1;
+      return parseFloat((other + (7 - other) * 0.35).toFixed(1));
+    }
+
+    // Acid + acid → weighted blend biased toward stronger acid
+    if (isAcid1 && isAcid2) {
+      var stronger = Math.min(ph1, ph2);
+      return Math.max(0, parseFloat((stronger * 0.55 + (ph1 + ph2) / 2 * 0.45).toFixed(1)));
+    }
+
+    // Base + base → weighted blend biased toward stronger base
+    if (isBase1 && isBase2) {
+      var stronger2 = Math.max(ph1, ph2);
+      return Math.min(14, parseFloat((stronger2 * 0.55 + (ph1 + ph2) / 2 * 0.45).toFixed(1)));
+    }
+
+    // Acid + base (general) → move toward neutral weighted by strength
+    if ((isAcid1 && isBase2) || (isBase1 && isAcid2)) {
+      var acid = Math.min(ph1, ph2), base = Math.max(ph1, ph2);
+      var hA = Math.pow(10, -acid), hB = Math.pow(10, -(14 - base));
+      if (hA > hB * 2) return parseFloat((acid + (7 - acid) * 0.55).toFixed(1));
+      if (hB > hA * 2) return parseFloat((base - (base - 7) * 0.55).toFixed(1));
+      return 7.0;
+    }
+
+    return parseFloat(((ph1 + ph2) / 2).toFixed(1));
+  }
+
+  function _isFizzReaction(k1, k2) {
+    var acids = ['hcl', 'limon', 'vinagre'];
+    var fizzbases = ['bicarbonato'];
+    return (acids.indexOf(k1) >= 0 && fizzbases.indexOf(k2) >= 0) ||
+           (fizzbases.indexOf(k1) >= 0 && acids.indexOf(k2) >= 0);
+  }
+
+  // ── Apply indicator to a specific beaker ──
+  // tornasol / universal: liquid color unchanged — only paper strip changes (handled by animation)
+  // fenolftaleina: liquid color changes
+  function applyIndicatorToBeaker(idx, indicatorKey) {
+    var b = beakers[idx];
+    if (!b.substance) {
+      addLog('Matraz ' + (idx+1) + ' vacío — vierte una sustancia primero.', 'scan');
+      return;
+    }
+    var ind = INDICATORS[indicatorKey];
+    if (!ind) return;
+    var effectivePH = b.ph !== null ? b.ph : SUBSTANCES[b.substance].ph;
+    b.indicator = indicatorKey;
+    if (indicatorKey === 'fenolftaleina') {
+      b.hasPhenolphthalein = true;   // persistent — survives subsequent indicator/pH-meter use
+    } else if (indicatorKey === 'tornasol' || indicatorKey === 'universal') {
+      b.paperIndicatorApplied = true;
+    }
+    b.phAnalyzed = false;
+    var logColor, logLabel;
+    // Only fenolftaleína changes liquid color; strips are for observation only
+    if (indicatorKey === 'fenolftaleina') {
+      var newColor  = ind.fn(effectivePH);
+      var prevColor = b.liquidColor || 'transparent';
+      b.liquidColor = newColor;
+      // Gradual 5-second color change instead of instant renderLiquid
+      _animateLiquidColor(idx, prevColor, newColor, {duration: 5000});
+      if (window.__triggerScannerBeam) window.__triggerScannerBeam(idx);
+      logColor = newColor;
+      logLabel = colorName(newColor);
+    } else {
+      // Paper-based indicators: log pH range observation
+      logColor = phToColor(effectivePH);
+      logLabel = 'pH ≈ ' + effectivePH.toFixed(1);
+    }
+    var substName;
+    if (b.substances && b.substances.length === 2) {
+      var sn1 = SUBSTANCES[b.substances[0]] ? SUBSTANCES[b.substances[0]].name : b.substances[0];
+      var sn2 = SUBSTANCES[b.substances[1]] ? SUBSTANCES[b.substances[1]].name : b.substances[1];
+      substName = sn1 + ' + ' + sn2;
+    } else {
+      substName = SUBSTANCES[b.substance] ? SUBSTANCES[b.substance].name : '?';
+    }
+    var isMixture = b.substances && b.substances.length === 2;
+    var mixNote = isMixture ? ' Resultado según pH de la mezcla.' : '';
+    addLog('<span class="log-color-swatch" style="background:' + logColor + ';"></span><strong>' + ind.name + '</strong> aplicado a <em>' + substName + '</em> (matraz ' + (idx+1) + ') → <strong style="color:' + logColor + ';">' + logLabel + '</strong>' + mixNote, 'reaction');
+
+    // Record in per-tool history
+    indicatorHistory[indicatorKey].push({
+      substance: substName,
+      label: _indResultLabel(indicatorKey, effectivePH),
+      color: logColor,
+    });
+    renderIndicatorHistory();
+
+    setInstruction(4, 'Reacción observada. Presiona <strong>Analizar pH</strong> para medir el pH.');
+    completedCount++;
+    updateAppliedSummary();
+    // Stepper: mark the corresponding indicator step done
+    if (indicatorKey === 'tornasol') {
+      if (b.completedTests.indexOf('tornasol') === -1) b.completedTests.push('tornasol');
+      completeLabStep(3);
+    } else if (indicatorKey === 'universal') {
+      if (b.completedTests.indexOf('universal') === -1) b.completedTests.push('universal');
+      completeLabStep(4);
+    } else if (indicatorKey === 'fenolftaleina') {
+      if (b.completedTests.indexOf('fenolftaleina') === -1) b.completedTests.push('fenolftaleina');
+      completeLabStep(5);
+    }
+    _checkComparStep(idx);
+    if (completedCount >= 3) {
+      document.getElementById('finish-section').style.display = 'flex';
+      document.getElementById('pill-quiz').classList.add('active');
+      addLog('Experimento completado. Procede al quiz.', 'ok');
+    }
+    selectBeaker(idx);
+    updatePanel();
+    updateApplyBtn();
+  }
+
+  // ── Analyze pH (manual button — triggered AFTER pH meter placed in beaker) ──
+  function analyzePH() {
+    var meterBeaker = phMeterState.activeBeaker;
+    if (meterBeaker === null) return;
+    var b = beakers[meterBeaker];
+    if (!b || !b.substance) return;
+    // Inventory is already locked from placement; just confirm meter is locked
+    phMeterState.locked = true;
+    if (phMeterState.meterImgEl) {
+      phMeterState.meterImgEl.style.cursor = 'default';
+      phMeterState.meterImgEl.style.pointerEvents = 'none';
+    }
+    var effectivePH = b.ph !== null ? b.ph : SUBSTANCES[b.substance].ph;
+    var idxSnap = meterBeaker;
+    document.getElementById('btn-analyze').disabled = true;
+    document.getElementById('btn-analyze').style.opacity = '0.35';
+    setApplyDisabled(true);
+    document.getElementById('ph-display').textContent = '--';
+    document.getElementById('ph-display').style.color  = 'rgba(52,211,153,0.52)';
+    document.getElementById('ph-state').textContent    = 'Analizando muestra...';
+    document.getElementById('ph-state').style.color    = 'rgba(52,211,153,0.38)';
+    document.getElementById('panel-ph-value').textContent = '--';
+    document.getElementById('panel-ph-state').textContent = 'Analizando...';
+    addLog('pH Metro analizando matraz ' + (idxSnap+1) + '...', 'scan');
+    if (window.__triggerScannerBeam) window.__triggerScannerBeam(idxSnap);
+    setTimeout(function() {
+      var target = effectivePH;
+      var current = 0;
+      var step = target / 18;
+      var iv = setInterval(function() {
+        current = Math.min(current + step, target);
+        document.getElementById('ph-display').textContent = current.toFixed(1);
+        document.getElementById('ph-display').style.color = phToColor(current);
+        // Mirror value into in-beaker SVG display
+        try {
+          var _mObj = phMeterState.meterObjEl;
+          if (_mObj && _mObj.contentDocument) {
+            var _svgPh = _mObj.contentDocument.getElementById('ph-value');
+            if (_svgPh) _svgPh.textContent = current.toFixed(1);
+          }
+        } catch(e) {}
+        if (current >= target) {
+          clearInterval(iv);
+          b.ph = target;
+          b.phAnalyzed = true;
+          activeBeakerIdx = idxSnap;
+          var col = phToColor(target), st = phToState(target);
+          updatePhDisplay(target, st, col);
+          updateBeakerLabel(idxSnap);
+          addLog('pH matraz ' + (idxSnap+1) + ': <strong style="color:' + col + ';">' + target.toFixed(1) + '</strong> — ' + st, 'data');
+          // Record in pH Metro history
+          var bSnap = beakers[idxSnap];
+          var phSubstName;
+          if (bSnap.substances && bSnap.substances.length === 2) {
+            var ps1 = SUBSTANCES[bSnap.substances[0]] ? SUBSTANCES[bSnap.substances[0]].name : bSnap.substances[0];
+            var ps2 = SUBSTANCES[bSnap.substances[1]] ? SUBSTANCES[bSnap.substances[1]].name : bSnap.substances[1];
+            phSubstName = ps1 + ' + ' + ps2;
+          } else {
+            phSubstName = SUBSTANCES[bSnap.substance] ? SUBSTANCES[bSnap.substance].name : bSnap.substance || '?';
+          }
+          indicatorHistory.phmetro.push({ substance: phSubstName, label: 'pH ' + target.toFixed(1) + ' / ' + st, color: col });
+          renderIndicatorHistory();
+          // Show pH reading on the meter inside the beaker
+          _updateMeterScreen(target, col);
+          // Stepper: mark pH step done and track for Comparar
+          if (beakers[idxSnap].completedTests.indexOf('phmetro') === -1) {
+            beakers[idxSnap].completedTests.push('phmetro');
+          }
+          completeLabStep(2);
+          _checkComparStep(idxSnap);
+          // Remove pH meter after 5 seconds
+          setTimeout(function() { _removePHMeterFromBeaker(); }, 5000);
+        }
+      }, 65);
+    }, 1300);
+  }
+
+  // ── Select beaker (internal state only — no visual selection UI) ──
+  function selectBeaker(idx) {
+    activeBeakerIdx = idx;
+    updatePanel();
+    updateApplyBtn();
+    updateAnalyzeBtn();
+  }
+
+  // ── Update right panel reading ──
+  function updatePanel() {
+    if (activeBeakerIdx === null) {
+      document.getElementById('panel-ph-value').textContent = '—';
+      document.getElementById('panel-ph-value').style.color = 'rgba(255,255,255,0.22)';
+      document.getElementById('panel-ph-state').textContent = 'Selecciona un matraz';
+      document.getElementById('panel-ph-state').style.color = 'rgba(255,255,255,0.2)';
+      return;
+    }
+    var b = beakers[activeBeakerIdx];
+    if (!b.substance) {
+      document.getElementById('panel-ph-value').textContent = '—';
+      document.getElementById('panel-ph-value').style.color = 'rgba(255,255,255,0.22)';
+      document.getElementById('panel-ph-state').textContent = 'Matraz vacío';
+      document.getElementById('panel-ph-state').style.color = 'rgba(255,255,255,0.2)';
+      document.getElementById('ph-display').textContent = '—';
+      document.getElementById('ph-display').style.color = 'rgba(255,255,255,0.22)';
+      document.getElementById('ph-state').textContent = 'Sin muestra';
+      document.getElementById('ph-state').style.color = 'rgba(255,255,255,0.18)';
+      return;
+    }
+    // Only show analyzed pH when the meter is physically here and analysis ran this session
+    var meterHereAndDone = phMeterState.inBeaker &&
+                           phMeterState.activeBeaker === activeBeakerIdx &&
+                           phMeterState.locked;
+    if (b.phAnalyzed && b.ph !== null && meterHereAndDone) {
+      updatePhDisplay(b.ph, phToState(b.ph), phToColor(b.ph));
+    } else {
+      document.getElementById('panel-ph-value').textContent = '?';
+      document.getElementById('panel-ph-value').style.color = 'rgba(255,255,255,0.3)';
+      document.getElementById('panel-ph-state').textContent = 'Sin analizar';
+      document.getElementById('panel-ph-state').style.color = 'rgba(255,255,255,0.2)';
+      document.getElementById('ph-display').textContent = '—';
+      document.getElementById('ph-display').style.color = 'rgba(255,255,255,0.22)';
+      document.getElementById('ph-state').textContent = 'Presiona Analizar pH';
+      document.getElementById('ph-state').style.color = 'rgba(100,180,255,0.5)';
+    }
+  }
+
+  function updateAnalyzeBtn() {
+    var btn = document.getElementById('btn-analyze');
+    if (!btn) return;
+    // ANALIZAR PH is only enabled when a pH meter is placed in a filled beaker
+    var hasMeter = phMeterState.activeBeaker !== null && beakers[phMeterState.activeBeaker] && beakers[phMeterState.activeBeaker].substance;
+    btn.disabled = !hasMeter;
+    btn.style.opacity = hasMeter ? '' : '0.28';
+    btn.style.cursor  = hasMeter ? '' : 'not-allowed';
+  }
+
+  function resetPHMeterDisplay() {
+    document.getElementById('ph-display').textContent    = '—';
+    document.getElementById('ph-display').style.color    = 'rgba(255,255,255,0.22)';
+    document.getElementById('ph-state').textContent      = 'Sin muestra';
+    document.getElementById('ph-state').style.color      = 'rgba(255,255,255,0.18)';
+    document.getElementById('panel-ph-value').textContent = '—';
+    document.getElementById('panel-ph-value').style.color = 'rgba(255,255,255,0.22)';
+    document.getElementById('panel-ph-state').textContent = 'Sin muestra';
+    document.getElementById('panel-ph-state').style.color = 'rgba(255,255,255,0.2)';
+    var fill = document.getElementById('panel-ph-fill');
+    fill.style.width = '0%'; fill.style.background = 'transparent';
+    var led = document.getElementById('ph-led');
+    if (led) { led.style.background = 'rgba(255,255,255,0.1)'; led.style.boxShadow = 'none'; }
+  }
+
+  function updatePhDisplay(ph, state, stateColor) {
+    const val = ph !== null ? ph.toFixed(1) : '—';
+    const col = ph !== null ? stateColor : 'rgba(255,255,255,0.22)';
+    document.getElementById('ph-display').textContent = val;
+    document.getElementById('ph-display').style.color  = col;
+    document.getElementById('ph-state').textContent    = state;
+    document.getElementById('ph-state').style.color    = ph !== null ? stateColor : 'rgba(255,255,255,0.18)';
+    document.getElementById('panel-ph-value').textContent = val;
+    document.getElementById('panel-ph-value').style.color  = col;
+    document.getElementById('panel-ph-state').textContent  = state;
+    document.getElementById('panel-ph-state').style.color  = ph !== null ? stateColor : 'rgba(255,255,255,0.2)';
+    var fill = document.getElementById('panel-ph-fill');
+    if (ph !== null) {
+      fill.style.width      = (ph / 14 * 100).toFixed(1) + '%';
+      fill.style.background = stateColor;
+    } else {
+      fill.style.width      = '0%';
+      fill.style.background = 'transparent';
+    }
+    const led = document.getElementById('ph-led');
+    led.style.background = ph !== null ? stateColor : 'rgba(255,255,255,0.1)';
+    led.style.boxShadow  = ph !== null ? `0 0 6px ${stateColor}` : 'none';
+  }
+
+  const LOG_TYPES = {
+    init:     { label: 'INICIO',   cls: 'log-entry--init'     },
+    data:     { label: 'DATOS',    cls: 'log-entry--data'     },
+    scan:     { label: 'ANÁLISIS', cls: 'log-entry--scan'     },
+    reaction: { label: 'REACCIÓN', cls: 'log-entry--reaction' },
+    ok:       { label: 'COMPLET.', cls: 'log-entry--ok'       },
+    pending:  { label: 'ANÁLISIS', cls: 'log-entry--scan'     },
+    normal:   { label: 'DATOS',    cls: 'log-entry--data'     },
+  };
+  function addLog(text, type) {
+    const t = LOG_TYPES[type] || LOG_TYPES.data;
+    const c = document.getElementById('log-container');
+    const e = document.createElement('div');
+    e.className = 'log-entry ' + t.cls;
+    e.innerHTML =
+      `<span class="log-dot"></span>` +
+      `<span class="log-ts">${ts()}</span>` +
+      `<span class="log-label">${t.label}</span>` +
+      `<span class="log-text">${text}</span>`;
+    c.appendChild(e);
+    c.scrollTop = c.scrollHeight;
+  }
+
+  function setInstruction(num, text) {
+    // Legacy no-op — stepper renders its own instruction text
+  }
+
+  // ── Dropper animation ──
+  function animateDropper(beakerIdx, callback) {
+    const dropper = document.getElementById('dropper-anim');
+    const slot    = document.getElementById(`beaker-${beakerIdx}`);
+    const bench   = document.querySelector('.lab-bench');
+    if (!dropper || !slot || !bench) { callback(); return; }
+
+    const br = bench.getBoundingClientRect();
+    const sr = slot.getBoundingClientRect();
+    dropper.style.left    = (sr.left + sr.width / 2 - 15 - br.left) + 'px';
+    dropper.style.top     = (sr.top  - 50 - br.top) + 'px';
+    dropper.style.opacity = '1';
+    dropper.classList.add('animating');
+
+    setTimeout(() => {
+      dropper.classList.remove('animating');
+      dropper.style.opacity = '0';
+      callback();
+    }, 840);
+  }
+
+  // ── Indicator selection (from rack or panel tab) ──
+  function selectIndicator(el) {
+    const ind = el.dataset.indicator;
+    activeIndicator = ind;
+    document.querySelectorAll('.rack-indicator').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('active-indicator-display').textContent = indicatorColors[ind]?.name || ind;
+    document.getElementById('active-indicator-display').style.color = 'var(--science)';
+    updateApplyBtn();
+    setInstruction(3, `<strong>${indicatorColors[ind].name}</strong> seleccionado. Arrástralo sobre un matraz.`);
+    // Switch to bitácora tab
+    document.querySelectorAll('.panel-tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel-tab')[0].classList.add('active');
+    document.getElementById('tab-bitacora').style.display = 'flex';
+    document.getElementById('tab-registro').style.display  = 'none';
+  }
+
+  // Right-panel indicator selection — completely independent from left inventory
+  var rightPanelIndicatorSelected = null;
+
+  // Per-tool result history (only populated by actual use)
+  var indicatorHistory = { tornasol: [], fenolftaleina: [], universal: [], phmetro: [] };
+
+  function selectIndicatorPanel(ind, el) {
+    // Toggle: clicking the same button deselects it
+    if (rightPanelIndicatorSelected === ind) {
+      rightPanelIndicatorSelected = null;
+      document.querySelectorAll('.indicator-btn').forEach(function(b){ b.classList.remove('selected'); });
+      renderIndicatorHistory();
+      return;
+    }
+    rightPanelIndicatorSelected = ind;
+    // Only update .indicator-btn elements (right panel) — NEVER touch .rack-indicator
+    document.querySelectorAll('.indicator-btn').forEach(function(b){ b.classList.remove('selected'); });
+    el.classList.add('selected');
+    // Do NOT set activeIndicator, do NOT update active-indicator-display, do NOT touch left rack
+    renderIndicatorHistory();
+  }
+
+  function setApplyDisabled(state) { /* no-op: apply button removed, indicators applied by drag */ }
+  function updateApplyBtn() { /* no-op: apply button removed */ }
+
+  // ── Apply indicator button (rack-click path fallback) ──
+  function applyIndicator() {
+    if (activeBeakerIdx === null || !activeIndicator) return;
+    applyIndicatorToBeaker(activeBeakerIdx, activeIndicator);
+  }
+
+  function colorName(c) {
+    if (c.includes('214,69,80')  || c === '#D64550') return 'Rojo';
+    if (c.includes('232,75,138') || c === '#E84B8A') return 'Rosa fucsia';
+    if (c.includes('58,110,165') || c === '#3A6EA5') return 'Azul';
+    if (c.includes('68,170,68')  || c === '#44AA44') return 'Verde';
+    if (c.includes('224,168,0')  || c === '#E0A800') return 'Amarillo';
+    if (c.includes('90,78,165')  || c === '#5A4EA5') return 'Violeta';
+    if (c.includes('200,200,0'))                     return 'Amarillo-verdoso';
+    if (c.includes('68,170,170'))                    return 'Verde azulado';
+    if (c.includes('255,255,255,0.05'))              return 'Incoloro';
+    if (c === '#888')                                return 'Gris';
+    if (c === '#c8c800')                             return 'Amarillo';
+    return 'Variable';
+  }
+
+  function _indResultLabel(indicatorKey, ph) {
+    if (indicatorKey === 'tornasol') {
+      if (ph < 7)  return 'Rojo / Ácido';
+      if (ph > 7)  return 'Azul / Base';
+      return 'Morado / Neutro';
+    }
+    if (indicatorKey === 'fenolftaleina') {
+      if (ph < 8.2) return 'Incoloro / Ácido';
+      if (ph < 10)  return 'Rosa / Base débil';
+      return 'Magenta / Base fuerte';
+    }
+    if (indicatorKey === 'universal') {
+      if (ph <= 2)  return 'Rojo / pH ' + ph.toFixed(1);
+      if (ph <= 4)  return 'Naranja / pH ' + ph.toFixed(1);
+      if (ph <= 6)  return 'Amarillo / pH ' + ph.toFixed(1);
+      if (ph < 7.5) return 'Verde / pH ' + ph.toFixed(1);
+      if (ph <= 9)  return 'Verde azul / pH ' + ph.toFixed(1);
+      if (ph <= 11) return 'Azul / pH ' + ph.toFixed(1);
+      return 'Violeta / pH ' + ph.toFixed(1);
+    }
+    return 'pH ' + ph.toFixed(1);
+  }
+
+  var _TOOL_LABELS = {
+    tornasol:     'Papel tornasol',
+    fenolftaleina:'Fenolftaleína',
+    universal:    'Ind. universal',
+    phmetro:      'pH Metro',
+  };
+
+  function renderIndicatorHistory() {
+    var container = document.getElementById('ind-history-container');
+    if (!container) return;
+
+    var sel = rightPanelIndicatorSelected;
+
+    // Nothing selected — prompt to pick a tool
+    if (!sel) {
+      container.innerHTML = '<span style="font-family:var(--mono);font-size:0.63rem;color:rgba(255,255,255,0.22);">Selecciona un registro para ver aplicaciones.</span>';
+      return;
+    }
+
+    var label   = _TOOL_LABELS[sel] || sel;
+    var entries = indicatorHistory[sel] || [];
+
+    var html = '<div style="margin-bottom:2px;">';
+    html += '<div style="font-family:var(--mono);font-size:0.6rem;color:rgba(255,255,255,0.5);margin-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:3px;">' + label + '</div>';
+
+    if (entries.length === 0) {
+      html += '<span style="font-family:var(--mono);font-size:0.63rem;color:rgba(255,255,255,0.22);">Sin registros aún.</span>';
+    } else {
+      entries.forEach(function(e) {
+        html += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">';
+        html += '<span style="flex-shrink:0;display:inline-block;width:7px;height:7px;border-radius:50%;background:' + e.color + ';"></span>';
+        html += '<span style="font-family:var(--mono);font-size:0.63rem;color:rgba(255,255,255,0.48);line-height:1.4;">';
+        html += '<span style="color:rgba(255,255,255,0.72);">' + e.substance + '</span>: ' + e.label;
+        html += '</span></div>';
+      });
+    }
+
+    html += '</div>';
+    container.innerHTML = html;
+  }
+
+  function updateAppliedSummary() {
+    renderIndicatorHistory();
+  }
+
+  function switchPanelTab(tab, btn) {
+    document.querySelectorAll('.panel-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-bitacora').style.display = tab === 'bitacora' ? 'flex' : 'none';
+    document.getElementById('tab-registro').style.display  = tab === 'registro'  ? 'flex' : 'none';
+    if (tab === 'registro') {
+      staggerEnter(document.querySelectorAll('.indicator-btn'), 20, 55);
+    }
+    if (tab === 'bitacora') {
+      // Clear any registro tool selection so returning to Registro starts fresh
+      rightPanelIndicatorSelected = null;
+      document.querySelectorAll('.indicator-btn').forEach(function(b) { b.classList.remove('selected'); });
+      renderIndicatorHistory();
+    }
+  }
+
+  // ── Init ──
+  document.getElementById('start-time').textContent = ts();
+  _renderLabStepper();
+  requestAnimationFrame(animateWaves);
+
+
+  // ── Glassmorphism lab panel interactions ──
+  // Ported from FrostedGlassCard React component to vanilla JS.
+  // Applies to: bench poster (.bench-poster-glass), pH meter (.ph-instrument),
+  //             bitácora reading widget (.reading-widget).
+
+  // ── Flask Spotlight System ─────────────────────────────────────────────────
+
+  // ── Glowing 3D Card Effect ────────────────────────────────────────────────
+  // Injects scan dot, diagonal ray, and L-bracket corner accents into
+  // specific lab instrument panels. Staggered timing per panel so they
+  // don't pulse in sync. Never replaces panel content — purely decorative overlay.
+  // ── Scanner Beam & Analysis Overlay ──────────────────────────────────────
+  // Extracted from scanner-card-stream.tsx (21st.dev).
+  // Ported to vanilla JS/Canvas — no Three.js, no card carousel.
+  // Three effects:
+  //   1. Vertical green scan beam sweeps across the active flask (JS anim)
+  //   2. ASCII data noise flickers in the pH instrument panel (setInterval)
+  //   3. Green/cyan particles drift upward from the flask center (canvas RAF)
+  // All effects start together when applyIndicator() fires and stop at ~2.6s.
+  (function initScannerBeam() {
+    'use strict';
+
+    // ASCII character set — from scanner-card-stream.tsx ASCII_CHARS
+    var ASCII = 'abcdefghijklmnopqrstuvwxyz0123456789(){}[]<>;:._-+=!@#$%^&*|\\/ABCDEF░▒▓';
+    var bench = document.querySelector('.lab-bench');
+    var phInst = document.querySelector('.ph-screen');   // inject into the black display, not the whole panel
+    if (!bench || !phInst) return;
+
+    // ── Create and inject DOM elements ──────────────────────────────────────
+
+    // 1. ASCII noise overlay — injected as FIRST child of .ph-screen so text elements
+    //    that follow it in the DOM stack on top (z-index: 0 < z-index: 1 on text).
+    var asciiPanel = document.createElement('div');
+    asciiPanel.id = 'scan-ascii-panel';
+    asciiPanel.setAttribute('aria-hidden', 'true');
+    var asciiContent = document.createElement('div');
+    asciiContent.id = 'scan-ascii-content';
+    asciiPanel.appendChild(asciiContent);
+    phInst.insertBefore(asciiPanel, phInst.firstChild);
+
+    // 2. Particle canvas (inside bench — particles stay near the flask)
+    var pCanvas = document.createElement('canvas');
+    pCanvas.id = 'scan-react-canvas';
+    pCanvas.setAttribute('aria-hidden', 'true');
+    bench.appendChild(pCanvas);
+    var pCtx = pCanvas.getContext('2d');
+
+    // Size canvas to bench, guarded against RO feedback loop
+    var pW = 0, pH2 = 0;
+    function sizeCanvas() {
+      var r = bench.getBoundingClientRect();
+      var nW = r.width | 0, nH = r.height | 0;
+      if (pCanvas.width === nW && pCanvas.height === nH) return;
+      pCanvas.width = nW; pCanvas.height = nH;
+      pW = nW; pH2 = nH;
+    }
+    sizeCanvas();
+    new ResizeObserver(sizeCanvas).observe(bench);
+
+    // ── ASCII generation (adapted from scanner-card-stream generateCode) ──
+    function genAscii(cols, rows) {
+      var out = '';
+      for (var y = 0; y < rows; y++) {
+        for (var x = 0; x < cols; x++) {
+          out += ASCII[Math.random() * ASCII.length | 0];
+        }
+        out += '\n';
+      }
+      return out;
+    }
+
+    // ── Particle system ───────────────────────────────────────────────────
+    var particles = [];
+    var animRaf = null;
+    var scanActive = false;
+
+    function spawnParticle(cx, cy) {
+      return {
+        x: cx + (Math.random() - 0.5) * 48,
+        y: cy,
+        vx: (Math.random() - 0.5) * 1.4,
+        vy: -(Math.random() * 2.8 + 0.6),
+        r: Math.random() * 1.8 + 0.5,
+        alpha: Math.random() * 0.55 + 0.35,
+        life: 1.0,
+        decay: Math.random() * 0.024 + 0.008,
+        hue: 148 + (Math.random() * 42 | 0)   // green 148° → cyan 190°
+      };
+    }
+
+    function renderParticles() {
+      if (!scanActive && particles.length === 0) {
+        pCtx.clearRect(0, 0, pW, pH2);
+        animRaf = null;
+        return;
+      }
+      pCtx.clearRect(0, 0, pW, pH2);
+      var alive = [];
+      for (var i = 0; i < particles.length; i++) {
+        var p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy -= 0.045;           // upward acceleration
+        p.life -= p.decay;
+        if (p.life <= 0) continue;
+        pCtx.globalAlpha = p.alpha * p.life;
+        pCtx.fillStyle = 'hsl(' + p.hue + ',78%,62%)';
+        pCtx.beginPath();
+        pCtx.arc(p.x, p.y, p.r, 0, 6.283);
+        pCtx.fill();
+        alive.push(p);
+      }
+      pCtx.globalAlpha = 1;
+      particles = alive;
+      animRaf = requestAnimationFrame(renderParticles);
+    }
+
+    // ── ASCII noise control ───────────────────────────────────────────────
+    var asciiTimer = null;
+    function startAscii() {
+      // Approximate character grid from pH instrument dimensions
+      var cols = Math.ceil(phInst.offsetWidth  / 6.5) | 0;
+      var rows = Math.ceil(phInst.offsetHeight / 11)  | 0;
+      function tick() { asciiContent.textContent = genAscii(cols, rows); }
+      tick();
+      asciiTimer = setInterval(tick, 55);
+      asciiPanel.classList.add('active');
+    }
+    function stopAscii() {
+      clearInterval(asciiTimer);
+      asciiTimer = null;
+      asciiPanel.classList.remove('active');
+    }
+
+    // ── Main trigger — called from applyIndicator() ───────────────────────
+    // Triggers: ASCII data noise in pH panel + small bubbles near the flask.
+    // No full-height laser beam — effects stay inside the flask/panel area.
+    window.__triggerScannerBeam = function(flaskIdx) {
+      var flaskEl = document.getElementById('beaker-' + flaskIdx);
+      if (!flaskEl) return;
+
+      var bR = bench.getBoundingClientRect();
+      var fR = flaskEl.getBoundingClientRect();
+      var flaskCX = (fR.left - bR.left + fR.right - bR.left) * 0.5;
+      var flaskCY = (fR.top - bR.top) + fR.height * 0.62;
+
+      scanActive = true;
+      pCanvas.classList.add('active');
+      startAscii();
+      if (!animRaf) renderParticles();
+
+      // Initial burst of reaction bubbles at flask center
+      for (var k = 0; k < 14; k++) particles.push(spawnParticle(flaskCX, flaskCY));
+
+      // Continuous drip for ~1s, then stop
+      var spawned = 0;
+      var spawnInterval = setInterval(function() {
+        if (!scanActive) { clearInterval(spawnInterval); return; }
+        for (var j = 0; j < 3; j++) particles.push(spawnParticle(flaskCX, flaskCY));
+        spawned++;
+        if (spawned >= 16) {
+          scanActive = false;
+          pCanvas.classList.remove('active');
+          stopAscii();
+          clearInterval(spawnInterval);
+        }
+      }, 65);
+    };
+
+    // Honour prefers-reduced-motion
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      pCanvas.style.display  = 'none';
+      asciiPanel.style.display = 'none';
+    }
+  })();
+
+  // ── Animated Card Options ─────────────────────────────────────────────────
+  // Staggered spring entrance animation for rack items (substance + indicator
+  // selectors) and indicator-btn panel controls (lab control tray).
+  // Matches the animated-card-options.tsx behavior: each card enters with a
+  // delay of 52ms × its index, overshoots slightly, then settles.
+  // Cards stay visible after selection (repeat-experiment pattern).
+  function staggerEnter(nodes, baseDelay, step) {
+    nodes.forEach(function(el, i) {
+      el.classList.remove('card-enter');
+      void el.offsetWidth; // force reflow so animation restarts
+      el.style.setProperty('--card-delay', (baseDelay + i * step) + 'ms');
+      el.classList.add('card-enter');
+      el.addEventListener('animationend', function handler() {
+        el.classList.remove('card-enter');
+        el.style.removeProperty('--card-delay');
+        el.removeEventListener('animationend', handler);
+      });
+    });
+  }
+
+  // Substance + indicator rack cards (page load)
+  staggerEnter(document.querySelectorAll('.rack-item'), 60, 52);
+  // Indicator buttons in the panel tab (page load)
+  staggerEnter(document.querySelectorAll('.indicator-btn'), 90, 65);
+
+  (function initGlowCards() {
+    'use strict';
+
+    function addGlowCard(el, opts) {
+      if (!el) return;
+      // Position context (lab-glass-panel already sets this; add for other targets)
+      if (getComputedStyle(el).position === 'static') el.style.position = 'relative';
+
+      el.style.setProperty('--dot-dur',   opts.dotDur   || '5.5s');
+      el.style.setProperty('--dot-delay', opts.dotDelay || '0s');
+      el.style.setProperty('--ray-dur',   opts.rayDur   || '10s');
+      el.style.setProperty('--ray-delay', opts.rayDelay || '0s');
+
+      // dot removed — floating glowing ball orb (not needed)
+
+      var ray = document.createElement('div');
+      ray.className = 'glow-card-ray';
+      el.appendChild(ray);
+
+      ['tl-h','tl-v','tr-h','tr-v','bl-h','bl-v','br-h','br-v'].forEach(function(s) {
+        var ln = document.createElement('div');
+        ln.className = 'glow-card-line gcl-' + s;
+        el.appendChild(ln);
+      });
+    }
+
+    // 1. pH meter — full treatment (dot shows as scanning instrument cursor)
+    addGlowCard(document.querySelector('.ph-instrument'), {
+      dot: true, dotDur: '5.5s', dotDelay: '0s', rayDur: '10s', rayDelay: '0s',
+    });
+
+    // 2. Bitácora reading widget (shows active flask info: pH + state)
+    addGlowCard(document.querySelector('.reading-widget'), {
+      dot: false, rayDur: '12s', rayDelay: '-3.5s',
+    });
+
+    // 3. pH scale wall poster (too wide for dot; ray sweeps across the scale)
+    addGlowCard(document.querySelector('.bench-poster-glass'), {
+      dot: false, rayDur: '16s', rayDelay: '-7s',
+    });
+
+    // 4. Experiment completion card (appears when ≥3 reactions done)
+    var finishCard = document.querySelector('#finish-section > div');
+    addGlowCard(finishCard, {
+      dot: true, dotDur: '6s', dotDelay: '-1.5s', rayDur: '11s', rayDelay: '-4s',
+    });
+
+  })();
+
+  (function initGlassPanels() {
+    document.querySelectorAll('.lab-glass-panel').forEach(function(panel) {
+      var maxTilt = parseFloat(panel.dataset.maxTilt || '5');
+
+      panel.addEventListener('mousemove', function(e) {
+        var rect = panel.getBoundingClientRect();
+        var x = e.clientX - rect.left;
+        var y = e.clientY - rect.top;
+        var cx = rect.width / 2;
+        var cy = rect.height / 2;
+        var rotY = ((x - cx) / cx) * maxTilt;
+        var rotX = ((y - cy) / cy) * -maxTilt;
+        panel.style.transform = 'perspective(900px) rotateX(' + rotX.toFixed(2) + 'deg) rotateY(' + rotY.toFixed(2) + 'deg)';
+        panel.style.setProperty('--mouse-x', x + 'px');
+        panel.style.setProperty('--mouse-y', y + 'px');
+      });
+
+      panel.addEventListener('mouseleave', function() {
+        panel.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg)';
+      });
+    });
+  })();
+</script>
+</body>
+</html>

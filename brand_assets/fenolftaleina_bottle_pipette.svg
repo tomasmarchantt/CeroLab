@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none">
+  <defs>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="22" stdDeviation="26" flood-color="#000" flood-opacity="0.28"/>
+    </filter>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.2"/>
+    </filter>
+    <linearGradient id="amberGlass" x1="270" y1="260" x2="625" y2="910" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#9B4A16" stop-opacity="0.86"/>
+      <stop offset="0.22" stop-color="#B76622" stop-opacity="0.72"/>
+      <stop offset="0.55" stop-color="#7B330F" stop-opacity="0.88"/>
+      <stop offset="1" stop-color="#2A1108" stop-opacity="0.95"/>
+    </linearGradient>
+    <linearGradient id="glassHighlight" x1="318" y1="248" x2="430" y2="886" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff" stop-opacity="0.82"/>
+      <stop offset="0.38" stop-color="#fff" stop-opacity="0.20"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0.05"/>
+    </linearGradient>
+    <linearGradient id="capGrad" x1="280" y1="142" x2="620" y2="250" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fffaf0"/>
+      <stop offset="0.45" stop-color="#d4c9b4"/>
+      <stop offset="1" stop-color="#f8f2e4"/>
+    </linearGradient>
+    <linearGradient id="labelGrad" x1="285" y1="470" x2="624" y2="640" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f2eee5"/>
+      <stop offset="0.5" stop-color="#fffdf7"/>
+      <stop offset="1" stop-color="#ddd5c8"/>
+    </linearGradient>
+    <linearGradient id="pipetteGrad" x1="610" y1="108" x2="795" y2="850" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f7fbff" stop-opacity="0.92"/>
+      <stop offset="0.28" stop-color="#dfeaf2" stop-opacity="0.78"/>
+      <stop offset="0.66" stop-color="#fbfdff" stop-opacity="0.72"/>
+      <stop offset="1" stop-color="#d6e2ec" stop-opacity="0.88"/>
+    </linearGradient>
+    <linearGradient id="pipetteStroke" x1="615" y1="120" x2="830" y2="860" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="0.5" stop-color="#9fb0bd" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.7"/>
+    </linearGradient>
+    <radialGradient id="liquidGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(450 710) rotate(90) scale(260 175)">
+      <stop stop-color="#d1712d" stop-opacity="0.50"/>
+      <stop offset="1" stop-color="#5a220d" stop-opacity="0.62"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1024" height="1024" fill="transparent"/>
+
+  <g filter="url(#shadow)">
+    <!-- Pasteur pipette behind bottle, realistic translucent plastic -->
+    <g transform="rotate(-20 690 475)">
+      <path d="M687 120C641 120 604 157 604 203V274C604 301 616 326 637 342C650 352 658 367 658 383V810C658 831 669 852 682 870C686 876 690 876 694 870C707 852 718 831 718 810V383C718 367 726 352 739 342C760 326 772 301 772 274V203C772 157 734 120 687 120Z" fill="url(#pipetteGrad)" stroke="url(#pipetteStroke)" stroke-width="5"/>
+      <path d="M635 196C635 171 654 151 679 151H696C721 151 741 171 741 196V270C741 295 721 315 696 315H679C654 315 635 295 635 270V196Z" fill="#ffffff" fill-opacity="0.22"/>
+      <path d="M678 348H698V781C698 799 693 819 688 831C683 818 678 799 678 781V348Z" fill="#ffffff" fill-opacity="0.30"/>
+      <path d="M647 160C657 148 674 141 690 143" stroke="#fff" stroke-width="7" stroke-linecap="round" opacity="0.62"/>
+      <path d="M665 195V300" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity="0.65"/>
+      <path d="M690 370V772" stroke="#aab9c4" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
+      <path d="M682 842C684 853 688 864 691 869" stroke="#f9fdff" stroke-width="4" stroke-linecap="round" opacity="0.55"/>
+    </g>
+
+    <!-- Bottle -->
+    <g>
+      <!-- cap -->
+      <rect x="297" y="138" width="302" height="102" rx="22" fill="url(#capGrad)" stroke="#b4a990" stroke-width="4"/>
+      <rect x="315" y="230" width="266" height="52" rx="17" fill="#d9d0bf" stroke="#b7ad9a" stroke-width="3"/>
+      <g opacity="0.45">
+        <path d="M318 153V225M342 148V230M366 148V230M390 148V230M414 148V230M438 148V230M462 148V230M486 148V230M510 148V230M534 148V230M558 153V225" stroke="#8d806b" stroke-width="5" stroke-linecap="round"/>
+      </g>
+      <path d="M315 142H579" stroke="#fff" stroke-width="6" stroke-linecap="round" opacity="0.45"/>
+
+      <!-- neck -->
+      <path d="M351 276C351 254 370 238 392 238H504C526 238 545 254 545 276V340H351V276Z" fill="url(#amberGlass)" stroke="#38190c" stroke-opacity="0.35" stroke-width="4"/>
+      <path d="M366 286H530" stroke="#fff" stroke-width="5" opacity="0.26"/>
+
+      <!-- body outline -->
+      <path d="M299 350C299 313 329 283 366 283H530C567 283 597 313 597 350V848C597 884 568 913 532 913H364C328 913 299 884 299 848V350Z" fill="url(#amberGlass)" stroke="#2d150b" stroke-opacity="0.55" stroke-width="5"/>
+      <path d="M303 650C334 664 562 664 593 650V845C593 878 567 906 532 906H365C330 906 303 878 303 845V650Z" fill="url(#liquidGlow)" opacity="0.55"/>
+      <path d="M314 365C314 327 345 296 383 296H513C551 296 582 327 582 365V840C582 868 559 891 531 891H365C337 891 314 868 314 840V365Z" stroke="#fff" stroke-width="4" opacity="0.18"/>
+
+      <!-- highlights -->
+      <path d="M338 340C338 316 358 297 382 297H412V881H374C354 881 338 865 338 845V340Z" fill="url(#glassHighlight)" opacity="0.40"/>
+      <path d="M520 320C550 338 567 367 567 408V833" stroke="#fff" stroke-width="10" stroke-linecap="round" opacity="0.18"/>
+      <path d="M350 855C393 878 505 880 546 855" stroke="#fff" stroke-width="9" stroke-linecap="round" opacity="0.24"/>
+      <path d="M320 622C365 640 533 641 579 621" stroke="#fff" stroke-width="4" opacity="0.23"/>
+      <ellipse cx="448" cy="894" rx="125" ry="24" fill="#fff" opacity="0.10"/>
+
+      <!-- label -->
+      <rect x="321" y="456" width="254" height="172" rx="16" fill="url(#labelGrad)" stroke="#c7bfb1" stroke-width="3"/>
+      <path d="M333 469C374 460 522 461 563 470" stroke="#fff" stroke-width="5" opacity="0.50"/>
+      <text x="448" y="529" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#312b27">Fenolftaleína</text>
+      <text x="448" y="571" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="500" fill="#5f5650">Phenolphthalein</text>
+      <text x="448" y="602" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="19" fill="#847a70">pH Indicator</text>
+    </g>
+  </g>
+</svg>

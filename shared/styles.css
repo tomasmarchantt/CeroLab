@@ -1,0 +1,478 @@
+/* ── CeroLab Shared Design System ──────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root {
+  --dark-lab:   #0F241B;
+  --dark-lab-2: #162d22;
+  --dark-lab-3: #0a1c13;
+  --forest:     #1B5E3F;
+  --science:    #2E8B57;
+  --science-lt: #3aa86a;
+  --lab-bg:     #E8F3EC;
+  --page-bg:    #F7F9F7;
+  --acid:       #D64550;
+  --phenol:     #E84B8A;
+  --neutral:    #44AA44;
+  --base-blue:  #3A6EA5;
+  --warning:    #E0A800;
+  --text:       #1A2421;
+  --text-sec:   #5C6B63;
+  --mono:  'IBM Plex Mono', monospace;
+  --display: 'Plus Jakarta Sans', sans-serif;
+  --body:  'Inter', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--body);
+  background: var(--dark-lab);
+  color: #fff;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* ── Type helpers ───────────────────────────────────────────────── */
+.display { font-family: var(--display); }
+.mono    { font-family: var(--mono); }
+
+/* ── App layout ─────────────────────────────────────────────────── */
+.app-shell {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  min-height: 100vh;
+}
+.app-main { overflow-y: auto; }
+
+/* ── Sidebar nav ────────────────────────────────────────────────── */
+.sidebar {
+  background: var(--dark-lab-3);
+  border-right: 1px solid rgba(46,139,87,0.15);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+.sidebar-logo {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid rgba(46,139,87,0.12);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+.sidebar-logo img { height: 30px; }
+.sidebar-logo-text {
+  font-family: var(--display);
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+.sidebar-section-label {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+  padding: 16px 20px 6px;
+}
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.55);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+.sidebar-link:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.04);
+}
+.sidebar-link.active {
+  color: #fff;
+  background: rgba(46,139,87,0.12);
+  border-left-color: var(--science);
+}
+.sidebar-link svg { opacity: 0.65; flex-shrink: 0; }
+.sidebar-link.active svg { opacity: 1; }
+.sidebar-badge {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  padding: 2px 7px;
+  border-radius: 10px;
+  background: var(--science);
+  color: #fff;
+}
+.sidebar-user {
+  margin-top: auto;
+  padding: 16px 20px;
+  border-top: 1px solid rgba(46,139,87,0.12);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sidebar-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--forest);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+.sidebar-user-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.8);
+}
+.sidebar-user-role {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  color: var(--science);
+  letter-spacing: 0.06em;
+}
+
+/* ── Top bar (inside pages) ─────────────────────────────────────── */
+.topbar {
+  height: 56px;
+  background: rgba(15,36,27,0.95);
+  border-bottom: 1px solid rgba(46,139,87,0.12);
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.topbar-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+}
+.topbar-breadcrumb a {
+  color: rgba(255,255,255,0.4);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.topbar-breadcrumb a:hover { color: rgba(255,255,255,0.7); }
+.topbar-breadcrumb span { color: rgba(255,255,255,0.25); }
+.topbar-breadcrumb .current { color: rgba(255,255,255,0.85); font-weight: 500; }
+.topbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ── Buttons ────────────────────────────────────────────────────── */
+.btn {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 0.87rem;
+  letter-spacing: 0.02em;
+  padding: 11px 22px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: background 0.18s, transform 0.12s, opacity 0.18s;
+}
+.btn:focus-visible { outline: 2px solid var(--science); outline-offset: 3px; }
+.btn:active { transform: translateY(1px); }
+.btn-primary { background: var(--science); color: #fff; box-shadow: 0 4px 16px rgba(46,139,87,0.3); }
+.btn-primary:hover { background: var(--science-lt); }
+.btn-secondary { background: rgba(46,139,87,0.15); color: rgba(255,255,255,0.85); border: 1px solid rgba(46,139,87,0.3); }
+.btn-secondary:hover { background: rgba(46,139,87,0.25); }
+.btn-ghost { background: transparent; color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.2); }
+.btn-ghost:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.4); }
+.btn-danger { background: var(--acid); color: #fff; }
+.btn-danger:hover { background: #e05060; }
+.btn-sm { padding: 7px 14px; font-size: 0.78rem; }
+.btn-lg { padding: 14px 30px; font-size: 0.95rem; }
+
+/* ── Cards ──────────────────────────────────────────────────────── */
+.card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 4px;
+  padding: 20px;
+}
+.card-dark { background: var(--dark-lab-3); border-color: rgba(46,139,87,0.15); }
+.card-science { border-color: rgba(46,139,87,0.3); background: rgba(46,139,87,0.06); }
+
+/* ── Section tag ────────────────────────────────────────────────── */
+.section-tag {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 10px;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  opacity: 0.7;
+}
+.section-tag::before {
+  content: '';
+  display: block;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* ── Status chips ───────────────────────────────────────────────── */
+.chip {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  padding: 3px 9px;
+  border-radius: 2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 500;
+}
+.chip-green  { background: rgba(68,170,68,0.15);  color: var(--neutral);   border: 1px solid rgba(68,170,68,0.3); }
+.chip-red    { background: rgba(214,69,80,0.15);   color: var(--acid);      border: 1px solid rgba(214,69,80,0.3); }
+.chip-blue   { background: rgba(58,110,165,0.15);  color: #6da0d0;          border: 1px solid rgba(58,110,165,0.3); }
+.chip-yellow { background: rgba(224,168,0,0.15);   color: var(--warning);   border: 1px solid rgba(224,168,0,0.3); }
+.chip-gray   { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.1); }
+
+/* ── Progress gauge ─────────────────────────────────────────────── */
+.gauge-wrap { display: flex; flex-direction: column; gap: 5px; }
+.gauge-label { font-family: var(--mono); font-size: 0.65rem; color: rgba(255,255,255,0.45); letter-spacing: 0.08em; }
+.gauge-bar { height: 5px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+.gauge-fill { height: 100%; border-radius: 2px; background: var(--science); transition: width 0.6s ease; }
+.gauge-fill.acid   { background: var(--acid); }
+.gauge-fill.warn   { background: var(--warning); }
+
+/* ── pH scale (reusable) ────────────────────────────────────────── */
+.ph-scale-bar {
+  height: 20px;
+  border-radius: 2px;
+  background: linear-gradient(90deg,
+    #D64550 0%,#E05020 8%,#E07820 16%,#E0A800 25%,#c8c800 33%,
+    #88cc00 42%,#44AA44 50%,#44AA44 58%,#44AAAA 66%,
+    #3A6EA5 75%,#5A4EA5 83%,#8B4EA5 91%,#A044A0 100%);
+  position: relative;
+}
+
+/* ── Stat block ─────────────────────────────────────────────────── */
+.stat-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.stat-value {
+  font-family: var(--mono);
+  font-size: 1.8rem;
+  font-weight: 500;
+  color: #fff;
+  line-height: 1;
+}
+.stat-label {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+}
+
+/* ── Form elements ──────────────────────────────────────────────── */
+.form-field { display: flex; flex-direction: column; gap: 6px; }
+.form-label { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.1em; color: rgba(255,255,255,0.5); text-transform: uppercase; }
+.form-input {
+  font-family: var(--body);
+  font-size: 0.9rem;
+  padding: 11px 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(46,139,87,0.25);
+  border-radius: 3px;
+  color: #fff;
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+  width: 100%;
+}
+.form-input::placeholder { color: rgba(255,255,255,0.25); }
+.form-input:focus { border-color: var(--science); background: rgba(46,139,87,0.06); }
+.form-input:focus-visible { outline: 2px solid var(--science); outline-offset: 2px; }
+
+/* ── Experiment step indicator ──────────────────────────────────── */
+.step-track {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex: 1;
+}
+.step-dot {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.35);
+  position: relative;
+  z-index: 1;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.step-item.done   .step-dot { background: var(--forest); border-color: var(--science); color: #fff; }
+.step-item.active .step-dot { background: var(--science); border-color: var(--science); color: #fff; box-shadow: 0 0 12px rgba(46,139,87,0.4); }
+.step-line {
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+  margin: 0 -1px;
+}
+.step-item.done ~ .step-item .step-line { background: rgba(46,139,87,0.3); }
+.step-label {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  color: rgba(255,255,255,0.3);
+  text-align: center;
+  margin-top: 5px;
+  letter-spacing: 0.05em;
+}
+.step-item.active .step-label { color: rgba(255,255,255,0.7); }
+.step-item.done   .step-label { color: var(--science); }
+
+/* ── Animations ─────────────────────────────────────────────────── */
+@keyframes bubble-rise {
+  0%   { transform: translateY(0) scale(1); opacity: 0.5; }
+  100% { transform: translateY(-80px) scale(1.3); opacity: 0; }
+}
+@keyframes gentle-float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-7px); }
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 8px currentColor; }
+  50%       { box-shadow: 0 0 20px currentColor; }
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.anim-float    { animation: gentle-float 4s ease-in-out infinite; }
+.anim-fade-up  { animation: fade-up 0.6s ease both; }
+.anim-glow     { animation: glow-pulse 2.5s ease-in-out infinite; }
+
+.bubble {
+  animation: bubble-rise linear infinite;
+}
+.b1 { animation-duration: 2.6s; animation-delay: 0s; }
+.b2 { animation-duration: 3.2s; animation-delay: 0.7s; }
+.b3 { animation-duration: 2.0s; animation-delay: 1.4s; }
+.b4 { animation-duration: 3.8s; animation-delay: 0.3s; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* ── Utility ────────────────────────────────────────────────────── */
+.container { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+.page-pad  { padding: 36px 28px; }
+
+.divider {
+  height: 1px;
+  background: rgba(46,139,87,0.12);
+  border: none;
+  margin: 0;
+}
+.glow-line-top::before {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--science), transparent);
+}
+
+/* ── Badge Delta — educational metric badges ─────────────────────── */
+/* Ported from badge-delta.tsx (21st.dev / Tremor UI).               */
+/* Used on dashboard stat cards to visualise week-over-week deltas.  */
+/* Plain HTML/CSS/JS port — no React, no class-variance-authority.   */
+
+.badge-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 2px 8px 2px 5px;
+  border-radius: 4px;
+  white-space: nowrap;
+  line-height: 1.5;
+  vertical-align: middle;
+  user-select: none;
+}
+.badge-delta svg {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  fill: currentColor;
+}
+
+/* bd-up: positive progress — completions, score improvements */
+.badge-delta.bd-up {
+  background: rgba(52, 211, 153, 0.11);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.22);
+}
+/* bd-down: negative progress — score drop, fewer completions */
+.badge-delta.bd-down {
+  background: rgba(248, 113, 113, 0.11);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.22);
+}
+/* bd-risk: risk / at-risk students — always orange regardless of direction */
+.badge-delta.bd-risk {
+  background: rgba(251, 146, 60, 0.11);
+  color: #fb923c;
+  border: 1px solid rgba(251, 146, 60, 0.22);
+}
+/* bd-flat: neutral / no change / not enough data */
+.badge-delta.bd-flat {
+  background: rgba(156, 163, 175, 0.07);
+  color: #9ca3af;
+  border: 1px solid rgba(156, 163, 175, 0.16);
+}
+
+/* ── Responsive ─────────────────────────────────────────────────── */
+@media (max-width: 860px) {
+  .app-shell { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+}

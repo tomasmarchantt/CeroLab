@@ -1,0 +1,77 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="amberGlass" x1="132" y1="80" x2="390" y2="445" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFF0C2" stop-opacity="0.55"/>
+      <stop offset="0.22" stop-color="#C98520" stop-opacity="0.50"/>
+      <stop offset="0.55" stop-color="#6D3A0D" stop-opacity="0.48"/>
+      <stop offset="1" stop-color="#2D1605" stop-opacity="0.62"/>
+    </linearGradient>
+    <linearGradient id="bottleEdge" x1="132" y1="110" x2="374" y2="430" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFE8A3" stop-opacity="0.9"/>
+      <stop offset="0.25" stop-color="#B56E19" stop-opacity="0.5"/>
+      <stop offset="0.74" stop-color="#3B1E08" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#140A03" stop-opacity="0.7"/>
+    </linearGradient>
+    <linearGradient id="liquidLemon" x1="160" y1="240" x2="354" y2="424" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFF2A6" stop-opacity="0.62"/>
+      <stop offset="0.45" stop-color="#F6D23C" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#B98A0D" stop-opacity="0.42"/>
+    </linearGradient>
+    <linearGradient id="cap" x1="176" y1="48" x2="336" y2="120" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F9F9F5"/>
+      <stop offset="0.45" stop-color="#D8D8D0"/>
+      <stop offset="1" stop-color="#8E8D86"/>
+    </linearGradient>
+    <linearGradient id="label" x1="158" y1="214" x2="354" y2="342" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E8E4D7"/>
+    </linearGradient>
+    <radialGradient id="shine" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(192 178) rotate(70) scale(185 42)">
+      <stop stop-color="#FFFFFF" stop-opacity="0.75"/>
+      <stop offset="0.28" stop-color="#FFFFFF" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="softShadow" x="64" y="32" width="384" height="456" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#000000" flood-opacity="0.28"/>
+    </filter>
+    <filter id="innerBlur" x="90" y="66" width="332" height="388" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="1.2"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#softShadow)">
+    <!-- cap -->
+    <rect x="177" y="51" width="158" height="56" rx="14" fill="url(#cap)"/>
+    <rect x="187" y="60" width="138" height="11" rx="5.5" fill="#FFFFFF" opacity="0.45"/>
+    <path d="M184 96H328" stroke="#77766F" stroke-width="4" opacity="0.35"/>
+    <path d="M198 52V106M222 52V106M246 52V106M270 52V106M294 52V106M318 52V106" stroke="#FFFFFF" stroke-width="2" opacity="0.2"/>
+    <path d="M198 52V106M222 52V106M246 52V106M270 52V106M294 52V106M318 52V106" stroke="#4C4B46" stroke-width="1.2" opacity="0.25"/>
+
+    <!-- neck -->
+    <path d="M207 102H305C302 122 302 143 305 164H207C210 143 210 122 207 102Z" fill="url(#amberGlass)" stroke="#8A5416" stroke-width="2"/>
+    <rect x="215" y="116" width="82" height="33" rx="9" fill="#2A1606" opacity="0.14"/>
+
+    <!-- shoulders and body -->
+    <path d="M188 157C178 175 157 188 143 207C129 227 125 254 125 286V402C125 426 144 446 168 446H344C368 446 387 426 387 402V286C387 254 383 227 369 207C355 188 334 175 324 157H188Z" fill="url(#amberGlass)" stroke="url(#bottleEdge)" stroke-width="4"/>
+
+    <!-- liquid inside lower part -->
+    <path d="M146 310C175 300 207 303 236 312C275 325 322 319 366 304V400C366 414 355 425 341 425H171C157 425 146 414 146 400V310Z" fill="url(#liquidLemon)" opacity="0.85"/>
+    <path d="M146 310C175 300 207 303 236 312C275 325 322 319 366 304" stroke="#FFF8B0" stroke-width="5" opacity="0.45"/>
+
+    <!-- label -->
+    <rect x="153" y="220" width="206" height="104" rx="13" fill="url(#label)" stroke="#D2CBB8" stroke-width="2"/>
+    <rect x="166" y="232" width="180" height="80" rx="8" fill="#FFFFFF" opacity="0.55"/>
+    <text x="256" y="266" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="42" font-weight="800" fill="#2A2419">Limón</text>
+    <text x="256" y="294" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="600" letter-spacing="0.5" fill="#6B5D3C">Lemon Juice</text>
+
+    <!-- glass highlights -->
+    <path d="M169 193C153 230 153 324 159 397" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round" opacity="0.22"/>
+    <path d="M189 169C210 154 300 154 323 172" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" opacity="0.24"/>
+    <ellipse cx="210" cy="210" rx="50" ry="122" fill="url(#shine)" opacity="0.42"/>
+    <path d="M346 212C360 250 362 337 355 397" stroke="#130B03" stroke-width="8" stroke-linecap="round" opacity="0.16"/>
+
+    <!-- base thickness -->
+    <path d="M160 424C198 439 312 439 352 424" stroke="#FFFFFF" stroke-width="6" opacity="0.25" stroke-linecap="round"/>
+    <path d="M165 438H347" stroke="#1C0F04" stroke-width="4" opacity="0.18" stroke-linecap="round"/>
+  </g>
+</svg>

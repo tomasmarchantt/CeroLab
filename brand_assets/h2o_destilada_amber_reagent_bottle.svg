@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="H2O destilada reagent bottle">
+  <defs>
+    <linearGradient id="glassAmber" x1="190" y1="120" x2="820" y2="920" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f7d385" stop-opacity="0.24"/>
+      <stop offset="0.22" stop-color="#b77a24" stop-opacity="0.42"/>
+      <stop offset="0.52" stop-color="#6b3b12" stop-opacity="0.58"/>
+      <stop offset="0.78" stop-color="#2b1708" stop-opacity="0.72"/>
+      <stop offset="1" stop-color="#120a04" stop-opacity="0.82"/>
+    </linearGradient>
+    <linearGradient id="glassEdge" x1="250" y1="160" x2="780" y2="880" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff4d2" stop-opacity="0.55"/>
+      <stop offset="0.35" stop-color="#f1b34b" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#140805" stop-opacity="0.55"/>
+    </linearGradient>
+    <linearGradient id="capGrad" x1="355" y1="62" x2="668" y2="214" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.16" stop-color="#e9ecef"/>
+      <stop offset="0.52" stop-color="#a7adb4"/>
+      <stop offset="0.84" stop-color="#f9fafb"/>
+      <stop offset="1" stop-color="#b8bec6"/>
+    </linearGradient>
+    <linearGradient id="labelGrad" x1="300" y1="410" x2="727" y2="664" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.5" stop-color="#f4f1e7"/>
+      <stop offset="1" stop-color="#ded7c4"/>
+    </linearGradient>
+    <radialGradient id="liquidClear" cx="50%" cy="38%" r="72%">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.38"/>
+      <stop offset="0.48" stop-color="#eafcff" stop-opacity="0.23"/>
+      <stop offset="1" stop-color="#bcecff" stop-opacity="0.12"/>
+    </radialGradient>
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="24" stdDeviation="28" flood-color="#000000" flood-opacity="0.42"/>
+    </filter>
+    <filter id="innerGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="bottleClip">
+      <path d="M392 171 h240 v124 c0 34 18 61 45 86 45 42 73 108 73 181 v235 c0 69-56 125-125 125H399c-69 0-125-56-125-125V562c0-73 28-139 73-181 27-25 45-52 45-86Z"/>
+    </clipPath>
+  </defs>
+
+  <rect width="1024" height="1024" fill="none"/>
+  <ellipse cx="512" cy="938" rx="226" ry="38" fill="#000" opacity="0.20"/>
+
+  <g filter="url(#softShadow)">
+    <path d="M392 171 h240 v124 c0 34 18 61 45 86 45 42 73 108 73 181 v235 c0 69-56 125-125 125H399c-69 0-125-56-125-125V562c0-73 28-139 73-181 27-25 45-52 45-86Z" fill="url(#glassAmber)" stroke="#d9973e" stroke-opacity="0.42" stroke-width="7"/>
+    <path d="M426 177 h172 v125 c0 46 22 78 55 109 36 34 59 88 59 151v226c0 49-39 88-88 88H400c-49 0-88-39-88-88V562c0-63 23-117 59-151 33-31 55-63 55-109Z" fill="url(#glassEdge)" opacity="0.36"/>
+
+    <g clip-path="url(#bottleClip)">
+      <path d="M306 662 C388 639 465 650 535 674 C599 696 665 699 735 674 V838 C735 879 702 912 661 912H363 C322 912 289 879 289 838V681 C294 673 299 667 306 662Z" fill="url(#liquidClear)" opacity="0.76"/>
+      <path d="M309 663 C390 641 462 652 534 675 C599 696 664 699 733 675" fill="none" stroke="#f7ffff" stroke-width="7" opacity="0.42"/>
+      <path d="M335 211 C296 318 291 414 315 530 C339 646 327 739 304 835" fill="none" stroke="#fff1c4" stroke-width="26" opacity="0.20"/>
+      <path d="M690 269 C730 404 722 565 701 690" fill="none" stroke="#fff" stroke-width="12" opacity="0.12"/>
+      <ellipse cx="512" cy="842" rx="178" ry="38" fill="#000" opacity="0.13"/>
+    </g>
+
+    <rect x="379" y="74" width="266" height="118" rx="30" fill="url(#capGrad)" stroke="#ffffff" stroke-opacity="0.62" stroke-width="5"/>
+    <rect x="395" y="55" width="234" height="50" rx="20" fill="#f8fafc" stroke="#bdc3cb" stroke-width="4"/>
+    <g opacity="0.22">
+      <path d="M407 82 v96M438 73 v111M469 69 v116M500 68 v117M531 68 v117M562 69 v116M593 73 v111M624 82 v96" stroke="#3f4650" stroke-width="5"/>
+    </g>
+    <path d="M403 68 C452 44 572 44 621 68" fill="none" stroke="#fff" stroke-width="10" opacity="0.55"/>
+
+    <rect x="292" y="408" width="440" height="250" rx="25" fill="url(#labelGrad)" stroke="#bdb49c" stroke-width="5"/>
+    <rect x="314" y="430" width="396" height="206" rx="18" fill="#fffaf0" opacity="0.88"/>
+    <text x="512" y="512" text-anchor="middle" font-family="Plus Jakarta Sans, Inter, Arial, sans-serif" font-size="82" font-weight="800" fill="#0f241b">H₂O</text>
+    <text x="512" y="574" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="36" font-weight="700" fill="#1b5e3f">Destilada</text>
+    <line x1="355" y1="602" x2="669" y2="602" stroke="#1b5e3f" stroke-opacity="0.35" stroke-width="3"/>
+
+    <path d="M309 430 C331 340 385 314 398 260" fill="none" stroke="#fff4c8" stroke-width="18" opacity="0.30" stroke-linecap="round"/>
+    <path d="M718 500 C733 642 712 790 650 875" fill="none" stroke="#000" stroke-width="18" opacity="0.12" stroke-linecap="round"/>
+    <path d="M612 176 C652 261 689 306 724 381" fill="none" stroke="#fff" stroke-width="10" opacity="0.18" stroke-linecap="round"/>
+  </g>
+</svg>

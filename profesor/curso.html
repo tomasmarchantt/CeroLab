@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3° Medio A — Progreso — CeroLab</title>
+  <link rel="stylesheet" href="/shared/styles.css" />
+  <style>
+    .student-table { width: 100%; border-collapse: collapse; }
+    .student-table th { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 8px 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); font-weight: 400; }
+    .student-table td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.83rem; vertical-align: middle; }
+    .student-table tr:hover td { background: rgba(255,255,255,0.015); }
+    .ph-tag { font-family: var(--mono); font-size: 0.65rem; padding: 2px 7px; border-radius: 2px; }
+    .status-bar { height: 4px; background: rgba(255,255,255,0.07); border-radius: 2px; width: 80px; overflow: hidden; display: inline-block; }
+    .status-fill { height: 100%; border-radius: 2px; }
+    .score-cell { font-family: var(--mono); font-size: 0.85rem; font-weight: 500; }
+    /* Analytics */
+    .curso-analytics-grid { display: grid; grid-template-columns: 1fr 200px; gap: 14px; margin-bottom: 24px; }
+    .score-bars { display: flex; align-items: flex-end; gap: 6px; height: 56px; }
+    .score-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; height: 100%; justify-content: flex-end; }
+    .score-bar-fill { width: 100%; border-radius: 2px 2px 0 0; }
+    .score-bar-lbl { font-family: var(--mono); font-size: 0.5rem; color: rgba(255,255,255,0.3); }
+    .chart-x-labels { display: flex; justify-content: space-between; margin-top: 4px; padding: 0 3px; }
+    .chart-x-label { font-family: var(--mono); font-size: 0.51rem; color: rgba(255,255,255,0.2); }
+    .chart-x-label.current { color: rgba(255,255,255,0.4); font-weight: 600; }
+    /* Enhanced stat cards */
+    .stat-card-enhanced { padding: 14px; display: flex; flex-direction: column; gap: 6px; }
+    .stat-card-enhanced .stat-label { font-size: 0.62rem; }
+    .stat-card-enhanced .stat-value { font-size: 1.6rem; line-height: 1; }
+    .stat-sparkline { width: 100%; height: 22px; display: block; margin-top: 2px; }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" aria-label="Navegación docente">
+    <a href="/" class="sidebar-logo">
+      <img src="/brand_assets/CeroLab PNG.png" alt="CeroLab" />
+      <span class="sidebar-logo-text">CeroLab</span>
+    </a>
+    <span class="sidebar-section-label">Docente</span>
+    <a href="/profesor" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+      Dashboard
+    </a>
+    <a href="/profesor/curso" class="sidebar-link active" aria-current="page">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Mis cursos
+    </a>
+    <span class="sidebar-section-label">Gestión</span>
+    <a href="#" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M8 5v6M5 8h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Crear curso
+    </a>
+    <a href="#" class="sidebar-link">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M7 3V8L3 13H13L9 8V3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 3H10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Asignar experimento
+    </a>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar">PM</div>
+      <div>
+        <div class="sidebar-user-name">Prof. Martínez</div>
+        <div class="sidebar-user-role">Docente · Química</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="app-main">
+    <div class="topbar">
+      <nav class="topbar-breadcrumb" aria-label="Ubicación">
+        <a href="/profesor">Dashboard</a>
+        <span>/</span>
+        <span class="current">3° Medio A</span>
+      </nav>
+      <div class="topbar-right">
+        <span class="chip chip-gray" style="font-family:var(--mono);letter-spacing:0.08em;">QUI-3M-24A</span>
+        <button class="btn btn-secondary btn-sm" onclick="navigator.clipboard.writeText('QUI-3M-24A').then(()=>alert('Código copiado'))">Copiar código</button>
+      </div>
+    </div>
+
+    <div class="page-pad">
+
+      <!-- Course header -->
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:24px;">
+        <div>
+          <span class="section-tag" style="color:var(--science);font-size:0.6rem;">Química · Activo</span>
+          <h1 style="font-family:var(--display);font-size:1.4rem;font-weight:800;letter-spacing:-0.02em;color:#fff;margin-top:10px;">3° Medio A — Química</h1>
+          <p style="font-size:0.85rem;color:rgba(255,255,255,0.4);margin-top:4px;">28 estudiantes · 1 experimento asignado · Vence 21 jun 2024</p>
+        </div>
+        <button class="btn btn-primary btn-sm">+ Asignar experimento</button>
+      </div>
+
+      <!-- Stats row — enhanced with sparklines -->
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px;">
+
+        <div class="card card-dark stat-card-enhanced" style="border-left:2px solid rgba(255,255,255,0.12);">
+          <div class="stat-label">Total alumnos</div>
+          <div class="stat-value">28</div>
+          <svg class="stat-sparkline" viewBox="0 0 60 22" preserveAspectRatio="none" aria-hidden="true">
+            <polyline points="0,18 15,18 30,18 45,14 60,14" fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+          <span class="badge-delta bd-flat" style="font-size:0.6rem;">Sin cambio</span>
+        </div>
+
+        <div class="card card-dark stat-card-enhanced" style="border-left:2px solid rgba(52,211,153,0.5);">
+          <div class="stat-label">Alumnos completados</div>
+          <div class="stat-value" style="color:var(--neutral);">12</div>
+          <svg class="stat-sparkline" viewBox="0 0 60 22" preserveAspectRatio="none" aria-hidden="true">
+            <polyline points="0,20 15,17 30,13 45,9 60,4" fill="none" stroke="rgba(52,211,153,0.5)" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+          <span class="badge-delta bd-up" style="font-size:0.6rem;">+3 esta semana</span>
+        </div>
+
+        <div class="card card-dark stat-card-enhanced" style="border-left:2px solid rgba(224,168,0,0.5);">
+          <div class="stat-label">En progreso</div>
+          <div class="stat-value" style="color:var(--warning);">8</div>
+          <svg class="stat-sparkline" viewBox="0 0 60 22" preserveAspectRatio="none" aria-hidden="true">
+            <polyline points="0,18 15,14 30,10 45,8 60,8" fill="none" stroke="rgba(224,168,0,0.45)" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+          <span class="badge-delta bd-up" style="font-size:0.6rem;">+2 activos</span>
+        </div>
+
+        <div class="card card-dark stat-card-enhanced" style="border-left:2px solid rgba(255,255,255,0.15);">
+          <div class="stat-label">Sin iniciar</div>
+          <div class="stat-value" style="color:rgba(255,255,255,0.4);">8</div>
+          <svg class="stat-sparkline" viewBox="0 0 60 22" preserveAspectRatio="none" aria-hidden="true">
+            <polyline points="0,6 15,8 30,12 45,15 60,18" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+          <span class="badge-delta bd-up" style="font-size:0.6rem;">−2 pendientes</span>
+        </div>
+
+        <div class="card card-dark stat-card-enhanced" style="border-left:2px solid rgba(52,211,153,0.4);">
+          <div class="stat-label">Promedio quiz</div>
+          <div class="stat-value" style="color:var(--neutral);">3.7<span style="font-size:0.75rem;color:rgba(255,255,255,0.3);">/5</span></div>
+          <svg class="stat-sparkline" viewBox="0 0 60 22" preserveAspectRatio="none" aria-hidden="true">
+            <polyline points="0,16 15,14 30,11 45,9 60,7" fill="none" stroke="rgba(52,211,153,0.42)" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+          <span class="badge-delta bd-up" style="font-size:0.6rem;">+9.3% promedio</span>
+        </div>
+
+      </div>
+
+      <!-- ── Analytics panel: area chart + score distribution ──────── -->
+      <div class="curso-analytics-grid">
+
+        <!-- Area chart: weekly completion progress -->
+        <div class="card card-dark" style="overflow:hidden;position:relative;">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;">
+            <div>
+              <div style="font-family:var(--mono);font-size:0.57rem;letter-spacing:0.12em;color:rgba(255,255,255,0.28);text-transform:uppercase;margin-bottom:4px;">Progreso semanal</div>
+              <div style="display:flex;align-items:baseline;gap:8px;">
+                <span style="font-family:var(--display);font-size:1.8rem;font-weight:800;color:#fff;letter-spacing:-0.03em;">43%</span>
+                <span style="font-family:var(--mono);font-size:0.64rem;color:rgba(255,255,255,0.38);">tasa de completación</span>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
+              <span class="badge-delta bd-up">
+                <svg aria-hidden="true" viewBox="0 0 10 10"><path d="M5 1.5 L9 8.5 L1 8.5Z"/></svg>
+                +3 esta sem.
+              </span>
+              <span style="font-family:var(--mono);font-size:0.53rem;color:rgba(255,255,255,0.24);">12 / 28 alumnos</span>
+            </div>
+          </div>
+
+          <svg viewBox="0 0 560 76" preserveAspectRatio="none" style="width:100%;height:76px;display:block;" aria-hidden="true">
+            <defs>
+              <linearGradient id="crsG" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#2E8B57" stop-opacity="0.28"/>
+                <stop offset="100%" stop-color="#2E8B57" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <line x1="0" y1="19" x2="560" y2="19" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+            <line x1="0" y1="48" x2="560" y2="48" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+            <!-- 6 data points: 0→2→5→8→10→12 completed out of 28 (max scale=14) -->
+            <path d="M20,73 L128,62 L236,46 L344,30 L452,20 L540,9 L540,76 L20,76 Z" fill="url(#crsG)"/>
+            <polyline points="20,73 128,62 236,46 344,30 452,20 540,9" fill="none" stroke="rgba(52,211,153,0.88)" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+            <circle cx="20"  cy="73" r="2.4" fill="#34D399" stroke="rgba(2,7,4,0.9)" stroke-width="1.5"/>
+            <circle cx="128" cy="62" r="2.4" fill="#34D399" stroke="rgba(2,7,4,0.9)" stroke-width="1.5"/>
+            <circle cx="236" cy="46" r="2.4" fill="#34D399" stroke="rgba(2,7,4,0.9)" stroke-width="1.5"/>
+            <circle cx="344" cy="30" r="2.4" fill="#34D399" stroke="rgba(2,7,4,0.9)" stroke-width="1.5"/>
+            <circle cx="452" cy="20" r="2.4" fill="#34D399" stroke="rgba(2,7,4,0.9)" stroke-width="1.5"/>
+            <circle cx="540" cy="9"  r="3.2" fill="#34D399" stroke="rgba(2,7,4,0.9)" stroke-width="2"/>
+          </svg>
+
+          <div class="chart-x-labels">
+            <span class="chart-x-label">May 27</span>
+            <span class="chart-x-label">Jun 1</span>
+            <span class="chart-x-label">Jun 8</span>
+            <span class="chart-x-label">Jun 15</span>
+            <span class="chart-x-label">Jun 19</span>
+            <span class="chart-x-label current">Jun 22</span>
+          </div>
+
+          <!-- Completion progress bar at bottom -->
+          <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.05);">
+            <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+              <span style="font-family:var(--mono);font-size:0.57rem;color:rgba(255,255,255,0.35);">Experimentos terminados</span>
+              <span style="font-family:var(--mono);font-size:0.57rem;color:rgba(255,255,255,0.55);">12 / 28</span>
+            </div>
+            <div class="gauge-bar" style="height:5px;">
+              <div class="gauge-fill" style="width:43%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Score distribution mini chart -->
+        <div class="card card-dark" style="display:flex;flex-direction:column;gap:10px;">
+          <div style="font-family:var(--mono);font-size:0.56rem;letter-spacing:0.12em;color:rgba(255,255,255,0.28);text-transform:uppercase;">Puntajes quiz</div>
+
+          <!-- Bar chart — scores 1-5 -->
+          <div class="score-bars">
+            <!-- Score 1: 1 student = 20% of max (5) -->
+            <div class="score-bar-col">
+              <div class="score-bar-fill" style="height:20%;background:rgba(214,69,80,0.72);" title="1 alumno"></div>
+              <span class="score-bar-lbl">1</span>
+            </div>
+            <!-- Score 2: 1 student = 20% -->
+            <div class="score-bar-col">
+              <div class="score-bar-fill" style="height:20%;background:rgba(214,120,69,0.66);" title="1 alumno"></div>
+              <span class="score-bar-lbl">2</span>
+            </div>
+            <!-- Score 3: 2 students = 40% -->
+            <div class="score-bar-col">
+              <div class="score-bar-fill" style="height:40%;background:rgba(224,168,0,0.65);" title="2 alumnos"></div>
+              <span class="score-bar-lbl">3</span>
+            </div>
+            <!-- Score 4: 4 students = 80% -->
+            <div class="score-bar-col">
+              <div class="score-bar-fill" style="height:80%;background:rgba(52,211,153,0.58);" title="4 alumnos"></div>
+              <span class="score-bar-lbl">4</span>
+            </div>
+            <!-- Score 5: 5 students = 100% -->
+            <div class="score-bar-col">
+              <div class="score-bar-fill" style="height:100%;background:rgba(46,139,87,0.85);" title="5 alumnos"></div>
+              <span class="score-bar-lbl">5</span>
+            </div>
+          </div>
+
+          <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:9px;display:flex;flex-direction:column;gap:5px;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;">
+              <span style="font-family:var(--mono);font-size:0.58rem;color:rgba(255,255,255,0.35);">Promedio quiz</span>
+              <span style="font-family:var(--mono);font-size:0.95rem;font-weight:600;color:var(--neutral);">3.7<span style="font-size:0.57rem;opacity:0.5;">/5</span></span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;">
+              <span style="font-family:var(--mono);font-size:0.58rem;color:rgba(255,255,255,0.35);">Quiz completados</span>
+              <span style="font-family:var(--mono);font-size:0.78rem;color:rgba(255,255,255,0.55);">13 / 28</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;">
+              <span style="font-family:var(--mono);font-size:0.58rem;color:rgba(255,255,255,0.35);">Puntaje más alto</span>
+              <span style="font-family:var(--mono);font-size:0.78rem;color:var(--neutral);">5 / 5</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Student table -->
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+          <h2 style="font-family:var(--display);font-size:1rem;font-weight:700;color:#fff;">Estudiantes</h2>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-ghost btn-sm" onclick="filterStudents('all',this)">Todos (28)</button>
+            <button class="btn btn-ghost btn-sm" onclick="filterStudents('risk',this)">En riesgo (4)</button>
+            <button class="btn btn-ghost btn-sm" onclick="filterStudents('done',this)">Completados (12)</button>
+          </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.06);border-radius:3px;overflow:auto;">
+          <table class="student-table" aria-label="Progreso de estudiantes">
+            <thead>
+              <tr>
+                <th>Estudiante</th>
+                <th>Estado</th>
+                <th>Progreso lab.</th>
+                <th>Puntaje quiz</th>
+                <th>Última actividad</th>
+              </tr>
+            </thead>
+            <tbody id="student-table-body">
+              <!-- filled by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+const students = [
+  { name: 'Valentina González', status: 'completed', progress: 100, score: 5, last: 'Hace 2 h', risk: false },
+  { name: 'Diego Herrera',       status: 'completed', progress: 100, score: 4, last: 'Hace 3 h', risk: false },
+  { name: 'Camila Soto',         status: 'completed', progress: 100, score: 5, last: 'Hace 5 h', risk: false },
+  { name: 'Felipe Castillo',     status: 'completed', progress: 100, score: 3, last: 'Ayer', risk: false },
+  { name: 'Ignacia Morales',     status: 'completed', progress: 100, score: 4, last: 'Ayer', risk: false },
+  { name: 'Tomás Bravo',         status: 'completed', progress: 100, score: 4, last: 'Ayer', risk: false },
+  { name: 'Sofía Reyes',         status: 'completed', progress: 100, score: 5, last: 'Ayer', risk: false },
+  { name: 'Joaquín Pérez',       status: 'completed', progress: 100, score: 3, last: 'Hace 2 días', risk: false },
+  { name: 'Martina López',       status: 'completed', progress: 100, score: 5, last: 'Hace 2 días', risk: false },
+  { name: 'Sebastián Vargas',    status: 'completed', progress: 100, score: 2, last: 'Hace 2 días', risk: true },
+  { name: 'Isidora Fuentes',     status: 'completed', progress: 100, score: 4, last: 'Hace 3 días', risk: false },
+  { name: 'Benjamín Torres',     status: 'completed', progress: 100, score: 5, last: 'Hace 4 días', risk: false },
+  { name: 'Constanza Díaz',      status: 'in-progress', progress: 65, score: null, last: 'Hoy', risk: false },
+  { name: 'Matías Rojas',        status: 'in-progress', progress: 80, score: null, last: 'Hace 5 días', risk: true },
+  { name: 'Renata Álvarez',      status: 'in-progress', progress: 40, score: null, last: 'Ayer', risk: false },
+  { name: 'Nicolás Jiménez',     status: 'in-progress', progress: 25, score: null, last: 'Hace 2 días', risk: false },
+  { name: 'Valentina Muñoz',     status: 'in-progress', progress: 90, score: null, last: 'Hace 1 h', risk: false },
+  { name: 'Emilio Ramos',        status: 'in-progress', progress: 50, score: null, last: 'Ayer', risk: false },
+  { name: 'Catalina Silva',      status: 'in-progress', progress: 70, score: null, last: 'Hoy', risk: false },
+  { name: 'Maximiliano León',    status: 'in-progress', progress: 10, score: null, last: 'Hace 4 días', risk: false },
+  { name: 'Andrea Fuentes',      status: 'completed',   progress: 100, score: 1, last: 'Hace 3 días', risk: true },
+  { name: 'Carlos Muñoz',        status: 'not-started', progress: 0, score: null, last: 'Hace 7 días', risk: true },
+  { name: 'Paula Castro',        status: 'not-started', progress: 0, score: null, last: 'Hace 4 días', risk: false },
+  { name: 'Rodrigo Navarro',     status: 'not-started', progress: 0, score: null, last: 'Hace 3 días', risk: false },
+  { name: 'Florencia Aravena',   status: 'not-started', progress: 0, score: null, last: 'Hace 2 días', risk: false },
+  { name: 'Gabriel Medina',      status: 'not-started', progress: 0, score: null, last: 'Hace 3 días', risk: false },
+  { name: 'Daniela Espinoza',    status: 'not-started', progress: 0, score: null, last: 'Hace 2 días', risk: false },
+  { name: 'Lucas Vergara',       status: 'not-started', progress: 0, score: null, last: 'Hace 1 día', risk: false },
+];
+
+const statusLabel = { 'completed': 'Completado', 'in-progress': 'En progreso', 'not-started': 'Sin iniciar' };
+const statusChip  = { 'completed': 'chip-green', 'in-progress': 'chip-yellow', 'not-started': 'chip-gray' };
+const scoreColor  = s => s === null ? 'rgba(255,255,255,0.25)' : s >= 4 ? 'var(--neutral)' : s >= 3 ? 'var(--warning)' : 'var(--acid)';
+
+function renderTable(filter) {
+  const filtered = filter === 'all' ? students : filter === 'risk' ? students.filter(s => s.risk) : students.filter(s => s.status === 'completed');
+  const tbody = document.getElementById('student-table-body');
+  tbody.innerHTML = filtered.map(s => `
+    <tr>
+      <td style="color:#fff;font-weight:500;display:flex;align-items:center;gap:8px;">
+        ${s.risk ? `<div class="risk-dot" style="background:var(--acid);box-shadow:0 0 5px var(--acid);" title="En riesgo"></div>` : `<div class="risk-dot" style="background:transparent;"></div>`}
+        ${s.name}
+      </td>
+      <td><span class="chip ${statusChip[s.status]}">${statusLabel[s.status]}</span></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <div class="status-bar"><div class="status-fill" style="width:${s.progress}%;background:${s.progress === 100 ? 'var(--neutral)' : s.progress > 0 ? 'var(--warning)' : 'rgba(255,255,255,0.15)'};"></div></div>
+          <span style="font-family:var(--mono);font-size:0.62rem;color:rgba(255,255,255,0.35);">${s.progress}%</span>
+        </div>
+      </td>
+      <td class="score-cell" style="color:${scoreColor(s.score)};">${s.score !== null ? `${s.score} / 5` : '—'}</td>
+      <td style="font-family:var(--mono);font-size:0.68rem;color:rgba(255,255,255,0.35);">${s.last}</td>
+    </tr>`).join('');
+}
+
+function filterStudents(filter, btn) {
+  document.querySelectorAll('.page-pad .btn-ghost').forEach(b => b.classList.remove('btn-secondary'));
+  btn.classList.add('btn-secondary');
+  renderTable(filter);
+}
+
+renderTable('all');
+</script>
+</body>
+</html>

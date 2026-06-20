@@ -1,0 +1,68 @@
+<svg width="900" height="620" viewBox="0 0 900 620" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="paperShadow" x="-20%" y="-25%" width="140%" height="160%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="14" stdDeviation="12" flood-color="#000000" flood-opacity="0.22"/>
+      <feDropShadow dx="4" dy="4" stdDeviation="3" flood-color="#6b4a00" flood-opacity="0.16"/>
+    </filter>
+    <linearGradient id="redPaper" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff4a54"/>
+      <stop offset="0.48" stop-color="#df111d"/>
+      <stop offset="1" stop-color="#a90012"/>
+    </linearGradient>
+    <linearGradient id="bluePaper" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#43a9ff"/>
+      <stop offset="0.48" stop-color="#1367c6"/>
+      <stop offset="1" stop-color="#0b2f7c"/>
+    </linearGradient>
+    <linearGradient id="paperHighlight" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.35"/>
+      <stop offset="0.22" stop-color="#ffffff" stop-opacity="0.08"/>
+      <stop offset="0.7" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0.18"/>
+    </linearGradient>
+    <linearGradient id="edgeShade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.25"/>
+      <stop offset="0.09" stop-color="#ffffff" stop-opacity="0.08"/>
+      <stop offset="0.75" stop-color="#000000" stop-opacity="0.05"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0.20"/>
+    </linearGradient>
+  </defs>
+
+  <g filter="url(#paperShadow)">
+    <!-- red strip 1 -->
+    <g transform="translate(130 70) rotate(-4 320 58)">
+      <rect x="0" y="0" width="640" height="116" rx="7" fill="url(#redPaper)"/>
+      <rect x="0" y="0" width="640" height="116" rx="7" fill="url(#paperHighlight)"/>
+      <rect x="0" y="0" width="640" height="116" rx="7" fill="url(#edgeShade)"/>
+      <path d="M18 18 C150 34 330 8 620 20" stroke="#fff" stroke-opacity="0.14" stroke-width="5" stroke-linecap="round"/>
+      <path d="M8 95 C180 90 350 104 632 89" stroke="#4a0008" stroke-opacity="0.18" stroke-width="4" stroke-linecap="round"/>
+    </g>
+
+    <!-- red strip 2 -->
+    <g transform="translate(105 205) rotate(-2 320 58)">
+      <rect x="0" y="0" width="640" height="116" rx="7" fill="url(#redPaper)"/>
+      <rect x="0" y="0" width="640" height="116" rx="7" fill="url(#paperHighlight)" opacity="0.9"/>
+      <rect x="0" y="0" width="640" height="116" rx="7" fill="url(#edgeShade)"/>
+      <path d="M22 23 C160 12 310 28 612 16" stroke="#fff" stroke-opacity="0.13" stroke-width="5" stroke-linecap="round"/>
+      <path d="M15 93 C170 100 390 84 625 96" stroke="#4a0008" stroke-opacity="0.18" stroke-width="4" stroke-linecap="round"/>
+    </g>
+
+    <!-- blue strip 1 -->
+    <g transform="translate(130 340) rotate(2.5 320 58)">
+      <rect x="0" y="0" width="640" height="116" rx="7" fill="url(#bluePaper)"/>
+      <rect x="0" y="0" width="640" height="116" rx="7" fill="url(#paperHighlight)"/>
+      <rect x="0" y="0" width="640" height="116" rx="7" fill="url(#edgeShade)"/>
+      <path d="M18 18 C150 34 330 8 620 20" stroke="#fff" stroke-opacity="0.16" stroke-width="5" stroke-linecap="round"/>
+      <path d="M8 95 C180 90 350 104 632 89" stroke="#00183f" stroke-opacity="0.20" stroke-width="4" stroke-linecap="round"/>
+    </g>
+
+    <!-- blue strip 2 -->
+    <g transform="translate(105 475) rotate(4 320 58)">
+      <rect x="0" y="0" width="640" height="116" rx="7" fill="url(#bluePaper)"/>
+      <rect x="0" y="0" width="640" height="116" rx="7" fill="url(#paperHighlight)" opacity="0.9"/>
+      <rect x="0" y="0" width="640" height="116" rx="7" fill="url(#edgeShade)"/>
+      <path d="M22 23 C160 12 310 28 612 16" stroke="#fff" stroke-opacity="0.15" stroke-width="5" stroke-linecap="round"/>
+      <path d="M15 93 C170 100 390 84 625 96" stroke="#00183f" stroke-opacity="0.20" stroke-width="4" stroke-linecap="round"/>
+    </g>
+  </g>
+</svg>
